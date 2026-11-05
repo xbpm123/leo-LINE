@@ -1,0 +1,14 @@
+{
+  "name": "lovecode",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev public",
+    "deploy": "wrangler pages deploy public --project-name lovecode",
+    "build:demo": "node build-demo.mjs",
+    "test": "node test.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

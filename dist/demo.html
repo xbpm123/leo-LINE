@@ -1,0 +1,1386 @@
+<title>ラブコード診断</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<style>
+/* Layout: 1カラム（最大680px）。診断は1問1カード、結果は「コード札」を頂点に縦に積む */
+:root {
+  --bg: #f3f1f7;
+  --surface: #ffffff;
+  --ink: #251e35;
+  --muted: #6b6480;
+  --line: #dcd6e8;
+  --accent: #d6416c;
+  --accent-ink: #ffffff;
+  --accent-soft: #fbe4eb;
+  --q-co: #c97a12;
+  --q-eo: #d6416c;
+  --q-ck: #2f72b8;
+  --q-ek: #7651c2;
+  --display: 'Dela Gothic One', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  --body: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16121e; --surface: #211b2c; --ink: #efebf6; --muted: #a79fba; --line: #3a3149;
+    --accent: #ff7598; --accent-ink: #1a0f16; --accent-soft: #3d1f2b;
+    --q-co: #f0aa4a; --q-eo: #ff7598; --q-ck: #6aa8ea; --q-ek: #a98af0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16121e; --surface: #211b2c; --ink: #efebf6; --muted: #a79fba; --line: #3a3149;
+  --accent: #ff7598; --accent-ink: #1a0f16; --accent-soft: #3d1f2b;
+  --q-co: #f0aa4a; --q-eo: #ff7598; --q-ck: #6aa8ea; --q-ek: #a98af0;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--body); font-size: 16px; line-height: 1.8;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 680px; margin: 0 auto; padding-block: 32px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.35; }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 0; border-radius: 999px; padding: 14px 28px; font-weight: 700;
+  background: var(--accent); color: var(--accent-ink);
+  transition: transform .15s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.btn.small { padding: 8px 16px; font-size: 14px; }
+.eyebrow { font-size: 12px; letter-spacing: .14em; color: var(--muted); font-weight: 700; }
+.muted { color: var(--muted); }
+.panel { background: var(--surface); border-radius: 20px; padding: 24px; display: grid; gap: 14px; }
+
+/* ---------- intro ---------- */
+.hero { display: grid; gap: 18px; padding-top: 16px; }
+.hero h1 { font-family: var(--display); font-weight: 400; font-size: clamp(36px, 9vw, 56px); letter-spacing: .02em; }
+.hero h1 small { display: block; font-family: var(--body); font-size: 15px; font-weight: 700; color: var(--accent); letter-spacing: .1em; }
+.hero .lead { font-size: 17px; max-width: 34em; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+
+.anatomy { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
+.anatomy .slot { flex: 1 1 64px; min-width: 0; border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 8px; text-align: center; display: grid; gap: 2px; }
+.anatomy .slot b { font-family: var(--display); font-weight: 400; font-size: 26px; line-height: 1.2; }
+.anatomy .slot span { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.anatomy .dash { align-self: center; font-family: var(--display); font-size: 24px; color: var(--muted); }
+.anatomy .slot.ll { border-color: var(--accent); }
+
+.typegrid { display: grid; gap: 18px; }
+.typerow { display: grid; gap: 8px; }
+.typerow h3 { font-size: 15px; display: flex; gap: 8px; align-items: baseline; }
+.typerow h3 .base { font-size: 12px; color: var(--muted); font-weight: 500; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 520px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tile { border: 0; text-align: left; background: var(--surface); border-radius: 14px; padding: 12px; display: grid; gap: 2px; border-top: 4px solid var(--qc); }
+.tile code { font-family: var(--display); font-size: 14px; color: var(--qc); }
+.tile strong { font-size: 15px; line-height: 1.4; }
+.tile span { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+.viewer { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.viewer label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+select, input[type="text"] {
+  font: inherit; color: var(--ink); background: var(--bg); border: 1.5px solid var(--line);
+  border-radius: 10px; padding: 8px 10px; min-width: 0;
+}
+
+.note { font-size: 13px; color: var(--muted); line-height: 1.7; }
+.foot { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; }
+.foot a { color: var(--muted); }
+.demo-banner { background: var(--accent-soft); border-radius: 12px; padding: 10px 14px; font-size: 13px; }
+
+/* ---------- quiz ---------- */
+.progress { display: grid; gap: 6px; }
+.progress .bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.progress .bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .25s ease; }
+.progress .meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.qcard { background: var(--surface); border-radius: 24px; padding: 32px 24px; display: grid; gap: 28px; min-height: 300px; align-content: center; }
+.qcard .qtext { font-size: 21px; font-weight: 700; line-height: 1.6; text-wrap: balance; text-align: center; }
+.likert { display: grid; gap: 10px; }
+.likert .dots { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.likert .dots button { border: 2px solid var(--line); background: transparent; border-radius: 50%; padding: 0; flex: none; }
+.likert .dots button:nth-child(1), .likert .dots button:nth-child(5) { width: 52px; height: 52px; }
+.likert .dots button:nth-child(2), .likert .dots button:nth-child(4) { width: 42px; height: 42px; }
+.likert .dots button:nth-child(3) { width: 34px; height: 34px; }
+.likert .dots button.on, .likert .dots button:hover { background: var(--accent); border-color: var(--accent); }
+.likert .ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.choices { display: grid; gap: 12px; }
+.choices button { border: 2px solid var(--line); background: transparent; border-radius: 16px; padding: 16px 18px; text-align: left; font-weight: 500; line-height: 1.6; }
+.choices button.on, .choices button:hover { border-color: var(--accent); background: var(--accent-soft); }
+.qnav { display: flex; justify-content: space-between; align-items: center; }
+.linkbtn { border: 0; background: none; color: var(--muted); font-size: 14px; padding: 6px 0; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- result ---------- */
+.codecard { background: var(--surface); border-radius: 24px; padding: 28px 24px; display: grid; gap: 10px; border-top: 8px solid var(--qc); }
+.codecard .code { font-family: var(--display); font-size: clamp(34px, 10vw, 64px); line-height: 1.1; letter-spacing: .04em; color: var(--qc); white-space: nowrap; }
+.codecard .code em { font-style: normal; color: var(--accent); }
+.codecard h2 { font-size: 26px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 13px; border-radius: 999px; padding: 3px 12px; background: var(--bg); font-weight: 700; }
+.chip.att { background: var(--qc); color: var(--surface); }
+
+.axes { display: grid; gap: 14px; }
+.axis { display: grid; gap: 4px; }
+.axis .names { display: flex; justify-content: space-between; font-size: 13px; }
+.axis .names b { color: var(--accent); }
+.axis .track { position: relative; height: 10px; background: var(--bg); border-radius: 99px; }
+.axis .track i { position: absolute; top: 0; bottom: 0; background: var(--accent); border-radius: 99px; }
+.axis .label { font-size: 12px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
+
+.sec { display: grid; gap: 12px; }
+.sec h3 { font-size: 19px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tag { font-family: var(--body); font-size: 11px; letter-spacing: .1em; border-radius: 6px; padding: 1px 8px; font-weight: 700; }
+.tag.free { background: var(--bg); color: var(--muted); }
+.tag.paid { background: var(--accent-soft); color: var(--accent); }
+.kv { display: grid; gap: 10px; }
+.kv div { display: grid; gap: 2px; }
+.kv dt, .kv .k { font-size: 13px; font-weight: 700; color: var(--muted); }
+.ask { border-left: 3px solid var(--accent); padding: 8px 14px; background: var(--bg); border-radius: 0 10px 10px 0; display: flex; gap: 12px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.tips { margin: 0; padding: 0; list-style: none; counter-reset: tip; display: grid; gap: 12px; }
+.tips li { counter-increment: tip; display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: start; }
+.tips li::before { content: counter(tip); font-family: var(--display); font-size: 18px; width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; line-height: 1; }
+.lock { background: var(--surface); border-radius: 20px; padding: 28px 24px; display: grid; gap: 16px; border: 2px dashed var(--accent); }
+.lock ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.lock .price { font-family: var(--display); font-size: 32px; }
+.lock .price small { font-family: var(--body); font-size: 13px; color: var(--muted); }
+.compat-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.compat-form input { flex: 1 1 160px; text-transform: uppercase; }
+.compat-out { display: grid; gap: 10px; }
+.err { color: var(--accent); font-size: 14px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ---------- plans & long report ---------- */
+.plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; align-items: start; }
+.plan { position: relative; background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; padding: 22px 18px; display: grid; gap: 10px; min-width: 0; }
+.plan.star { border: 2px solid var(--accent); }
+.plan h4 { margin: 0; font-size: 16px; line-height: 1.5; }
+.plan .price { font-family: var(--display); font-size: 30px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.plan .price small { font-family: var(--body); font-size: 12px; color: var(--muted); }
+.plan ul { margin: 0; padding-left: 1.1em; font-size: 14px; line-height: 1.7; display: grid; gap: 2px; }
+.plan .btn { width: 100%; }
+.plan input { width: 100%; text-transform: uppercase; }
+.badge { position: absolute; top: -12px; left: 16px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 12px; }
+.stack { display: grid; gap: 28px; }
+.part { font-family: var(--display); font-weight: 400; font-size: 22px; padding-top: 8px; border-top: 1.5px solid var(--line); }
+ul.dots { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.ask + .ask { margin-top: 6px; }
+.ranking { display: grid; gap: 6px; }
+.ranking details { background: var(--surface); border-radius: 12px; padding: 10px 14px; }
+.ranking summary { display: flex; gap: 10px; align-items: center; cursor: pointer; list-style: none; }
+.ranking summary::-webkit-details-marker { display: none; }
+.ranking code { font-family: var(--display); font-size: 13px; color: var(--muted); }
+.ranking .nm { flex: 1; font-weight: 700; min-width: 0; }
+.ranking .st { color: var(--accent); letter-spacing: .05em; }
+.ranking .kv { padding-top: 8px; font-size: 14px; }
+.pair-codes { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-family: var(--display); font-size: clamp(22px, 6vw, 32px); }
+.pair-codes span { display: grid; }
+.pair-codes small { font-family: var(--body); font-size: 13px; font-weight: 700; color: var(--muted); }
+.pair-codes b { font-weight: 400; color: var(--accent); }
+.partner-report summary { cursor: pointer; list-style: none; display: grid; gap: 4px; }
+.partner-report summary::-webkit-details-marker { display: none; }
+.partner-report[open] summary { margin-bottom: 28px; }
+.cgroup { display: grid; gap: 8px; }
+.cgroup h4 { margin: 8px 0 0; font-size: 15px; }
+.cgroup > p { font-size: 14px; color: var(--muted); }
+.ranking details p { padding-top: 8px; font-size: 14px; }
+.rephrase { display: grid; gap: 10px; }
+.rephrase > div { display: grid; gap: 4px; background: var(--surface); border-radius: 12px; padding: 12px 14px; }
+.rephrase .before { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--accent); }
+.rephrase .after { font-weight: 700; }
+.rephrase .after::before { content: "→ "; color: var(--accent); }
+.ask .who { display: block; font-size: 12px; font-weight: 700; color: var(--muted); }
+.guide-text { white-space: pre-wrap; font: inherit; background: var(--bg); border-radius: 10px; padding: 12px; margin: 0; }
+.qa { display: grid; gap: 14px; }
+.qa > div { display: grid; gap: 4px; }
+.qa .q { font-weight: 700; }
+.qa .q::before { content: "Q. "; color: var(--accent); font-family: var(--display); }
+.cgroup h4 { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+.cgroup h4 .st { color: var(--accent); font-size: 14px; letter-spacing: .05em; }
+.ranking .near { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+</style>
+<main class="wrap" id="app"></main>
+<script>
+// 無料で見せる範囲のデータ（質問・タイプ名・概要）。有料部分は lib/premium.js（サーバー側）にある。
+window.LC = (function () {
+  var AXES = [
+    { label: '心の揺れ', pos: 'E', posName: 'たしかめたい', neg: 'C', negName: '安心している' },
+    { label: '距離感', pos: 'K', posName: '距離を保つ', neg: 'O', negName: '近づく' },
+    { label: '恋のペース', pos: 'F', posName: 'すぐ動く', neg: 'S', negName: 'じっくり' },
+    { label: '判断の軸', pos: 'H', posName: '気持ち', neg: 'M', negName: '頭' }
+  ];
+
+  // t:'l' = 5段階。ax = 軸番号、s = +1 なら「そう思う」が pos 側
+  var LIKERT = [
+    { ax: 0, s: 1, q: '返信が遅いと、嫌われたかもと考えてしまう' },
+    { ax: 1, s: -1, q: '恋人には弱いところも見せられる' },
+    { ax: 2, s: 1, q: 'いいなと思ったら、自分から早めに動く' },
+    { ax: 3, s: 1, q: '恋人選びは「条件」より「気持ち」が大事だ' },
+    { ax: 0, s: 1, q: '恋人が自分を大切に思っているか、時々確かめたくなる' },
+    { ax: 1, s: 1, q: '付き合いが深くなると、少し息苦しく感じることがある' },
+    { ax: 2, s: -1, q: '付き合うかどうかは、時間をかけて決めたい' },
+    { ax: 3, s: -1, q: 'ケンカしたら、まず冷静に原因を話し合いたい' },
+    { ax: 0, s: -1, q: '恋人が友達と楽しそうにしていても、特に気にならない' },
+    { ax: 1, s: 1, q: '困ったとき、恋人に頼るより自分で解決したい' },
+    { ax: 2, s: 1, q: '恋が始まるときは、勢いやノリも大事だと思う' },
+    { ax: 3, s: 1, q: '気持ちが盛り上がると、後先を考えずに動いてしまう' },
+    { ax: 0, s: 1, q: '「重い」と思われないか心配になることがある' },
+    { ax: 1, s: -1, q: '好きな人とはできるだけ一緒にいたい' },
+    { ax: 2, s: -1, q: '気になる人がいても、まず友達として様子を見る' },
+    { ax: 3, s: -1, q: '相手の気持ちより、話の筋が通っているかが気になる' },
+    { ax: 0, s: -1, q: '恋人から急に連絡がなくても、忙しいんだろうと思える' },
+    { ax: 1, s: 1, q: '「将来の話」をされると、ちょっと構えてしまう' },
+    { ax: 2, s: 1, q: '好きになるスピードは速いほうだ' },
+    { ax: 3, s: 1, q: '恋愛の悩みは、解決策より気持ちを分かってほしい' }
+  ];
+
+  // 愛情言語の二択（5つから2つずつ、全10組）
+  var PAIRS = [
+    { a: 'W', b: 'T', qa: '「いつもありがとう」と言葉で言われる', qb: '予定を空けて、一緒に過ごしてくれる' },
+    { a: 'G', b: 'A', qa: '誕生日に、考え抜いたプレゼントをくれる', qb: '困っていることを、先回りして片付けてくれる' },
+    { a: 'W', b: 'P', qa: '「好きだよ」と言ってくれる', qb: '何も言わずに、ぎゅっとしてくれる' },
+    { a: 'T', b: 'G', qa: 'スマホを置いて、じっくり話を聞いてくれる', qb: '前に欲しいと言ったものを覚えていてくれる' },
+    { a: 'A', b: 'P', qa: '体調が悪い日に、ご飯を作ってくれる', qb: '落ち込んでいるときに、頭をなでてくれる' },
+    { a: 'W', b: 'G', qa: '手紙やメッセージで想いを伝えてくれる', qb: '旅先で自分を思い出して、お土産を買ってくれる' },
+    { a: 'T', b: 'A', qa: '一緒にのんびり散歩する時間', qb: '疲れている日に、駅まで迎えに来てくれる' },
+    { a: 'G', b: 'P', qa: '記念日に花束をもらう', qb: '手をつないで歩く' },
+    { a: 'W', b: 'A', qa: '「頑張ってるね」と認めてくれる', qb: '忙しいときに、家事や用事を代わってくれる' },
+    { a: 'T', b: 'P', qa: '二人で遠出する', qb: 'ソファでくっついてダラダラする' }
+  ];
+
+  var LL = {
+    W: { name: '言葉', en: 'Words', short: '「好き」「ありがとう」を言葉でもらうと、愛されていると実感できます。' },
+    T: { name: '一緒の時間', en: 'Time', short: '自分にちゃんと向き合ってくれる時間を、何よりの愛情と感じます。' },
+    G: { name: '贈り物', en: 'Gift', short: '贈り物の値段ではなく、自分のことを考えて選んでくれた気持ちに愛を感じます。' },
+    A: { name: '行動', en: 'Act', short: '困ったときに動いてくれるなど、実際にしてくれる行動に愛を感じます。' },
+    P: { name: 'スキンシップ', en: 'Physical', short: '手をつなぐ、ハグをするなど、触れ合いで安心と愛情を感じます。' }
+  };
+  var LL_ORDER = ['W', 'T', 'G', 'A', 'P'];
+
+  var ATT = {
+    CO: { name: 'ひだまり型', base: '安定', body: '好きな人を信じることと、自分を大事にすることが、無理なく両立できるタイプです。連絡が少し途切れても「忙しいのかな」と受け流せますし、近づきたいときは素直に近づけます。恋愛が生活の一部として、ちょうどいい大きさに収まっている人です。' },
+    EO: { name: 'たしかめ型', base: '不安', body: '好きになるほど、相手の気持ちを確かめたくなるタイプです。返信の速さや言葉の調子に敏感で、小さな変化にもすぐ気づきます。愛情が深いぶん、不安という形で心が動きやすい人です。' },
+    CK: { name: 'ひとり時間型', base: '回避', body: '恋人のことは大切です。でも、自分の時間や自分の領域も同じくらい大切にしたいタイプです。べったりした関係より、お互いが自立した関係のほうが心地よく感じます。気持ちは、言葉より行動で示すほうが得意な人です。' },
+    EK: { name: 'ゆらぎ型', base: '恐れ・回避', body: '近づきたい気持ちと、傷つくのが怖い気持ちを同時に抱えやすいタイプです。距離が縮まると逃げたくなり、離れると寂しくなります。感受性が強く、人の気持ちの小さな変化にとても敏感な人です。' }
+  };
+
+  var TYPES = {
+    COFH: ['ひまわり', '好きをまっすぐ照らす人'],
+    COFM: ['船長', '二人の進路を迷わず決める人'],
+    COSH: ['縁側', 'ゆっくり深く、包み込む人'],
+    COSM: ['大樹', '何年たっても揺るがない人'],
+    EOFH: ['花火', '一瞬で燃え上がる、大きな愛の人'],
+    EOFM: ['名探偵', '小さなサインも見逃さない人'],
+    EOSH: ['月見草', '静かに想いを咲かせ続ける人'],
+    EOSM: ['天気予報士', '恋の雲行きを先読みする人'],
+    CKFH: ['風来坊', 'ときめきに素直、でも縛られない人'],
+    CKFM: ['ソロキャンパー', '自分の世界ごと愛してほしい人'],
+    CKSH: ['黒猫', '気まぐれに甘える、懐くと深い人'],
+    CKSM: ['書斎の住人', '静かな信頼を積み上げる人'],
+    EKFH: ['ジェットコースター', '近づくと怖く、離れると寂しい人'],
+    EKFM: ['綱渡り師', '頭でバランスを取りすぎる人'],
+    EKSH: ['ハリネズミ', '近づきたいのに、トゲが出る人'],
+    EKSM: ['要塞', '守りは固く、内側は誰より繊細な人']
+  };
+
+  // 恋愛あるある（無料）。シェアされやすいよう、各タイプ4つずつ
+  var ARUARU = {
+    COFH: ['好きな人ができると、友達にすぐバレる', '「好き」と言うのに、特に勇気はいらない', 'デートの帰り道に、もう次の予定を立てている', '恋人が落ち込んでいると、元気づけようとして張り切りすぎる'],
+    COFM: ['デートの行き先は、だいたい自分が決めている', '「で、どうする？」が口ぐせ', '付き合って早いうちから、将来の話もふつうにできる', '恋人の悩みを聞くと、つい解決策を出してしまう'],
+    COSH: ['友達から恋人になるパターンが多い', '家でのんびり過ごすデートがいちばん好き', '恋人に「落ち着く」とよく言われる', '好きだと気づくまでに、自分でも時間がかかる'],
+    COSM: ['付き合うまでに、相手のことをかなりよく見ている', '記念日より、何でもない日を一緒に過ごすほうが大事', 'ケンカをしても、翌日にはふつうに話せる', '「何考えてるか分からない」と言われたことがある'],
+    EOFH: ['好きになると、その人のことしか考えられなくなる', '返信が来るまで、何度もスマホを見てしまう', '付き合いたての盛り上がりは誰にも負けない', '気持ちがあふれて、長文のメッセージを送ったことがある'],
+    EOFM: ['恋人のSNSで、誰が「いいね」したかが気になる', '返信の文面がいつもと違うと、すぐに気づく', '頭の中で、まだ起きていないケンカの会話をしてしまう', '「なんでそんなことまで覚えてるの」と言われる'],
+    EOSH: ['片思いの期間が長くなりがち', '自分の気持ちより、相手の都合を優先してしまう', '恋人に言えなかった不満を、あとから一人で思い出す', '好きな人からの何気ない一言を、何年も覚えている'],
+    EOSM: ['付き合う前から、別れたときのことを考えてしまう', '「この先どうなるんだろう」と夜に考え込む', '恋人の小さな変化から、関係の行方を予想する', '心配性と言われるけれど、その心配が当たることもある'],
+    CKFH: ['恋の始まりは、ノリと勢いで決まることが多い', '束縛されると、一気に気持ちが冷めてしまう', '一人旅や一人行動も、デートと同じくらい好き', '「次いつ会う？」と聞かれると、少し身構える'],
+    CKFM: ['恋人がいても、趣味の時間は譲らない', '恋人とは「ちょうどいい距離感」でいたい', '連絡は用件だけで済ませがち', '頼るより頼られるほうが気楽'],
+    CKSH: ['甘えたい日と、放っておいてほしい日の差が激しい', '既読のまま返信を忘れることがある', '恋人の前でだけ見せる顔がある', '「好き」と言うのは照れくさいけど、隣にはいたい'],
+    CKSM: ['恋人とは、何時間でも話していられる', '自分の気持ちを話すより、相手の話を聞くほうが楽', '一人の時間がないと、恋人にも優しくできなくなる', '「本当に私のこと好き？」と聞かれたことがある'],
+    EKFH: ['好きになるのも、冷めた気がするのも早い', '昨日は会いたかったのに、今日は一人になりたい', '恋人に優しくされると、なぜか落ち着かないことがある', '勢いで別れ話をして、あとで後悔したことがある'],
+    EKFM: ['「重いと思われないかな」と、送る前にメッセージを何度も直す', '本音を言う前に、相手の反応を何パターンも考える', '平気なふりをするのが上手', '恋人の前でも、どこか気を張っている'],
+    EKSH: ['好きな人ほど、そっけなくしてしまう', 'きつく言ったあと、一人で反省会をしている', '優しくされると、どう返していいか分からなくなる', '信頼した人の前では、驚くほど甘えん坊になる'],
+    EKSM: ['自分のことを話すのが苦手', '恋人ができても、すぐには心を開けない', '「期待しなければ傷つかない」と思うことがある', '一度心を開いた相手には、ずっと一途']
+  };
+
+  // タイプの物語（無料）
+  var STORY = {
+    COFH: '好きになったら、まっすぐ「好き」と言える人です。駆け引きをしないぶん、相手は最初から安心して心を開けます。あなたが明るくいると、一緒にいる恋人まで前向きになれます。それがひまわりのいちばんの魅力です。ただ、自分の気持ちの勢いを基準にすると、ゆっくりした相手のペースが「気持ちが薄い」ように見えてしまうことがあります。まっすぐな気持ちに、相手を待つ力が加われば、最強の恋人になれます。',
+    COFM: '「この人だ」と思ったら、関係をどう進めるかを自然に考えられる人です。デートの段取りも将来の話も、気づけばあなたが決めていることが多いはずです。迷わない姿勢は、相手に大きな安心を与えます。一方で、決めるのが早いぶん、相手が自分の気持ちを言う前に話がまとまってしまうこともあります。ときどき「どうしたい？」と相手に聞いてみてください。それだけで、二人で決めている感覚が生まれます。',
+    COSH: '時間をかけて、相手のことを丸ごと受け止めていく人です。派手なアプローチはしませんが、一緒にいるうちに「この人の隣がいちばん落ち着く」と思わせる力があります。恋人が疲れたときに会いたくなるのが、縁側のあなたです。ただ、気持ちが育つまでに時間がかかるので、始まりの段階でほかの人に先を越されることもあります。好意は早めに、小さく、何度も見せておきましょう。そうすれば、あなたの良さが伝わる前に恋が終わってしまうのを防げます。',
+    COSM: '一度信頼した人とは、長く揺るがない関係を築ける人です。気持ちの波に流されず、相手をよく見てから関係を決めるので、選んだ相手とは本当に長続きします。何があっても態度が変わらないあなたは、恋人にとって大きな安心です。ただ、慎重で落ち着いているぶん、恋の始まりは「脈があるのか分からない」と思われがちです。好意は、言葉や態度で少し大げさに出すくらいでちょうど伝わります。',
+    EOFH: '好きになったとたんに、気持ちが一気に盛り上がる人です。相手を想う気持ちの強さも、愛情表現の大きさも、誰にも負けません。恋をしているときのあなたは生き生きしていて、そのまっすぐさに惹かれる人は多いはずです。ただ、気持ちが大きいぶん、相手の反応が少し冷たく見えただけで、不安も一気にふくらんでしまうことがあります。燃え上がった気持ちを、長く続けられる形に変えていくのが、あなたの恋の課題です。',
+    EOFM: '相手のちょっとした変化に、誰より早く気づける人です。返信の文面、声の調子、いつもと違う予定。小さなサインを手がかりに、二人の関係がどうなっているかを考えます。その観察力は、相手を本気で大切にしているからこそのものです。ただ、考えが先に進みすぎると、まだ起きていない「冷められた」という話を自分で作ってしまうことがあります。はっきりした根拠がそろう前に、結論を出さないようにしましょう。',
+    EOSH: '静かに、でも深く、ひとりの人を想い続けられる人です。好きな気持ちを急いでぶつけることはしませんが、その想いは長く、とても強いものです。相手のために我慢したり待ったりできるやさしさもあります。ただ、言葉にしない想いは、相手にはなかなか届きません。「待っていればいつか気づいてくれる」と考えてしまうのが、月見草がいちばん気をつけたいところです。二人きりのときくらいは、気持ちをそっと口にしてみてください。',
+    EOSM: '恋の行方を、いつも少し先まで予想している人です。「この先どうなるんだろう」「このままで大丈夫かな」と考えるのは、関係を大事に守りたいからです。心配なことに早く気づけるので、大きな失敗はあまりしません。ただ、予報はあくまで予報です。晴れる日まで曇りと予想していると、今日の楽しさを取りこぼしてしまいます。予想するのをやめる必要はありません。「今日はいい日だった」と思えた日を、意識して数えてみてください。',
+    CKFH: 'ときめきに素直で、好きになったらすぐに動ける人です。でも同時に、自分の自由も同じくらい大切です。恋の始まりは軽やかで楽しいのに、関係が決まりごとで縛られ始めると、急にどこかへ行きたくなります。その気まぐれさに惹かれる人もいれば、振り回される人もいます。あなたに合うのは、お互いの世界を持ったまま並んで歩ける関係です。「自由でいたい」と正直に言える相手を選ぶのが、いちばん大事です。',
+    CKFM: '自分の生活や趣味の世界がしっかりあって、それを大事にしながら恋もしたい人です。好きになれば動きは早く、関係の進め方も合理的です。依存せず、依存もさせない、大人の関係をつくれます。ただ、自分の領域に入られることには慎重で、相手からは「本当の自分を見せてくれない」と思われることもあります。自分の世界に、一人分の席を空けておいてください。それだけで、相手はあなたの世界の一部になれます。',
+    CKSH: 'ふだんはそっけないのに、ふとしたときに甘えてくる人です。気分が乗らないときは一人になりたいけれど、本当は懐いた相手のことが大好きです。そのギャップに、相手は振り回されながらも離れられなくなります。ただ、甘えるのも離れるのも「自分のタイミング」なので、相手は今近づいていいのか分からず、不安になりがちです。「今は一人の時間」「今は甘えたい」と一言伝えるだけで、黒猫の恋はぐっと落ち着きます。',
+    CKSM: '時間をかけて、少しずつ信頼を積み上げる人です。自分の考えや世界がはっきりしていて、恋人とも適度な距離を保ちながら、落ち着いた知的な関係を築けます。軽いノリの恋より、長く話せる相手に惹かれるはずです。ただ、自分の内側をなかなか見せないので、相手は「好かれているのか分からない」と感じやすいです。書斎の扉を、ときどき少しだけ開けておいてあげてください。',
+    EKFH: '好きになるのは速いのに、近づくほど怖くなって、急に離れたくなる人です。離れると今度は寂しくなって、また近づきたくなります。そんな気持ちの上がり下がりに、いちばん疲れているのはあなた自身かもしれません。感受性が豊かで、恋をすると毎日の見え方まで変わる人です。だからこそ、気持ちが動いたその場ですべてを決めないようにしましょう。別れるかどうかのような大事なことは、落ち着いてから決めれば大丈夫です。',
+    EKFM: '気持ちが揺れやすいことを自分でも分かっていて、頭でなんとかコントロールしようとする人です。「重くならないように」「冷たくならないように」と、いつもバランスを計算しています。その努力は、相手を傷つけたくないやさしさから来ています。ただ、ずっとバランスを取り続けるのは疲れるものです。ときどき「今ちょっと不安定」と相手に言ってしまうほうが、計算を続けるよりずっとうまくいきます。',
+    EKSH: '本当は誰かに近づきたいのに、傷つくのが怖くて、近づかれるとついトゲのある態度をとってしまう人です。冷たい言い方をしたあとで、一人で後悔していることも多いはずです。そのトゲは、やわらかい心を守るためにあります。ハリネズミも、安心するとトゲを寝かせて丸くなります。時間をかけて「この人は大丈夫」と思えた相手には、驚くほど深い愛情を注げる人です。焦らず、少しずつで大丈夫です。',
+    EKSM: '心の守りがとても固く、簡単には人を内側に入れない人です。過去の経験や慎重さから、「期待しなければ傷つかない」と考えることもあるかもしれません。でも、その壁の内側には、誰よりも繊細で一途な気持ちがあります。要塞の門は、外から叩かれるより、内側から開けるほうがうまくいきます。全部を見せなくてかまいません。信頼できる人に、小さな本音をひとつずつ渡していってみてください。'
+  };
+
+  var CODE_RE = /^([CE])([OK])([FS])([HM])-([WTGAP])([WTGAP])?$/;
+  function parseCode(code) {
+    var m = CODE_RE.exec(code || '');
+    if (!m || m[5] === m[6]) return null;
+    return { core: m[1] + m[2] + m[3] + m[4], att: m[1] + m[2], pace: m[3] + m[4], ll: m[6] ? [m[5], m[6]] : [m[5]] };
+  }
+
+  // answers: LIKERT は 1〜5、PAIRS は 'a' / 'b'
+  function score(likert, pairs) {
+    var sums = [0, 0, 0, 0];
+    LIKERT.forEach(function (item, i) { sums[item.ax] += item.s * (likert[i] - 3); });
+    var letters = sums.map(function (v, i) { return v > 0 ? AXES[i].pos : AXES[i].neg; });
+    var pct = sums.map(function (v) { return Math.round(((v + 10) / 20) * 100); });
+
+    var ll = { W: 0, T: 0, G: 0, A: 0, P: 0 };
+    PAIRS.forEach(function (p, i) { ll[pairs[i] === 'a' ? p.a : p.b] += 1; });
+    var ranked = LL_ORDER.slice().sort(function (x, y) { return ll[y] - ll[x]; });
+    var picks = ll[ranked[0]] - ll[ranked[1]] <= 1 ? ranked.slice(0, 2) : ranked.slice(0, 1);
+
+    return { code: letters.join('') + '-' + picks.join(''), pct: pct, llScores: ll };
+  }
+
+  return { AXES: AXES, LIKERT: LIKERT, PAIRS: PAIRS, LL: LL, LL_ORDER: LL_ORDER, ATT: ATT, TYPES: TYPES, ARUARU: ARUARU, STORY: STORY, parseCode: parseCode, score: score };
+})();
+
+</script>
+<script>
+
+// 料金プラン。価格を変えるときはここだけ直す（税込・円）
+const PLANS = {
+  lite: { name: 'ライト', price: 980, rank: 1 },
+  standard: { name: 'スタンダード', price: 1980, rank: 2 },
+  pair: { name: 'ペア', price: 2980, rank: 3 }
+};
+
+function upgradePrice(from, to) {
+  if (!PLANS[from] || !PLANS[to] || PLANS[to].rank <= PLANS[from].rank) return null;
+  return PLANS[to].price - PLANS[from].price;
+}
+// 有料レポートの本文。サーバー（functions/api/report.js）からだけ読まれ、支払い確認後に JSON で返す。
+// ブロックを組み合わせて 240 パターンを作る。文章を直すときはこのファイルだけ触ればいい。
+// 文体: 地の文は「です・ます」、読み手への勧めは「〜しましょう」「〜してみてください」。箇条書きは常体のまま。
+
+// ---------- 16タイプ（ライト以上） ----------
+
+const TYPE_EXTRA = {
+  COFH: { seen: '恋人から見たあなたは「一緒にいると元気になれる人」です。ただ、あなたの明るさに合わせようとして、相手が弱音を言いにくくなっていることもあります。', step: '相手の話を最後まで聞いてから、自分の話をする' },
+  COFM: { seen: '恋人から見たあなたは「頼りになる人」です。そのぶん、相手は「自分の意見はいらないのかな」と感じていることもあります。', step: '次のデートの行き先を、相手に決めてもらう' },
+  COSH: { seen: '恋人から見たあなたは「帰る場所のような人」です。ただ、あまりに穏やかなので「本当に楽しんでる？」と思われていることもあります。', step: '楽しかったデートのあとに「今日すごく楽しかった」と一言送る' },
+  COSM: { seen: '恋人から見たあなたは「絶対に裏切らない人」です。一方で、気持ちが読みにくく、好かれている実感が薄いと感じさせていることもあります。', step: '相手のいいところを一つ、具体的に言葉にして伝える' },
+  EOFH: { seen: '恋人から見たあなたは「全力で愛してくれる人」です。嬉しい反面、その気持ちの大きさに応えきれないと感じて、プレッシャーになっていることもあります。', step: '不安で連絡したくなったら、一回だけ送るのを翌朝に回す' },
+  EOFM: { seen: '恋人から見たあなたは「よく気がつく人」です。ただ、小さな変化まで指摘されると「見張られている」と感じる相手もいます。', step: '気になったことを指摘する前に「最近忙しい？」と事情を聞く' },
+  EOSH: { seen: '恋人から見たあなたは「控えめで優しい人」です。でも、あなたが我慢していることには、ほとんど気づいていないかもしれません。', step: '小さなお願いを一つ、我慢せずに言ってみる' },
+  EOSM: { seen: '恋人から見たあなたは「しっかり者」です。ただ、先の心配を口にすることが多いと、相手は「信用されていない」と受け取ることがあります。', step: '心配ごとを一つ減らして、代わりに楽しみなことを一つ話す' },
+  CKFH: { seen: '恋人から見たあなたは「一緒にいて楽しいけれど、つかめない人」です。急にいなくなるのでは、という不安を抱かせていることもあります。', step: '次に会う日を、自分から提案する' },
+  CKFM: { seen: '恋人から見たあなたは「自立した大人」です。ただ、自分は頼られていない、必要とされていないと感じさせていることもあります。', step: '小さなことでいいので、一つ相手に頼ってみる' },
+  CKSH: { seen: '恋人から見たあなたは「かわいいけれど気まぐれな人」です。今は近づいていいのか分からず、相手が様子をうかがっていることもあります。', step: '一人になりたい日は「今日は一人時間」と一言だけ送る' },
+  CKSM: { seen: '恋人から見たあなたは「落ち着いた、信頼できる人」です。でも、自分のことをどう思っているのか分からず、相手を不安にさせていることもあります。', step: '「一緒にいると落ち着く」と、言葉で一回伝える' },
+  EKFH: { seen: '恋人から見たあなたは「魅力的だけど、気持ちが読めない人」です。昨日と今日で態度が違うと、相手は戸惑っています。', step: '気持ちが揺れた日は「今日はちょっと不安定」と一言だけ伝える' },
+  EKFM: { seen: '恋人から見たあなたは「気をつかってくれる人」です。ただ、いつも本音を隠しているように見えて、距離を感じさせていることもあります。', step: '一日一つ、計算せずに思ったことをそのまま言ってみる' },
+  EKSH: { seen: '恋人から見たあなたは「本当は優しいのに、ときどき冷たい人」です。きつく言ったあとのあなたの後悔は、相手には見えていません。', step: 'きつく言ってしまったら、その日のうちに「さっきはごめん」と送る' },
+  EKSM: { seen: '恋人から見たあなたは「なかなか心を開いてくれない人」です。相手は、あなたに信頼されていないのではと悩んでいるかもしれません。', step: '今日あった小さな出来事を、一つだけ相手に話してみる' }
+};
+
+// 16タイプとの付き合いやすさ一覧で使う「この人と付き合うときのコツ」（スタンダード以上）
+const TYPE_HOWTO = {
+  COFH: '気持ちをまっすぐ出してくれる人なので、こちらも素直に反応を返すと喜びます。ペースが速いと感じたら「嬉しいけど、少しゆっくりでもいい？」と言えば分かってくれます。',
+  COFM: '決めてくれるのはありがたいですが、任せきりにすると不満がたまります。行きたい場所や希望は、早めに具体的に伝えましょう。',
+  COSH: '気持ちが育つのに時間がかかる人です。急かさずに何度も会って、少しずつ距離を縮めると、深く長い関係になります。',
+  COSM: '好意が分かりにくいのは、慎重だからです。態度だけで判断せず、約束を守ってくれるかどうかを見てください。',
+  EOFH: '気持ちを全力で向けてくれる人です。返信や「好き」の言葉を少しまめにするだけで、相手の不安はかなり減ります。',
+  EOFM: '小さな変化によく気づく人です。予定や気分の変化は先に一言伝えておくと、余計な心配をさせずに済みます。',
+  EOSH: '不満や希望をため込みやすい人です。「何かしてほしいことある？」と、こちらから聞いてあげましょう。',
+  EOSM: '先のことを心配しやすい人です。「この先も一緒にいたい」と、未来の話を少し言葉にすると安心します。',
+  CKFH: '縛られるのが苦手な人です。会う頻度や連絡のルールを決めすぎず、自由にさせるほど戻ってきます。',
+  CKFM: '自分の世界を大切にしている人です。趣味の時間を尊重しつつ、ときどき「一緒にやってみたい」と興味を示すと距離が縮まります。',
+  CKSH: '甘えたいときと一人になりたいときの差が大きい人です。そっけない日は追わずに待ち、甘えてきたらしっかり受け止めましょう。',
+  CKSM: '言葉より行動で信頼を示す人です。じっくり話す時間をつくると、少しずつ本音を見せてくれます。',
+  EKFH: '気持ちの上がり下がりが大きい人です。急に距離を取られても、すぐに結論を出さず、少し時間を置いてから話しましょう。',
+  EKFM: '平気なふりをしがちな人です。「無理してない？」と聞いてあげると、ほっとして本音を話してくれます。',
+  EKSH: '近づかれると、ついきつく当たってしまう人です。トゲのある言葉をそのまま受け取らず、落ち着いてから話を聞きましょう。',
+  EKSM: '心を開くまでに時間がかかる人です。無理に聞き出さず、変わらない態度で待つのがいちばんの近道です。'
+};
+
+// ---------- 愛着スタイル ----------
+const ATT = {
+  CO: {
+    portrait: '恋愛の心理学では、恋人との距離の取り方を「不安」と「回避」の2つの軸で見ます。あなたはどちらも低めで、いわゆる安定型です。相手を信じることと、自分を大切にすることを、無理なく両立できています。連絡が少し途切れても相手の忙しさを想像できますし、不満があればためこまずに話し合えるタイプです。恋愛が人生のすべてにならず、仕事や友達との時間とも自然に並んでいます。これは単に「恋愛が下手ではない」という意味ではありません。二人の関係を支える力がある、ということです。あなたの課題は、自分の安定を、そうでない相手にも分かる形で見せていくことです。',
+    loop: '安定型の恋で繰り返しやすいのは、「気づいたら相手の気持ちが離れていた」というパターンです。あなたは大きな問題がない限り関係は大丈夫だと考えますが、相手は小さな寂しさを積み重ねていることがあります。関係が穏やかなときほど、相手の様子に気を配っておきましょう。',
+    strengths: ['ケンカをしても、関係そのものは揺らがないという安心感をつくれる', '相手の不安や甘えを、重いと感じずに受け止められる', '自分の気持ちや要望を、責める形ではなく素直に伝えられる'],
+    pitfalls: ['自分が平気なぶん、相手の不安や寂しさに気づくのが遅れがち', '「言ってくれたらよかったのに」と、察することを相手任せにしやすい', '刺激の少ない関係に慣れて、ときめきを育てる努力を忘れやすい'],
+    signs: ['相手からの連絡が急に増えた、または確認の質問が増えたとき', '相手が「別に大丈夫」と言いながら表情が曇っているとき', '同じ話題でのケンカが2回以上くり返されたとき', '自分の予定を優先して、二人の時間が後回しになり始めたとき'],
+    match: 'あなたに合うのは、自分の気持ちを言葉にしてくれる人です。安定型同士なら穏やかで長続きしやすく、不安型や回避型の人とも、あなたが支え役になれば関係を育てていけます。',
+    caution: '気持ちを言葉にしない人と付き合うと、お互いが「問題ない」と思い込んだまま、すれ違いに気づくのが遅れがちです。相手が感情を見せないタイプなら、こちらから定期的に気持ちを聞く習慣をつくりましょう。',
+    rephrase: [['そんなに気にしなくていいよ', '気になってたんだね。話してくれてありがとう'], ['言ってくれればよかったのに', '気づけなくてごめん。次は早めに教えてほしい'], ['大丈夫、大丈夫', '大丈夫だよ。何か不安なことがあった？']],
+    tips: [
+      ['相手が不安になりやすい人なら、「大丈夫」と思っていても言葉や行動で一度見せる', 'あなたの「大丈夫」は、言わないと相手には見えません。'],
+      ['月に1回は「最近どう？」と、二人の関係について聞く', '小さな違和感は、聞かれて初めて言える人が多いからです。'],
+      ['相手を変えようとせず、安心をくれる役を楽しむ', 'あなたが揺れないことが、相手の不安をいちばんやわらげます。'],
+      ['関係が落ち着いてきたら、初めての場所や体験を意識して取り入れる', '安定した関係ほど、意識しないと新鮮さが失われます。'],
+      ['相手の弱音を聞いたら、解決策より先に「話してくれてありがとう」を伝える', '解決策より先に、聞いてもらえた安心が必要なときがあります。']
+    ],
+    selfcare: ['自分の気持ちを日記やメモに書き出して、自分の本音を知る', '恋人以外の友達や趣味の時間も、これまで通り大切にする', '「相手を支えすぎていないか」を月に一度ふり返る', '自分が疲れているときは、素直に「今日は甘えたい」と言う'],
+    guide: 'この人は気持ちが安定していて、多少のことでは関係を疑いません。そのぶん、あなたの不安や寂しさに気づくのが遅れることがあります。気になることがあったら、遠慮せずに言葉で伝えてください。言われれば、ちゃんと受け止めてくれる人です。',
+    crisis: {
+      pattern: 'あなたのケンカは、たいてい「温度差」から始まります。あなたにとっては小さなことでも、相手にとっては大きな不安だった、というズレです。あなたが冷静に話そうとするほど、相手は「気持ちを軽く見られている」と感じてしまうことがあります。',
+      dont: ['「そんなことで怒らなくても」と、相手の気持ちの大きさを決めつける', '正しさで相手を言い負かす', '話し合いを「もう大丈夫でしょ」で早く切り上げる'],
+      breakup: '別れが近づくと、あなたは「もう話し合うことはない」と静かに結論を出しがちです。でも相手は、まだ話したいことを抱えているかもしれません。結論を出す前に、相手が言えなかったことを聞く時間を一度とってください。',
+      makeup: ['まず「不安にさせてごめん」と、相手の気持ちを受け止める', '自分の言い分は、相手が落ち着いてから短く伝える', '「次にこうなったら、こうしよう」と小さなルールを一つ決める', '最後に、ふだん通りの会話やスキンシップで日常に戻る']
+    },
+    jealousy: 'あなたは嫉妬を感じにくいタイプです。そのぶん、恋人が嫉妬していることに気づきにくいところがあります。恋人が異性の友達の話に反応したら、軽く流さずに「気になる？」と聞いてみましょう。あなたにとっては何でもないことでも、事情を話すだけで相手の不安は小さくなります。',
+    afterBreakup: '別れたあとも、あなたは比較的早く日常に戻れるタイプです。ただ、平気なふりをしているだけのこともあります。悲しい気持ちは無理に片づけず、信頼できる友達に話してください。次の恋に進むのは、相手を思い出してもつらくなくなってからで十分です。',
+    stages: {
+      crush: '片思いの段階でも焦らず、自然体で近づけるのがあなたの強みです。ただ、落ち着いて見えるぶん「友達としか思われていない」と誤解されることもあります。好意は分かりやすく、早めに出しましょう。二人で会う約束を自分から取りつける、相手の話を覚えておいて次に会ったときに話題にする。そうした小さな行動を重ねれば、気持ちは十分伝わります。',
+      early: '付き合いたては、相手の「恋人としての癖」を知る時期です。あなたにとって普通の連絡頻度や会い方が、相手にとっても普通とは限りません。最初の1か月で、お互いの「ちょうどいい」をすり合わせておきましょう。相手が不安そうにしていたら、理由を聞く前にまず「大丈夫だよ」と伝えてみてください。',
+      long: '長く付き合うほど、あなたの安定感は大きな価値になります。一方で、関係が決まりきった毎日のくり返しになりやすいのも事実です。年に一度は旅行や記念日など、「特別な日」を意識してつくりましょう。将来の話も、あなたからなら相手を不安にさせずに切り出せます。同棲や結婚のような大きな決断の前には、お金や家事の考え方を一度話し合っておくと安心です。'
+    }
+  },
+  EO: {
+    portrait: '恋愛の心理学では、恋人との距離の取り方を「不安」と「回避」の2つの軸で見ます。あなたは不安の軸が高く、回避の軸が低い、いわゆる不安型です。近づきたい気持ちは強いのに、「本当に愛されているのかな」という気持ちも同時に動きやすいタイプです。これは弱さではありません。それだけ関係を大切にしているということです。人とのつながりを強く求める気持ちは、相手を深く愛せる力の裏返しでもあります。あなたの課題は、不安を相手にぶつけずに、安心の材料に変えて相手と分け合うことです。',
+    loop: '不安型の恋で繰り返しやすいのは、「不安になる、確かめる、相手が引く、もっと不安になる」という流れです。相手の反応を待つ時間が長いほど、想像はどんどん悪い方へ進みます。この流れを止めるのに必要なのは、相手を変えることではありません。自分が安心できる材料を、自分で持っておくことです。',
+    strengths: ['相手の変化にいち早く気づき、寄り添える', '愛情表現を惜しまず、相手に「大切にされている」と感じさせられる', '関係を良くするための努力を、面倒がらずに続けられる'],
+    pitfalls: ['返信の遅さや言葉の調子から、悪い想像をふくらませやすい', '不安になると、確認の連絡や試すような言動が増えてしまう', '相手に合わせすぎて、自分の気持ちや予定を後回しにしやすい'],
+    signs: ['同じメッセージを何度も読み返して、意味を考えているとき', '相手のSNSの更新や、オンラインかどうかが気になり始めたとき', '「どうせ自分なんて」と思う回数が増えたとき', '友達との予定より、相手からの連絡待ちを優先しているとき'],
+    match: 'あなたに合うのは、言葉や態度で安心をくれる安定型の人です。連絡がまめで約束を守ってくれる人と付き合うと、あなたの不安は驚くほど落ち着きます。逆に、つかみどころのない人ほど惹かれやすいので気をつけましょう。',
+    caution: '連絡がまばらで、気分によって態度が変わる人には強く惹かれやすい一方で、不安も大きくなりやすいです。一緒にいて安心できるかどうかを、ときめきと同じくらい大切な基準にしてください。',
+    rephrase: [['なんで返信くれないの？', '忙しかった？声が聞けたら安心する'], ['もう好きじゃないんでしょ', '最近ちょっと不安で。好きって言ってもらえたら嬉しい'], ['別にいいよ', '本当は少し寂しかった']],
+    tips: [
+      ['不安になったら送る前に10分置き、その間に「本当に欲しいのは何か」を一言でメモする', '10分あると、送る内容が「責める」から「頼む」に変わります。'],
+      ['試すのではなく、頼む。「不安になったから、一言だけほしい」はわがままではない', '試されると相手は身構えますが、頼まれると応えたくなります。'],
+      ['恋愛以外に、自分を満たしてくれる時間や人を2つ以上持っておく', '恋愛だけで心を満たそうとすると、不安が大きくなります。'],
+      ['相手がくれた安心の言葉や行動を、メモやスクリーンショットで残しておく', '不安な日の自分に、安心の証拠を見せてあげられます。'],
+      ['「相手がどう思っているか」より先に「自分はどうしたいか」を考える', '相手の気持ちを読むことに使っていた力を、自分に戻せます。']
+    ],
+    selfcare: ['不安な気持ちを紙に書き出して、事実と想像を分けてみる', '恋人の連絡を待つ時間に、自分の好きなことを予定に入れる', '「今の自分は不安になっている」と心の中で実況する', '友達に話すときは、相手の悪口ではなく自分の気持ちを話す'],
+    guide: 'この人はあなたのことが大好きなぶん、不安になりやすいタイプです。返信が遅れそうなときや予定が変わるときは、一言伝えてもらえると安心します。「好きだよ」の言葉は、思っている以上にこの人を支えます。確認されることが多くても、疑っているのではなく、安心したいだけです。',
+    crisis: {
+      pattern: 'あなたのケンカは、たいてい「不安の爆発」から始まります。小さな引っかかりを我慢して我慢して、ある日まとめて伝えてしまう。相手からすると突然怒られたように感じて、身構えてしまいます。',
+      dont: ['「どうせ自分なんて」と言って、相手に否定してもらおうとする', '夜中にまとめて長文を送る', '別れをほのめかして、相手の気持ちを試す'],
+      breakup: '別れ話が出ると、あなたは「捨てられたくない」気持ちから、必死に引き止めたり、逆に自分から先に終わらせようとしたりしがちです。どちらも本心ではないことが多いので、その日のうちに決めないようにしましょう。',
+      makeup: ['感情が高ぶっている間は、「少し落ち着いてから話したい」とだけ伝える', '責める言葉ではなく、「〜されて不安だった」と自分の気持ちを主語にする', '相手の話を最後まで聞いてから、自分の希望を一つだけ伝える', '仲直りできたら、「話してくれてありがとう」で終える']
+    },
+    jealousy: 'あなたは嫉妬を感じやすいタイプです。恋人の交友関係が気になったときは、責める前に「自分は何が不安なのか」を一度言葉にしてみてください。多くの場合、本当に欲しいのは、相手の行動を制限することではなく、「自分が大切にされている」という実感です。その実感をもらえるよう、具体的にお願いしてみましょう。',
+    afterBreakup: '別れたあと、あなたは「自分の何がいけなかったのか」を考え続けてしまいがちです。連絡を取りたくなったら、送る前に友達に見せるなど、一人で決めない工夫をしましょう。別れの原因が、どちらか一人だけにあることはまずありません。自分を責める時間を、自分を大切にする時間に少しずつ変えていってください。',
+    stages: {
+      crush: '片思い中は、相手の反応ひとつで気持ちが上がったり下がったりしがちです。返信の速さや内容だけで脈を判断しないようにしましょう。会ったときの表情や、相手から誘ってくれる回数のほうが、ずっと当てになるサインです。好きな人のSNSを何度も見てしまう日は、スマホを置いて別のことをする時間をつくってください。',
+      early: '付き合いたては不安が出やすい時期です。連絡や会う頻度について、最初に「どのくらいが心地いいか」を話しておくと、あとで不安になりにくくなります。相手の「好き」を疑いたくなったら、付き合おうと決めてくれた事実を思い出してください。最初の数か月は、相手の愛情を確かめるより、相手を知ることを楽しむ期間です。',
+      long: '長く付き合うと、不安は少しずつ落ち着いていきます。ただ、相手が忙しい時期や環境が変わる時期には、また不安が強くなりやすいです。その時期は「今は仕事が大変だから」と事情を教えてもらえるよう、前もって頼んでおきましょう。安心できる関係が続けば、あなたは恋人をいちばん近くで支えられる存在になれます。'
+    }
+  },
+  CK: {
+    portrait: '恋愛の心理学では、恋人との距離の取り方を「不安」と「回避」の2つの軸で見ます。あなたは回避の軸が高く、不安の軸が低い、いわゆる回避型です。人に頼るより自分でなんとかしたいし、恋人とも適度な距離を保ちたいタイプです。これは冷たいということではありません。自立していて、相手の自由も尊重できるということです。ただ、関係が深まる場面で無意識に一歩引いてしまう癖があり、相手にはそれが「冷めた」「拒まれた」と見えることがあります。あなたの課題は、距離を取りたいときに、その理由と期限を言葉にすることです。',
+    loop: '回避型の恋で繰り返しやすいのは、「付き合い始めは楽しいのに、関係が深まると冷めてしまう」というパターンです。冷めたと感じたその気持ちは、実は近づきすぎて怖くなっているサインかもしれません。離れる前に、その気持ちが何から来ているのかを考えてみてください。',
+    strengths: ['依存しない、させない、ちょうどいい距離感をつくれる', '相手の自由や一人の時間を尊重できる', '感情に流されず、問題を冷静に整理できる'],
+    pitfalls: ['将来の話や本音の話になると、話題をそらしたくなる', '気持ちを言葉にするのが苦手で、相手に誤解されやすい', '息苦しさを感じると、理由を言わずに少しずつ離れていきがち'],
+    signs: ['相手からの連絡に、なんとなく返信を後回しにし始めたとき', '相手の欠点ばかりが目につくようになったとき', '「一人のほうが楽かも」と思う回数が増えたとき', '相手との予定より、一人の予定を優先する理由を探しているとき'],
+    match: 'あなたに合うのは、自分の世界を持っていて、一人の時間を尊重してくれる人です。安定型の人なら、あなたの距離感を不安に思わず受け止めてくれます。不安型の人とも、ルールを決めておけば十分うまくいきます。',
+    caution: '毎日の連絡や頻繁なデートを求める人とは、最初は楽しくても、だんだん息苦しく感じやすいです。付き合う前に、お互いの「ちょうどいい距離」を話しておくと安心です。',
+    rephrase: [['別に', '今はうまく言えないから、少し考えさせて'], ['一人にして', '少し一人の時間がほしい。夜には連絡するね'], ['重いよ', '気持ちは嬉しい。ただ、もう少しゆっくりだと助かる']],
+    tips: [
+      ['距離を取りたいときは黙って離れず、「ちょっと一人の時間がほしい。○日には連絡する」と期限つきで伝える', '期限があるだけで、相手は「見捨てられた」と感じずに済みます。'],
+      ['本音は100点の言葉でなくていい。「うまく言えないけど嬉しい」で十分伝わる', 'うまく言えないことより、言わないことのほうが誤解を生みます。'],
+      ['息苦しさを感じたら、相手のせいにする前に自分が疲れていないか確かめる', '息苦しさの原因が、相手ではなく疲れであることも多いからです。'],
+      ['相手が近づいてきたときは、一歩だけ受け入れてみる', '小さく受け入れる経験が、距離への怖さを減らします。'],
+      ['自分にとって心地いい会い方や連絡頻度を、最初に正直に伝えておく', '最初に伝えておけば、距離を取っても誤解されにくくなります。']
+    ],
+    selfcare: ['一人の時間を罪悪感なく取れるよう、予定にあらかじめ入れておく', '嬉しかったことを、心の中だけでなく一言でいいので口に出す', '「冷めた」と感じたら、一週間待ってから結論を出す', '信頼できる友達に、恋愛の本音を話す練習をする'],
+    guide: 'この人はあなたのことを大切に思いながらも、一人の時間がないと疲れてしまうタイプです。連絡が少なかったり一人になりたがったりしても、気持ちが冷めたわけではありません。追いかけずに少し待ってあげると、ちゃんと戻ってきてくれます。',
+    crisis: {
+      pattern: 'あなたのケンカは、たいてい「沈黙」から始まります。不満があっても言わずに距離を取り、相手はその変化に不安になって詰め寄る。詰め寄られるほど、あなたはさらに黙る。このくり返しがいちばん多いパターンです。',
+      dont: ['黙ったまま、メッセージを開かずに放っておく', '「別に」「もういい」で話を終わらせる', '何も言わずに予定をキャンセルする'],
+      breakup: '別れを考えるとき、あなたは心の中で静かに結論を出し、相手には突然伝える形になりがちです。相手にとっては「何の前触れもなかった」と感じられます。迷い始めた段階で、一度その気持ちを言葉にしてみてください。',
+      makeup: ['黙り込む前に、「今は考えをまとめたいから、○時に話そう」と伝える', '約束した時間には、必ず自分から話しかける', '相手の不安に対して、まず「離れたいわけじゃない」と伝える', '自分が嫌だったことは、一つに絞って具体的に話す']
+    },
+    jealousy: 'あなたは嫉妬を表に出さないタイプです。気になっても「別にいいけど」と流してしまい、気づいたときには気持ちが冷めていることがあります。小さなもやもやは、ため込む前に「ちょっと気になった」と一言だけ伝えておきましょう。相手を責めずに済む大きさのうちに言うのがコツです。',
+    afterBreakup: '別れたあと、あなたは一人で気持ちを整理しようとします。悲しさを感じないようにしていて、あとから急につらくなることもあります。落ち込む期間があるのは自然なことなので、今はそういう時期だと認めてしまいましょう。次の恋では、前の恋で言えなかった本音を少しでも言えるよう意識してみてください。',
+    stages: {
+      crush: '片思い中は、気持ちを隠しすぎて相手に気づかれないことが多いはずです。好意を言葉にするのが苦手なら、相手が困っているときに手を貸すなど、行動で分かりやすく示しましょう。二人で会う回数を少しずつ増やすだけでも、相手には十分伝わります。告白は完璧なタイミングを待たず、「一緒にいると楽しい」と思えた時点で考えてみてください。',
+      early: '付き合いたてでいちばん大事なのは、自分にとって一人の時間がどれだけ必要かを、早めに伝えておくことです。あとから急に距離を取ると誤解されますが、最初に言っておけば「そういう人」として受け入れてもらえます。会う頻度を決めるときは、少なめに約束して、会えた日を大切にするほうがうまくいきます。',
+      long: '長く付き合うほど、居心地のよさを感じられるタイプです。ただ、相手は「この先」の話をしたくなる時期が来ます。将来の話から逃げずに、「今はこう考えている」と今の気持ちだけでも伝えましょう。答えが決まっていなくてもかまいません。考えていることを分けてくれるだけで、相手は大きく安心します。'
+    }
+  },
+  EK: {
+    portrait: '恋愛の心理学では、恋人との距離の取り方を「不安」と「回避」の2つの軸で見ます。あなたは不安も回避も高めで、恐れ・回避型と呼ばれるタイプです。誰かと深くつながりたい気持ちと、傷つくのが怖い気持ちが同時にあり、近づくと逃げたくなり、離れると寂しくなります。これはあなたがおかしいからではありません。それだけ繊細に人の心を感じ取れるということです。人の痛みが分かるやさしさは、あなたの大きな魅力になっています。あなたの課題は、揺れていることを隠さず、信頼できる相手と少しずつ分け合うことです。',
+    loop: '恐れ・回避型の恋で繰り返しやすいのは、「うまくいき始めると、自分から壊してしまう」というパターンです。幸せな状態が続くと、いつか失う怖さが大きくなり、先に終わらせたくなります。その衝動が出てきたときこそ、関係がうまくいっている証拠だと思い出してください。',
+    strengths: ['人の痛みや弱さに、深く共感できる', '感受性が豊かで、恋をすると相手の小さな良さにたくさん気づける', '一度信頼した相手には、とても一途で深い愛情を注げる'],
+    pitfalls: ['好きと怖いの間で態度が揺れ、相手を混乱させてしまう', 'うまくいきそうなときほど、自分から壊したくなる衝動が出やすい', '相手の言葉を信じたいのに、裏を読んでしまう'],
+    signs: ['相手が優しくしてくれるほど、居心地が悪くなるとき', '「どうせいつか離れていく」と考えてしまうとき', '急に連絡を断ちたくなったり、逆に何度も連絡したくなったりするとき', '関係がうまくいっているのに、別れる理由を探しているとき'],
+    match: 'あなたに合うのは、気持ちが安定していて、あなたが揺れても責めずに待ってくれる人です。最初は物足りなく感じても、安心できる人ほど、あなたの深い愛情を引き出してくれます。',
+    caution: '優しいときと冷たいときの差が大きい人と付き合うと、あなたの揺れはさらに大きくなります。刺激的に感じても、態度が安定している人のほうが、あなたは長く幸せでいられます。',
+    rephrase: [['どうせ離れていくんでしょ', '離れていかないか、ちょっと不安になってる'], ['もう別れよう', '今は気持ちが乱れてるから、少し時間がほしい'], ['なんでもない', 'うまく言えないけど、今日は少し揺れてる']],
+    tips: [
+      ['揺れやすいことを隠さず、「近づくと少し怖くなる癖がある」と先に伝えておく', '先に知ってもらえていれば、揺れたときに責められずに済みます。'],
+      ['別れる、告白するなどの大事な決断は、気持ちが大きく揺れた日には下さない', '揺れた日の決断は、あとで後悔することが多いからです。'],
+      ['安定したタイプの人との関係は、最初は物足りなく感じても育ててみる', '安心できる相手との時間が、あなたの揺れを少しずつ小さくします。'],
+      ['気持ちが揺れた日は、紙に書き出してから相手に伝えるかどうか決める', '書き出すと、気持ちと事実を分けられます。'],
+      ['恋人以外に、何でも話せる友達やカウンセラーなどの相談先を持っておく', '一人で抱えると、揺れが大きくなりやすいからです。']
+    ],
+    selfcare: ['気持ちが揺れた日は、大事な連絡や決断をしないと決めておく', '自分の気持ちを10段階で数字にして、日記に記録する', '信頼できる友達やカウンセラーなど、恋人以外の相談先を持つ', '「怖いと感じるのは、大切だから」と自分に言ってあげる'],
+    guide: 'この人は、近づきたい気持ちと、傷つくのが怖い気持ちを同時に抱えています。急にそっけなくなったり距離を取ったりするのは、あなたを嫌いになったからではありません。態度が揺れても、変わらずにそばにいてもらえることが、この人にとっていちばんの安心です。',
+    crisis: {
+      pattern: 'あなたのケンカは、「試す」と「逃げる」が交互に出るのが特徴です。相手の愛情を確かめたくて強く当たったかと思えば、相手が近づいてくると急に心を閉じる。相手はどう接していいか分からなくなってしまいます。',
+      dont: ['気持ちが高ぶった勢いで別れを切り出す', '相手を責めたあとで、急に連絡を断つ', '過去のケンカを持ち出して、全部まとめて責める'],
+      breakup: '関係が不安定になると、あなたは「傷つく前に自分から終わらせたい」と考えがちです。でもその決断は、多くの場合、怖さから来ています。別れを口にしたくなったら、まず一晩、できれば一週間置いてください。',
+      makeup: ['自分の気持ちが今どのくらい揺れているか、10段階で相手に伝える', '「本当は離れたくない」という本音を、短くてもいいので言う', '相手に求めることを一つだけ、具体的にお願いする', '落ち着いたら、揺れたときの合図や約束を二人で決めておく']
+    },
+    jealousy: 'あなたは嫉妬を感じると、相手を問い詰めたい気持ちと、何も言わずに離れたい気持ちが同時に出やすいタイプです。どちらかに動く前に、一晩置きましょう。翌日になっても気になるなら、「不安になった」と気持ちだけを伝えてください。事実を確かめるより、気持ちを分かってもらうほうが、あなたの安心につながります。',
+    afterBreakup: '別れたあと、あなたは「やっぱり自分はうまくいかない」と思い込みやすいタイプです。でも、関係が終わったのは、あなたに愛される価値がないからではありません。気持ちが落ち着くまでは、元恋人との連絡や大きな決断は避けましょう。つらさが長く続くときは、カウンセラーなど専門の人に話を聞いてもらうのもひとつの方法です。',
+    stages: {
+      crush: '片思い中は、近づきたいのにそっけなくしてしまいがちです。好意を全部見せる必要はないので、「会えて嬉しい」くらいの小さな一言から始めてみてください。相手の反応が少し冷たく見えても、それだけで「嫌われた」と決めつけないようにしましょう。脈があるかどうかは、何度か会ってから判断しても遅くありません。',
+      early: '付き合いたては、いちばん気持ちが揺れやすい時期です。幸せなのに不安、という矛盾した気持ちが出てきても、それは自然なことです。信頼できる相手なら、早めに自分の癖を打ち明けておくと、ずっと楽になります。急に別れたくなったときは、最低でも一週間は様子を見る、と自分の中で決めておきましょう。',
+      long: '時間をかけて信頼を積み上げるほど、あなたは安定していきます。長く一緒にいる相手は、あなたが揺れても受け止めてくれた人です。揺れた日には、その事実を思い出してください。関係が落ち着いてきたら、過去の恋愛でつらかったことを少しずつ話してみるのもおすすめです。分かってもらえた経験が、あなたの不安を小さくしていきます。'
+    }
+  }
+};
+
+// ---------- ペースと判断（ライト以上） ----------
+const PACE = {
+  FH: {
+    title: '直感で飛び込む',
+    body: '好きと思ったら、気持ちのままに動けるスピード派です。恋の始まりの勢いは誰にも負けません。勢いで言った言葉や決めたことを、あとで振り返る時間を意識してとると、恋が長続きしやすくなります。',
+    approach: 'アプローチは自分から、ストレートにいくタイプです。まっすぐさはあなたの魅力ですが、相手が戸惑っている様子が見えたら、一度ペースを落としましょう。返事を急かさないことが、うまくいくためのいちばんのポイントです。',
+    date: 'その日の思いつきで行き先を変えるような、自由なデートが向いています。ただ、記念日など大事な日だけは、事前に計画しておくと相手の満足度が上がります。',
+    line: '思ったときにすぐ送るタイプです。勢いのある長文や連投は、相手によっては重く感じられることがあります。「返信が来るまで次を送らない」を、ひとつのルールにしてみましょう。',
+    guide: '気持ちが動くと、すぐ行動に移すタイプです。勢いで言ったことは、少し時間を置いてから一緒に振り返ってあげてください。'
+  },
+  FM: {
+    title: '決めたら一直線',
+    body: '動きは早いけれど、頭はいつも冷静なタイプです。「この人とはこう進めよう」と道筋を描けます。ただ、相手の気持ちのペースが自分より遅いこともあるので、結論を急がず、相手の気持ちに付き合う時間をつくりましょう。',
+    approach: '段取りのいいアプローチができるタイプです。ただ、効率を重視しすぎると事務的に見えることもあります。一度くらいは計画外の寄り道をしたり、気持ちだけを伝えるメッセージを送ったりしてみましょう。',
+    date: '下調べをして、相手が喜ぶプランを組むのが得意です。行き先の候補を2つ用意して相手に選んでもらうと、「一緒に決めた」感じが出て、もっと楽しくなります。',
+    line: '用件中心の連絡になりがちです。予定の連絡だけで終わらせず、「今日のこれ面白かった」のような用事のない一言を混ぜると、距離が縮まります。',
+    guide: '物事をてきぱき決めるタイプです。自分の希望を早めに具体的に伝えると、喜んで取り入れてくれます。'
+  },
+  SH: {
+    title: 'じっくり温める',
+    body: '時間をかけて気持ちを育てるタイプです。一度好きになったら、想いは深く長く続きます。ただ、慎重なぶん、気持ちを伝えるタイミングを逃しがちです。「まだ早いかな」と思ったときが、ちょうどいいタイミングです。',
+    approach: '友達として過ごす期間を経て、恋に発展するのが自然なパターンです。ただ、友達のまま時間がたちすぎると、相手があなたを恋愛の相手として見なくなることもあります。二人きりで会う機会を、意識してつくりましょう。',
+    date: '家でゆっくり過ごしたり、同じお店に何度も通ったりする、落ち着いたデートが心地いいはずです。たまには相手の好きな場所に付き合うと、新しい一面を見せられます。',
+    line: '返信の内容をじっくり考えてしまうタイプです。完璧な文章を考えるより、早めに短く返すほうが相手は安心します。スタンプひとつでも十分です。',
+    guide: '気持ちを言葉にするまでに時間がかかるタイプです。返事を急かさず、ゆっくり待ってあげてください。'
+  },
+  SM: {
+    title: '見極めてから動く',
+    body: '相手をよく見て、納得してから関係を進める慎重派です。失敗は少ないものの、相手からは「脈なしかな」と誤解されやすいです。考えている途中でも「ちゃんと考えてるよ」と伝えておくと、相手は安心します。',
+    approach: '相手の人柄や価値観をよく知ってから動くタイプです。慎重さは長所ですが、相手のことを知ろうとしすぎて動けなくなることもあります。「7割分かったら動く」くらいの基準を持つと、チャンスを逃しにくくなります。',
+    date: '会話を楽しめる静かな場所や、共通の趣味を深められるデートが向いています。ときどき感想を言葉にして、楽しんでいることを相手に伝えましょう。',
+    line: '簡潔で、気持ちがあまり見えない文面になりがちです。読んだ相手は「怒ってる？」と感じることもあります。ときどき「！」や絵文字で、気持ちを足してあげましょう。',
+    guide: 'よく考えてから動く慎重なタイプです。反応が薄く見えても、ちゃんと考えてくれています。'
+  }
+};
+
+// ---------- 愛情言語（ライト以上） ----------
+const LL = {
+  W: {
+    need: '「好き」「ありがとう」「すごいね」と言葉にしてもらうことで、愛情を実感するタイプです。そのぶん、何気ないきつい一言は人一倍心に刺さります。',
+    give: '自分が言葉で伝えるぶん、相手から言葉が返ってこないと「愛されていないのかな」と感じがちです。でも相手は、別の方法で愛情を出しているかもしれません。',
+    starving: '相手の言葉を何度も読み返したり、「ねえ、好き？」と聞きたくなったりしたら、言葉が足りていないサインです。',
+    joys: ['別れ際に「今日も会えてよかった」と言われる', '頑張ったことを具体的に褒めてもらう', '寝る前の「おやすみ、好きだよ」', '友達の前で、自分のことを良く言ってくれる', '手書きのメッセージカード', 'ケンカのあとの「ごめんね、大事に思ってる」', '何でもない日の「ありがとう」', '見た目の変化に気づいて、言葉にしてくれる'],
+    giveTips: 'あなたが言葉で伝えるときは、「いつも」より「今日の〇〇が嬉しかった」と具体的に伝えましょう。具体的な言葉ほど、相手の心に長く残ります。',
+    receive: '相手の愛情言語が言葉でない場合、相手はきっと別の形で愛を伝えています。会いに来てくれる、手伝ってくれる。そうした行動を、言葉の代わりとして受け取ってみてください。',
+    phrases: ['たまにでいいから、言葉で言ってもらえるとすごく嬉しい', '「ありがとう」って言われると、それだけで一日がんばれる', '照れくさかったら、メッセージで一言くれるだけで十分だよ'],
+    action: '会った日の終わりに、今日よかったことを一つ言葉にする'
+  },
+  T: {
+    need: 'スマホを置いて、ちゃんと自分に向き合ってくれる時間を、何よりの愛情と感じるタイプです。会う回数や、一緒に何かをすることが大事です。',
+    give: '予定を空けて会いに行くことが、あなたにとっての愛情表現です。ただ、相手によっては、会う頻度の多さを重く感じることもあります。',
+    starving: '会っているのに相手がスマホばかり見ていてイライラしたり、次に会う予定が決まっていないと落ち着かなかったりしたら、時間が足りていないサインです。',
+    joys: ['スマホを見ずに、目を見て話を聞いてくれる', '忙しい中でも会う時間をつくってくれる', '一緒に料理をする', '散歩しながら、とりとめのない話をする', '毎週決まった曜日の電話のような、二人だけの習慣', '相手の趣味に一緒に付き合ってくれる', '旅行の計画を一緒に立てる', '何もしない日を、一緒にのんびり過ごす'],
+    giveTips: 'あなたが時間で愛を伝えるときは、長さより中身を大事にしましょう。会っている間はスマホを置く、相手の話を最後まで聞く。それだけで「大切にされている」と伝わります。',
+    receive: '相手の愛情言語が時間でない場合、会う回数が少なくても、愛情が薄いとは限りません。会えない間のメッセージや気づかいに、相手の愛がこめられているはずです。',
+    phrases: ['長くなくていいから、会ってるときはちゃんと二人の時間にしたい', '忙しいのは分かってるから、次に会う日だけ先に決めておきたい', '何もしなくていいから、一緒にいる時間がほしい'],
+    action: '週に一度、スマホを置いて30分話す'
+  },
+  G: {
+    need: '贈り物の値段ではなく、「自分のことを考えて選んでくれた」という気持ちに愛を感じるタイプです。小さなお土産でも、ずっと記憶に残ります。',
+    give: '相手を思って選ぶ時間が好きなタイプです。ただ、相手が贈り物で愛を受け取らないタイプだと、「物で済ませている」と思われることもあります。',
+    starving: '記念日を忘れられたことがずっと引っかかっていたり、ほかのカップルのプレゼントの話が妙に気になったりしたら、贈り物が足りていないサインです。',
+    joys: ['出かけた先で見つけた、小さなお土産', '前に話した「欲しいもの」を覚えていてくれる', '好きなお菓子を、さりげなく買ってきてくれる', '記念日の花束', '二人の写真をまとめたアルバム', '手紙を添えたプレゼント', '旅行先で撮った写真を送ってくれる', 'おそろいの小物'],
+    giveTips: 'あなたが贈り物で伝えるときは、値段より「覚えていた」ことが伝わるものを選びましょう。前に相手が話していたものや、二人の思い出にまつわるものは、特別な贈り物になります。',
+    receive: '相手の愛情言語が贈り物でない場合、記念日にプレゼントがなくても、気持ちがないわけではありません。欲しいものがあるなら、具体的に伝えておくのがいちばんです。',
+    phrases: ['高いものじゃなくていいから、思い出してくれた印がほしい', 'コンビニのお菓子一個でも、選んでくれたことが嬉しい', '記念日だけは、何か形に残るものを交換したいな'],
+    action: '出先で見つけた小さなものを持って帰る'
+  },
+  A: {
+    need: '言葉より行動で愛を感じるタイプです。困ったときに動いてくれる、用事を代わってくれる。そうした「実際にしてくれること」に愛情を感じます。',
+    give: '尽くすことが、あなたの愛情表現です。でも黙ってやっているぶん気づかれにくく、「こんなにしているのに」と不満がたまりやすいです。',
+    starving: '「なんで自分ばっかり」と思うことが増えたり、相手が手伝ってくれないことにイライラしたりしたら、行動が足りていないサインです。',
+    joys: ['体調が悪い日に、ご飯や薬を買ってきてくれる', '疲れている日に、駅まで迎えに来てくれる', '面倒な手続きや予約を代わりにしてくれる', '重い荷物を持ってくれる', '家事を言われる前にやってくれる', '引っ越しや大掃除を手伝ってくれる', '仕事が忙しい時期に、生活のことを支えてくれる', '頼んだことを忘れずにやってくれる'],
+    giveTips: 'あなたが行動で伝えるときは、黙ってやるより「これやっておいたよ」と一言添えましょう。気づいてもらえることで、あなたの愛情はちゃんと届きます。',
+    receive: '相手の愛情言語が行動でない場合、気が利かないように見えても、悪気はないことがほとんどです。してほしいことは、具体的にお願いしましょう。',
+    phrases: ['言葉もうれしいけど、忙しいときにちょっと手伝ってもらえるのがいちばん嬉しい', '疲れてる日に「何かしようか？」って聞いてくれるだけで嬉しい', 'お互い得意なことを分担できたら、すごく楽になると思う'],
+    action: '相手が忙しい日に、用事を一つ代わる'
+  },
+  P: {
+    need: '手をつなぐ、ハグをする、隣に座る。そうした触れ合いで、安心と愛情を感じるタイプです。触れる回数が減ると、心の距離まで遠く感じやすくなります。',
+    give: '自然と近くに寄りたくなるタイプです。ただ、人によっては触れられるのが苦手な場面もあるので、相手がどう感じているかを確かめましょう。',
+    starving: '隣に座っても距離があると寂しくなったり、ケンカのあとにハグがないと仲直りした気がしなかったりしたら、スキンシップが足りていないサインです。',
+    joys: ['会ったときと別れるときのハグ', '歩くときに手をつなぐ', 'ソファで肩を寄せ合って過ごす', '落ち込んだときに背中をさすってもらう', '寝る前に頭をなでてもらう', '人混みで、自然に手を引いてくれる', 'ケンカのあとのハグ', '隣に座ったときに、肩や腕が触れている'],
+    giveTips: 'あなたが触れ合いで伝えるときは、相手の気分や場所を見て選びましょう。人前が苦手な相手なら、二人きりのときにしっかりと。タイミングが合うほど、触れ合いは安心に変わります。',
+    receive: '相手の愛情言語がスキンシップでない場合、触れ合いが少なくても、気持ちが冷めたわけではありません。「手をつなぎたい」と言葉にすれば、たいてい応えてくれます。',
+    phrases: ['何も言わなくていいから、ぎゅっとしてもらえると安心する', '歩くときは、手をつないでいたいな', 'ケンカのあとは、ハグで仲直りしたい'],
+    action: '会ったときと別れるときに、必ずハグする'
+  }
+};
+
+// ---------- 愛着×愛情言語（ライト以上） ----------
+const CROSS = {
+  CO: {
+    W: '言葉がなくても関係を疑わないぶん、自分が言葉を求めていることを忘れがちです。でも本当は、言葉をもらうと、あなたの安心はさらに強くなります。欲しい言葉は、遠慮せず素直にお願いしてかまいません。',
+    T: '一緒の時間を大事にしつつ、相手の一人の時間も尊重できる組み合わせです。予定が合わない時期は「次いつ会う？」を先に決めておくと、二人とも落ち着いて過ごせます。',
+    G: '贈り物にこめられた気持ちを、そのまま受け取れるタイプです。相手が贈り物に慣れていなくても、選んでくれたことを褒めると次につながります。あなたから贈るときは、一言メッセージを添えるとさらに喜ばれます。',
+    A: '行動で支え合える、頼れるパートナーになれる組み合わせです。ただ、あなたの行動は「やって当然」と見られやすいので、たまには「これ、愛情だからね」と冗談まじりに伝えましょう。感謝の言葉が返ってくる関係を育てていけます。',
+    P: '触れ合いで、安心をさらに深められるタイプです。相手が疲れているときは、スキンシップを求めるより、こちらから差し出すつもりで触れてみましょう。手を握るだけで、言葉以上に伝わることがあります。'
+  },
+  EO: {
+    W: '不安になったとき、いちばん安心できるのが言葉です。だからこそ「好きって言って」は、責める口調ではなく、お願いの形で伝えましょう。もらった言葉は残しておいて、不安な日に読み返すのがおすすめです。',
+    T: '会えない時間に不安がふくらみやすい組み合わせです。会えない週は「5分だけ電話」のような小さな時間を約束しておくと、心が落ち着きます。長さよりも、確実にある時間のほうが安心につながります。',
+    G: '贈り物を「愛されている証拠」として集めたくなるかもしれません。物の量や値段で愛を測り始めたら、一度立ち止まりましょう。相手があなたを思い出してくれたこと自体が、いちばんの贈り物です。',
+    A: '尽くしすぎて疲れやすい組み合わせです。見返りを期待して動くと、返ってこなかったときに不安が倍になります。力は8割くらいにとどめておきましょう。してほしいことは、頼んでいいのです。',
+    P: '触れ合いが減ると、すぐに「冷めたのかな」と考えてしまいがちです。相手の忙しさや体調も、触れ合いの量に影響していることを思い出してください。「ハグしたい」と言葉で頼めば、たいていの相手は喜んで応えてくれます。'
+  },
+  CK: {
+    W: '言葉をもらうと嬉しいのに、自分から言うのは照れくさい組み合わせです。1日1回の「ありがとう」から始めてみましょう。長い言葉はいりません。それだけで、相手の安心感は大きく変わります。',
+    T: '一緒の時間は好きなのに、長すぎると疲れてしまう組み合わせです。「短く、でも中身の濃い時間」を過ごすスタイルを相手と共有しておけば、誤解されません。会っている間は、スマホを置いて相手に集中しましょう。',
+    G: '物で気持ちを伝えるのは、言葉が苦手なあなたに合った方法です。メモを一枚添えるだけで、伝わる気持ちは倍になります。相手の好みを覚えておくのも、立派な愛情表現です。',
+    A: '行動で愛情を示す、口数の少ないタイプです。相手が言葉で愛を感じるタイプだと伝わりにくいので、行動に一言添えましょう。「好きだからやってる」と言えたら、もう十分です。',
+    P: '触れ合いは好きですが、自分のタイミングでいたいタイプです。気が乗らないときは、拒むのではなく「あとでね」と返すと、相手が傷つきません。自分から触れにいく日をつくると、相手は驚くほど安心します。'
+  },
+  EK: {
+    W: '言葉が欲しいのに、もらっても信じきれないことがあります。もらった言葉はメモやスクリーンショットで残して、気持ちが揺れた日に読み返しましょう。疑ってしまう自分を責めず、「今日は信じられない日なんだ」と認めるだけで十分です。',
+    T: '一緒にいたいのに、長くいると逃げたくなる組み合わせです。会う時間の長さを最初に決めておくと、安心して楽しめます。「今日は3時間」と決めるだけで、気持ちの負担がぐっと軽くなります。',
+    G: '気持ちを物に託すのは、直接言うのが怖いあなたにとって安全な伝え方です。無理に言葉にしなくていい日もあります。相手からの贈り物は目に入る場所に置いておくと、安心の材料になります。',
+    A: '尽くすことで愛を確かめようとしがちです。断られると深く傷つくので、「手伝おうか？」と一度聞いてから動きましょう。相手からの手助けを受け取る練習も、同じくらい大切です。',
+    P: '触れ合いでいちばん安心できるのに、自分からは怖くて求めにくい組み合わせです。「手、つないでいい？」の一言で、関係は大きく変わります。断られても、それはあなたが嫌われたという意味ではありません。'
+  }
+};
+
+// ---------- 相性（スタンダード以上） ----------
+const ATT_PAIR = {
+  'CO-CO': { ease: 5, text: '安心できる者同士の、穏やかな関係です。刺激が足りないと感じたら、新しい場所や体験を一緒に取り入れましょう。' },
+  'CO-EO': { ease: 4, text: 'たしかめ型の不安を、ひだまり型の落ち着きが包み込める組み合わせです。言葉での確認を少し多めにすると、不安は確実に減ります。' },
+  'CK-CO': { ease: 4, text: 'ひとり時間型の距離感を、ひだまり型が尊重できれば大丈夫です。距離が開いても追いかけず、いつでも帰ってこられる場所でいましょう。' },
+  'CO-EK': { ease: 4, text: '揺れやすいゆらぎ型にとって、ひだまり型は安心して戻れる場所です。相手の態度が揺れても、こちらの態度を変えずに接することが、いちばんの愛情になります。' },
+  'EO-EO': { ease: 3, text: '気持ちを伝え合える反面、不安がうつりやすい組み合わせです。「どちらかが不安な日は、もう片方が聞き役になる」とルールにしておきましょう。' },
+  'CK-EO': { ease: 2, text: '追う人と逃げる人になりやすく、いちばんすれ違いやすい組み合わせです。追うほど相手は離れるので、たしかめ型は待つ練習を、ひとり時間型は先に安心させる一言を意識しましょう。' },
+  'EK-EO': { ease: 2, text: '繊細な者同士で深く分かり合えますが、気持ちの波も大きい組み合わせです。ケンカのときは、一晩置いてから話すルールを決めておきましょう。' },
+  'CK-CK': { ease: 3, text: 'お互い自由で快適な関係です。ただ、本音を言わないまま距離が開いていくこともあります。月に1回は「最近の二人」について話す日をつくりましょう。' },
+  'CK-EK': { ease: 2, text: 'ゆらぎ型が近づくとひとり時間型が引き、ひとり時間型が引くとゆらぎ型が揺れる組み合わせです。距離を取るときは、理由と期限を必ず言葉にしましょう。' },
+  'EK-EK': { ease: 2, text: '痛みを分かり合える反面、二人同時に揺れると関係ごと崩れやすい組み合わせです。二人以外にも相談できる相手を持っておくことが、安定につながります。' }
+};
+
+const PACE_PAIR = {
+  sameF: '二人ともスピード派です。盛り上がるのが早いぶん、大事な決断の前には一呼吸おくルールをつくりましょう。',
+  sameS: '二人ともじっくり派です。進展が遅くて不安になったら、どちらかが小さく一歩を踏み出す役を引き受けましょう。',
+  diffF: '恋のペースが違う二人です。スピード派は待つことを、じっくり派は「前向きに考えてる」と途中の気持ちを伝えることを意識しましょう。',
+  sameH: '二人とも気持ちを重視するタイプです。ケンカは激しくなりやすいものの、仲直りも早くできます。感情が落ち着いてから話すのがコツです。',
+  sameM: '二人とも頭で考えるタイプです。冷静に話し合えるぶん、気持ちの話が後回しになりがちです。「どう感じた？」と聞く習慣をつくりましょう。',
+  diffH: 'ケンカのときに優先するものが違う二人です。気持ちを重視する人には先に共感を、頭で考える人には先に要点を伝えましょう。順番を変えるだけで、ぶつかり方が変わります。'
+};
+
+// ---------- ペア専用 ----------
+const PAIR_DEEP = {
+  'CO-CO': {
+    gaps: ['どちらも「言わなくても分かっている」と思い、感謝や好意の言葉が減っていく', '大きなケンカがないぶん、小さな不満が話題にのぼらないまま積もっていく'],
+    talks: [['どちらからでも', '最近、二人でやって楽しかったことって何だった？'], ['どちらからでも', 'ちょっとだけ気になってることがあるんだけど、今話してもいい？']],
+    ritual: '月に一度、「今月うれしかったこと」と「来月やってみたいこと」を一つずつ言い合う日をつくりましょう。'
+  },
+  'CO-EO': {
+    gaps: ['ひだまり型の「既読のまま寝ちゃった」が、たしかめ型には一晩じゅうの不安になる', 'ひだまり型の冷静な話し方が、たしかめ型には「どうでもいいと思われている」ように聞こえる'],
+    talks: [['ひだまり型から', '今日は返信遅くなるけど、気持ちは変わってないからね'], ['たしかめ型から', '責めたいわけじゃなくて、ちょっと安心したいだけなんだ']],
+    ritual: '寝る前の「おやすみ」だけは、どんなに忙しくても欠かさないと決めておきましょう。'
+  },
+  'CK-CO': {
+    gaps: ['ひとり時間型が黙って距離を取ると、ひだまり型は理由が分からず戸惑う', 'ひだまり型が提案する二人の予定が、ひとり時間型には少し多すぎると感じられる'],
+    talks: [['ひとり時間型から', '今週はちょっと一人で過ごしたい。週末には会いたい'], ['ひだまり型から', '会う頻度、今くらいでちょうどいい？無理してない？']],
+    ritual: '会う日と、それぞれが一人で過ごす日を、カレンダーで見えるようにしておきましょう。'
+  },
+  'CO-EK': {
+    gaps: ['ゆらぎ型の急な態度の変化に、ひだまり型が「何かしたかな」と戸惑う', 'ひだまり型の変わらない優しさを、ゆらぎ型がかえって信じきれない日がある'],
+    talks: [['ゆらぎ型から', '今日はちょっと揺れてる日。あなたのせいじゃないよ'], ['ひだまり型から', 'どんな日でも、離れるつもりはないからね']],
+    ritual: '揺れた日の合図をスタンプ一つなどで決めておき、その日は無理に話さず、そばにいるだけにしましょう。'
+  },
+  'EO-EO': {
+    gaps: ['どちらも相手からの連絡を待ってしまい、不安が二倍になる', '一方の不安が、もう一方の不安を呼び起こして、ケンカが大きくなりやすい'],
+    talks: [['どちらからでも', '今ちょっと不安だから、少しだけ話を聞いてほしい'], ['どちらからでも', '二人とも不安になってるね。一回深呼吸してから話そう']],
+    ritual: '毎日決まった時間に短い連絡を交わすと決め、それ以外の時間は待たなくていいことにしましょう。'
+  },
+  'CK-EO': {
+    gaps: ['たしかめ型の「どうしたの？」が増えるほど、ひとり時間型は追い詰められて黙る', 'ひとり時間型の「一人になりたい」が、たしかめ型には「別れたい」と聞こえる'],
+    talks: [['ひとり時間型から', '一人になりたいのは、あなたが嫌だからじゃない。○日には連絡する'], ['たしかめ型から', '待つから、いつ頃話せそうかだけ教えてほしい']],
+    ritual: '距離を取るときは期限つきで伝えるルールを、二人の約束として決めておきましょう。'
+  },
+  'EK-EO': {
+    gaps: ['たしかめ型が近づくと、ゆらぎ型は嬉しい反面、怖くなって逃げたくなる', 'ゆらぎ型が離れると、たしかめ型の不安が一気に大きくなる'],
+    talks: [['ゆらぎ型から', '近づかれると少し怖くなる癖があるの。嫌いになったわけじゃない'], ['たしかめ型から', '不安になってるけど、追いかけすぎないようにするね']],
+    ritual: 'ケンカをしたら、どんなに話したくても一晩置いてから話すと決めておきましょう。'
+  },
+  'CK-CK': {
+    gaps: ['お互いに干渉しないぶん、相手が何を考えているか分からなくなっていく', 'どちらも本音を言わず、気づいたら心の距離が開いている'],
+    talks: [['どちらからでも', '最近どう？二人のことで、何か思ってることある？'], ['どちらからでも', '言うの得意じゃないけど、一緒にいて楽だなって思ってる']],
+    ritual: '月に一度、ご飯を食べながら「最近の二人」について話す日を決めておきましょう。'
+  },
+  'CK-EK': {
+    gaps: ['ゆらぎ型が近づきたい日に、ひとり時間型が距離を取りたがる', 'ひとり時間型の沈黙が、ゆらぎ型には「見捨てられる」サインに感じられる'],
+    talks: [['ひとり時間型から', '黙ってるのは考えをまとめたいから。明日ちゃんと話す'], ['ゆらぎ型から', '今日は少し不安だから、一言だけほしい']],
+    ritual: '距離を取る前に必ず理由と期限を一言伝える、というルールを二人で守りましょう。'
+  },
+  'EK-EK': {
+    gaps: ['二人同時に不安になると、どちらも支える側に回れない', '「どうせ離れていく」という思いが、お互いの言動で強まってしまう'],
+    talks: [['どちらからでも', '今日はこっちが揺れてる。そっちは大丈夫？'], ['どちらからでも', '今は二人とも不安定だから、大事な話は明日にしよう']],
+    ritual: '二人以外に相談できる人をそれぞれ持っておき、揺れたときはまずそこで気持ちを整えましょう。'
+  }
+};
+
+const LL_PAIR_TIP = {
+  shared: '二人に共通の愛情言語がある組み合わせです。そこを意識して増やすだけで、お互いの満足度が上がりやすいペアです。',
+  none: '共通の愛情言語がない二人です。愛情があっても「届いていない」と感じやすいので、相手の言語で愛を伝える練習をしていきましょう。'
+};
+
+
+// ---------- 追加の章 ----------
+// 恋のQ&A（ライト）
+const QA = {
+  CO: [
+    ['恋人が不安がるとき、どう接したらいいか分かりません。', '不安の理由が正しいかどうかを判断する前に、「不安にさせてごめんね」と気持ちを受け止めましょう。理由を聞くのは、相手が落ち着いてからで十分です。あなたが落ち着いていること自体が、相手にとっていちばんの安心になります。'],
+    ['恋人にときめかなくなってきました。冷めたのでしょうか。', '安定型の恋は、ときめきが落ち着いて安心に変わっていくのが自然な流れです。ときめきがないことと、好きでなくなったことは同じではありません。気になるなら、初めて行く場所でデートをするなど、新しい体験を一緒にしてみてください。'],
+    ['自分から「好き」と言うのが少し照れくさいです。', 'あなたの「好き」は、相手にとって大きな安心になります。照れくさいなら、メッセージや別れ際の一言からで十分です。言われた相手の反応を見ると、言ってよかったと思えるはずです。']
+  ],
+  EO: [
+    ['返信が遅いと、どうしても不安になります。', '返信の速さは、相手の気持ちより、相手の生活のリズムを表していることがほとんどです。不安になったら、最後に会ったときの相手の表情や言葉を思い出してください。どうしても気になるなら、「返信が遅いと少し不安になる」と、責めずに一度だけ伝えてみましょう。'],
+    ['重いと思われないか心配です。', '気持ちが大きいこと自体は、悪いことではありません。重く感じられやすいのは、確認や連絡の回数が増えたときです。気持ちを伝えるのはそのままに、確認する回数だけ少し減らしてみてください。'],
+    ['好きな人ができると、自分の予定を後回しにしてしまいます。', '恋人に合わせるのは優しさですが、続けると「こんなに合わせているのに」という不満に変わりやすくなります。週に一度は、恋人に関係なく自分のための予定を入れておきましょう。自分の時間が充実しているほど、不安は小さくなります。']
+  ],
+  CK: [
+    ['恋人からの連絡が多いと、少し疲れてしまいます。', '疲れを感じるのは、あなたが冷たいからではありません。一人で回復する時間が必要なタイプだからです。ちょうどいい連絡の頻度を、責めない言い方で具体的に伝えましょう。「夜にまとめて返すね」のように、いつ返すかを伝えるだけでも、相手はかなり安心します。'],
+    ['好きなのに、それを言葉にできません。', '気持ちを言葉にするのが苦手な人は少なくありません。長い言葉は必要ないので、「ありがとう」「楽しかった」のような短い一言から始めましょう。行動で示していることに一言を添えるだけでも、十分伝わります。'],
+    ['将来の話をされると、逃げたくなります。', '将来の話が怖いのは、まだ決めきれないことを今決めさせられる気がするからかもしれません。答えを出す必要はないので、「今はこう考えている」と今の気持ちだけを伝えてみてください。それだけで、相手は置いていかれていないと感じられます。']
+  ],
+  EK: [
+    ['うまくいっているのに、急に別れたくなります。', '関係がうまくいっているときほど失う怖さが強くなるのは、このタイプによくある反応です。その気持ちが出てきたら、すぐに行動せず、まず一週間様子を見ましょう。一週間たっても同じ気持ちなら、そのとき改めて考えれば間に合います。'],
+    ['恋人の優しさを、素直に受け取れません。', '優しさを信じきれないのは、過去に傷ついた経験から心を守ろうとしているからかもしれません。無理に信じようとしなくてかまいません。まずは「ありがとう」とだけ返す練習から始めてみましょう。受け取る経験が増えるほど、少しずつ信じられるようになっていきます。'],
+    ['自分の気持ちが、自分でも分かりません。', '近づきたい気持ちと離れたい気持ちが同時にあるので、分からなくなるのは自然なことです。気持ちを10段階で数字にして、日記に書いてみてください。数字の変化を見ると、自分がどんなときに揺れるのかが少しずつ見えてきます。']
+  ]
+};
+
+// 愛情言語ごとのデートのアイデア（ライト）
+const DATES = {
+  W: ['手紙を交換する記念日のディナー', 'お互いの好きなところを3つずつ言い合う夜のカフェ', '思い出の場所をめぐって、そのときの気持ちを話す散歩', '1冊のノートに交代で書き込む交換日記'],
+  T: ['スマホを置いて過ごす、半日のピクニック', '一から一緒に作る料理の日', '電車で知らない駅まで行く小さな旅', '同じ本や映画を見て、感想を話す日'],
+  G: ['お互いへのプレゼントを選び合う雑貨屋めぐり', '旅先でおそろいのものを探す日', '予算1,000円で相手へのプレゼントを選ぶ勝負', '写真を撮って、あとでアルバムにまとめるデート'],
+  A: ['一緒に部屋の模様替えや大掃除をする日', '相手が行きたかった場所の予約や段取りを、全部引き受けるデート', '作り置きのおかずを一緒に作る日', 'お互いの「やってほしいこと」を一つずつかなえる日'],
+  P: ['手をつないで歩く夜の散歩', 'ソファで並んで映画を見るおうちデート', 'マッサージをし合う日', '並んで座れるプラネタリウムや映画館']
+};
+
+// 全タイプ共通の読み物（ライト）
+const COMMON = {
+  spot: {
+    intro: '人は、自分がしてほしいことを相手にもしがちです。相手がふだんあなたに何をしてくれるかを見ると、相手の愛情言語の見当がつきます。',
+    hints: [
+      ['言葉', 'よく褒めてくれる人や、メッセージがまめな人は「言葉」の可能性があります。'],
+      ['一緒の時間', '会う予定をよく提案してくれる人や、会っているときにスマホを見ない人は「一緒の時間」かもしれません。'],
+      ['贈り物', '記念日を大事にする人や、出かけるたびにお土産を買ってくる人は「贈り物」の可能性があります。'],
+      ['行動', '頼まなくても手伝ってくれる人や、困ったときにすぐ動いてくれる人は「行動」かもしれません。'],
+      ['スキンシップ', '自然に手をつないでくる人や、隣に座りたがる人は「スキンシップ」の可能性があります。']
+    ],
+    outro: 'いちばん確実なのは、相手にもこの診断を受けてもらうことです。'
+  },
+  change: '愛着スタイルは、一生変わらないものではありません。子どものころの経験だけでなく、大人になってからの人間関係の中でも、少しずつ変わっていくと考えられています。安心できる相手と時間をかけて信頼を積み重ねるうちに、不安や回避の傾向が弱まり、安定型に近づいていく人もいます。今回の結果は「今のあなたの傾向」として読み、うまく付き合っていくためのヒントにしてください。',
+  fightRules: {
+    intro: 'どのタイプにも共通する、ケンカを大きくしないための約束です。',
+    rules: ['ケンカは、その日のうちに全部解決しようとしない', '「いつも」「絶対」という言葉を使わない', '相手の人格ではなく、起きたことについて話す', '夜遅い時間や、お酒を飲んでいるときは大事な話をしない', '仲直りしたら、何が嫌だったのかを一言ずつ確かめておく']
+  }
+};
+
+// スタンダードの追加章（愛着スタイル別）
+const ATT_MORE = {
+  CO: {
+    habits: ['月に一度、二人の関係について話す時間をつくる', '相手の小さな変化に気づいたら、声に出して聞く', '記念日以外にも、ちょっとした「特別な日」をつくる', '感謝の言葉を、思ったその日のうちに伝える', 'お互いの一人の時間も、大切にし合う'],
+    marriage: '安定型のあなたは、結婚や同棲の話を自然に切り出せるタイプです。ただ、相手が同じペースで考えているとは限りません。お金の使い方、家事の分担、仕事の続け方など、具体的なことを一つずつ話しておくと、相手も安心して答えを出せます。',
+    reunion: '別れた相手ともう一度やり直したくなったら、まず別れた理由を一つずつ書き出してみましょう。あなたは関係を穏やかに保てるタイプなので、話し合いで解決できる理由なら、やり直せる可能性は十分あります。ただ、相手が何に不満を持っていたのかを聞かないまま戻っても、同じ別れ方をくり返しやすくなります。',
+    app: 'マッチングアプリでも、あなたは自然体でやり取りできるタイプです。そのぶん、メッセージが淡々として見えることがあります。最初の数通は、質問を一つ添えたり、相手のプロフィールで気になったところに触れたりして、興味があることを分かりやすく伝えましょう。'
+  },
+  EO: {
+    habits: ['不安になったときの合図や頼み方を、二人で決めておく', '会えない日のために、短い電話の時間を約束する', '恋人以外の友達と過ごす予定を、毎月入れる', 'もらった嬉しい言葉を、一つのメモにまとめておく', '週に一度、自分のためだけの時間をつくる'],
+    marriage: '結婚や同棲で関係がはっきりすると、あなたの不安はかなり落ち着きます。ただ、不安を消すために結婚を急ぐと、相手が追い詰められたように感じることがあります。「いつかは一緒に住みたい」と気持ちを伝えたうえで、時期は二人で決めましょう。',
+    reunion: '復縁したい気持ちが強くなったときは、それが寂しさから来ているのか、その相手だからなのかを考えてみてください。不安型の人は、一人でいる寂しさを「やり直したい」と感じやすいところがあります。連絡するなら、気持ちが落ち着いている日を選び、一度だけ短く送りましょう。',
+    app: 'マッチングアプリでは、返信の速さや既読かどうかが気になりやすく、不安が大きくなりがちです。同時に何人かとやり取りしている相手も多いので、一人の返信に一喜一憂しないようにしましょう。実際に会ってから判断するほうが、あなたには向いています。'
+  },
+  CK: {
+    habits: ['一人で過ごす日と、二人で過ごす日をあらかじめ決めておく', '距離を取るときは、理由と期限を伝える', '1日1回、短くてもいいので気持ちを言葉にする', '月に一度、二人の将来について軽く話す', '相手からのお願いを、一つだけ先回りしてかなえる'],
+    marriage: '結婚や同棲の話は、自由がなくなるような気がして、身構えやすいテーマです。でも、一緒に暮らしても一人の時間をつくることはできます。「一人になれる部屋や時間がほしい」と最初に伝えておけば、あなたも相手も安心して話を進められます。',
+    reunion: 'あなたは別れたあとに、相手の大切さに気づくことが多いタイプです。距離ができて、ようやく本音が分かることもあります。やり直したいと思ったら、前の恋で言えなかった本音を、今度こそ言葉で伝えてください。それが伝わらないままでは、相手も安心して戻れません。',
+    app: 'マッチングアプリの、気軽に始めて気軽にやめられる距離感は、あなたに合っています。ただ、いい人がいても、関係が深まりそうになると返信をやめてしまうことがあります。気になる人とは三回は会ってから判断する、と決めておきましょう。'
+  },
+  EK: {
+    habits: ['揺れた日の合図を、二人で決めておく', '大事な話は、気持ちが落ち着いている日にすると決める', '恋人以外に、気持ちを話せる相手を持つ', '気持ちを10段階で伝え合う', '「ありがとう」を受け取る練習を、毎日一回する'],
+    marriage: '大きな決断を前にすると、気持ちが大きく揺れやすいタイプです。決める前に、少なくとも数か月は、今の気持ちが続くかどうか様子を見ましょう。揺れていることも正直に話せる相手なら、一緒に暮らす相手としてとても心強いはずです。',
+    reunion: '別れと復縁をくり返しやすいタイプです。やり直したくなったら、「別れたくなった理由」と「戻りたい理由」を両方書き出してみてください。同じ理由でまた別れそうなら、戻る前に、揺れたときの約束を二人で決めておく必要があります。',
+    app: 'マッチングアプリは、相手の反応が見えにくいぶん、あなたの不安と回避の両方が出やすい場所です。急にやり取りをやめたくなったら、その前に一日置いてみてください。プロフィールから落ち着いた人柄が伝わる人を選ぶのもおすすめです。'
+  }
+};
+
+// マンネリしたとき（スタンダード・ペース別）
+const RUT = {
+  FH: '刺激が好きなぶん、関係が落ち着くと退屈を感じやすいタイプです。マンネリを感じたら、行ったことのない場所に行く、新しい趣味を一緒に始めるなど、変化を自分から提案しましょう。気持ちが冷めたと決めつける前に、まず変化を試してみてください。',
+  FM: '効率を考えるあまり、デートが同じパターンになりやすいタイプです。月に一度は、あえて計画を立てずに出かける日をつくってみましょう。予定どおりにいかない時間が、新鮮さを取り戻してくれます。',
+  SH: '落ち着いた関係が好きなので、マンネリにも気づきにくいタイプです。相手が退屈していないか、ときどき聞いてみましょう。いつものお店で、まだ頼んだことのないメニューを選ぶくらいの小さな変化でも十分です。',
+  SM: '関係が安定すると、それで満足してしまうタイプです。年に一度は、二人で新しいことに挑戦する目標を立てましょう。旅行先を交代で決めるなど、相手に決める役を任せる日をつくるのもおすすめです。'
+};
+
+// ---------- 組み立て ----------
+const CODE_RE = /^([CE])([OK])([FS])([HM])-([WTGAP])([WTGAP])?$/;
+const TYPE_NAMES = {
+  COFH: 'ひまわり', COFM: '船長', COSH: '縁側', COSM: '大樹', EOFH: '花火', EOFM: '名探偵', EOSH: '月見草', EOSM: '天気予報士',
+  CKFH: '風来坊', CKFM: 'ソロキャンパー', CKSH: '黒猫', CKSM: '書斎の住人', EKFH: 'ジェットコースター', EKFM: '綱渡り師', EKSH: 'ハリネズミ', EKSM: '要塞'
+};
+const LL_NAMES = { W: '言葉', T: '一緒の時間', G: '贈り物', A: '行動', P: 'スキンシップ' };
+const ATT_ORDER = ['CO', 'EO', 'CK', 'EK'];
+
+function parseCode(code) {
+  const m = CODE_RE.exec(code || '');
+  if (!m || m[5] === m[6]) return null;
+  return { core: m[1] + m[2] + m[3] + m[4], att: m[1] + m[2], pace: m[3] + m[4], ll: m[6] ? [m[5], m[6]] : [m[5]] };
+}
+
+const attPair = (a, b) => ATT_PAIR[[a, b].sort().join('-')];
+const paceKey = (a, b) => (a[0] === b[0] ? (a[0] === 'F' ? 'sameF' : 'sameS') : 'diffF');
+const judgeKey = (a, b) => (a[1] === b[1] ? (a[1] === 'H' ? 'sameH' : 'sameM') : 'diffH');
+
+function lite(p) {
+  const a = ATT[p.att];
+  return {
+    seen: TYPE_EXTRA[p.core].seen,
+    step: TYPE_EXTRA[p.core].step,
+    portrait: a.portrait,
+    loop: a.loop,
+    strengths: a.strengths,
+    pitfalls: a.pitfalls,
+    signs: a.signs,
+    match: a.match,
+    caution: a.caution,
+    pace: { title: PACE[p.pace].title, body: PACE[p.pace].body, approach: PACE[p.pace].approach, date: PACE[p.pace].date, line: PACE[p.pace].line },
+    ll: p.ll.map((k) => ({ key: k, need: LL[k].need, give: LL[k].give, starving: LL[k].starving, joys: LL[k].joys, giveTips: LL[k].giveTips, receive: LL[k].receive, phrases: LL[k].phrases })),
+    cross: p.ll.map((k) => ({ key: k, text: CROSS[p.att][k] })),
+    rephrase: a.rephrase,
+    qa: QA[p.att].map(([q, ans]) => ({ q, a: ans })),
+    dates: DATES[p.ll[0]],
+    spot: COMMON.spot,
+    change: COMMON.change,
+    tips: a.tips.map(([t, why]) => ({ t, why })),
+    selfcare: a.selfcare,
+    // 恋人に見せる取扱説明書。「この人」は診断を受けた本人を指す
+    guide: {
+      att: a.guide,
+      pace: PACE[p.pace].guide,
+      ll: p.ll.map((k) => ({ name: LL_NAMES[k], action: LL[k].action }))
+    }
+  };
+}
+
+function standard(p) {
+  const a = ATT[p.att];
+  // 16タイプとの付き合いやすさ。愛着の組み合わせごとにまとめ、ペースと判断の違いで少し差をつける
+  const groups = ATT_ORDER.map((att) => {
+    const ap = attPair(p.att, att);
+    const types = Object.keys(TYPE_NAMES).filter((core) => core.slice(0, 2) === att).map((core) => {
+      const pace = core.slice(2);
+      const score = ap.ease * 20 - (p.pace[0] === pace[0] ? 0 : 6) - (p.pace[1] === pace[1] ? 0 : 3);
+      return { core, name: TYPE_NAMES[core], score, samePace: p.pace[0] === pace[0], sameJudge: p.pace[1] === pace[1], howto: TYPE_HOWTO[core] };
+    }).sort((x, y) => y.score - x.score);
+    return { att, ease: ap.ease, text: ap.text, types };
+  }).sort((x, y) => y.ease - x.ease);
+  return {
+    crisis: a.crisis,
+    fightRules: COMMON.fightRules,
+    habits: ATT_MORE[p.att].habits,
+    rut: RUT[p.pace],
+    marriage: ATT_MORE[p.att].marriage,
+    reunion: ATT_MORE[p.att].reunion,
+    app: ATT_MORE[p.att].app,
+    jealousy: a.jealousy,
+    afterBreakup: a.afterBreakup,
+    stages: a.stages,
+    compat: groups,
+    actions: Object.fromEntries(Object.entries(LL).map(([k, v]) => [k, v.action])),
+    attPairs: Object.fromEntries(ATT_ORDER.map((att) => [att, attPair(p.att, att).text])),
+    pacePairs: PACE_PAIR
+  };
+}
+
+function together(p, o) {
+  const deep = PAIR_DEEP[[p.att, o.att].sort().join('-')];
+  const shared = p.ll.filter((k) => o.ll.includes(k));
+  return {
+    att: attPair(p.att, o.att).text,
+    pace: PACE_PAIR[paceKey(p.pace, o.pace)],
+    judge: PACE_PAIR[judgeKey(p.pace, o.pace)],
+    gaps: deep.gaps,
+    talks: deep.talks.map(([who, line]) => ({ who, line })),
+    ritual: deep.ritual,
+    ll: {
+      shared: shared.map((k) => LL_NAMES[k]),
+      summary: shared.length ? LL_PAIR_TIP.shared : LL_PAIR_TIP.none,
+      toPartner: o.ll.map((k) => ({ name: LL_NAMES[k], action: LL[k].action })),
+      toYou: p.ll.map((k) => ({ name: LL_NAMES[k], action: LL[k].action }))
+    }
+  };
+}
+
+// plan: 'lite' | 'standard' | 'pair'。pair のときは partner（相手のコード）が必要
+function buildReport(code, plan = 'lite', partner = null) {
+  const p = parseCode(code);
+  if (!p) return null;
+  const rep = { code, plan, lite: lite(p) };
+  if (plan === 'standard' || plan === 'pair') rep.standard = standard(p);
+  if (plan === 'pair') {
+    const o = parseCode(partner);
+    if (!o) return null;
+    rep.partner = { code: partner, lite: lite(o), standard: standard(o) };
+    rep.together = together(p, o);
+  }
+  return rep;
+}
+
+window.LC_API = {
+  demo: true,
+  plans: function () { return Promise.resolve(PLANS); },
+  // デモでは購入内容を session_id に詰めて、決済なしでレポートを返す
+  checkout: function (o) {
+    var prev = o.upgradeFrom ? o.upgradeFrom.split('|') : null;
+    return Promise.resolve({ sessionId: ['demo', o.code, o.plan, o.partner || (prev && prev[3]) || ''].join('|') });
+  },
+  report: function (sid) { var s = sid.split('|'); return Promise.resolve(buildReport(s[1], s[2], s[3] || null)); }
+};
+</script>
+<script>
+(function () {
+  var LC = window.LC, API = window.LC_API;
+  var app = document.getElementById('app');
+  var ATT_COLOR = { CO: 'var(--q-co)', EO: 'var(--q-eo)', CK: 'var(--q-ck)', EK: 'var(--q-ek)' };
+  var ATT_ORDER = ['CO', 'EO', 'CK', 'EK'];
+  var TOTAL = LC.LIKERT.length + LC.PAIRS.length;
+  var state = { likert: [], pairs: [], i: 0 };
+
+  function load(key, fallback) {
+    try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch (e) { return fallback; }
+  }
+  function save(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* 保存できなくても診断は動く */ }
+  }
+  function setHash(code) {
+    try { history.replaceState(null, '', location.pathname + (code ? '#' + code : '')); } catch (e) { /* 表示には影響しない */ }
+  }
+  function llNames(list) { return list.map(function (k) { return LC.LL[k].name; }).join('・'); }
+
+  // ---------- intro ----------
+  function renderIntro() {
+    setHash('');
+    var rows = ATT_ORDER.map(function (att) {
+      var a = LC.ATT[att];
+      var tiles = Object.keys(LC.TYPES).filter(function (c) { return c.slice(0, 2) === att; }).map(function (c) {
+        var t = LC.TYPES[c];
+        return '<button class="tile" style="--qc:' + ATT_COLOR[att] + '" data-core="' + c + '"><code>' + c + '</code><strong>' + t[0] + '</strong><span>' + t[1] + '</span></button>';
+      }).join('');
+      return '<div class="typerow"><h3>' + a.name + '<span class="base">' + a.base + 'タイプ</span></h3><div class="tiles">' + tiles + '</div></div>';
+    }).join('');
+
+    var demo = API.demo ? (
+      '<section class="panel"><span class="eyebrow">制作者用ビューア</span>' +
+      '<p class="muted">16タイプ×愛情言語15通り＝240パターンの結果を直接確認できます。</p>' +
+      '<div class="viewer">' +
+      '<label for="v-core">タイプ<select id="v-core">' + Object.keys(LC.TYPES).map(function (c) { return '<option value="' + c + '">' + c + ' ' + LC.TYPES[c][0] + '</option>'; }).join('') + '</select></label>' +
+      '<label for="v-ll1">メイン<select id="v-ll1">' + LC.LL_ORDER.map(function (k) { return '<option value="' + k + '">' + k + ' ' + LC.LL[k].name + '</option>'; }).join('') + '</select></label>' +
+      '<label for="v-ll2">サブ<select id="v-ll2"><option value="">なし</option>' + LC.LL_ORDER.map(function (k) { return '<option value="' + k + '">' + k + ' ' + LC.LL[k].name + '</option>'; }).join('') + '</select></label>' +
+      '<button class="btn small" id="v-go">この結果を見る</button></div></section>'
+    ) : '';
+
+    app.innerHTML =
+      (API.demo ? '<div class="demo-banner">デモ版です。決済はStripeにつながず、「購入する」を押すとそのまま有料レポートが開きます。</div>' : '') +
+      '<section class="hero">' +
+      '<h1><small>LOVE CODE</small>ラブコード診断</h1>' +
+      '<p class="lead">恋をすると出てくる「不安のクセ」と、あなたが愛を感じる「愛情言語」。この2つから、あなたの恋愛を英字のコードにします。</p>' +
+      '<div class="actions"><button class="btn" id="start">診断をはじめる</button><span class="muted">30問・約5分</span></div>' +
+      (API.demo ? '<div class="actions"><button class="linkbtn" id="random">ランダムに回答して結果を見る（テスト用）</button></div>' : '') +
+      '</section>' +
+      '<section class="panel"><span class="eyebrow">コードの読み方</span>' +
+      '<div class="anatomy">' +
+      slot('E / C', 'たしかめたい<br>安心している') + slot('K / O', '距離を保つ<br>近づく') + slot('F / S', 'すぐ動く<br>じっくり') + slot('H / M', '気持ち<br>頭') +
+      '<span class="dash">-</span>' + slot('W T G A P', '愛情言語<br>1〜2個', 'll') +
+      '</div>' +
+      '<p class="note">前半の2文字が恋愛の愛着スタイル（安定・不安・回避・恐れ回避の4つ）、後半の2文字が恋のペースと判断の仕方。ハイフンの後ろは、言葉(W)・一緒の時間(T)・贈り物(G)・行動(A)・スキンシップ(P)のうち、あなたに響くもの。</p>' +
+      '</section>' +
+      '<section class="typegrid"><span class="eyebrow">16のラブタイプ</span>' + rows + '</section>' +
+      demo +
+      '<p class="note">エンタメとしてお楽しみください。医学的・心理学的な診断ではありません。愛着スタイルは成人の愛着研究（不安・回避の2軸）、愛情言語はゲーリー・チャップマン氏の「5つの愛の言語」の考え方を参考にした独自の質問です。</p>' +
+      footer();
+
+    document.getElementById('start').onclick = startQuiz;
+    var r = document.getElementById('random');
+    if (r) r.onclick = function () {
+      state.likert = LC.LIKERT.map(function () { return 1 + Math.floor(Math.random() * 5); });
+      state.pairs = LC.PAIRS.map(function () { return Math.random() < 0.5 ? 'a' : 'b'; });
+      finish();
+    };
+    var go = document.getElementById('v-go');
+    if (go) go.onclick = function () {
+      var a = document.getElementById('v-ll1').value, b = document.getElementById('v-ll2').value;
+      var code = document.getElementById('v-core').value + '-' + a + (b && b !== a ? b : '');
+      showResult(code, null);
+    };
+    Array.prototype.forEach.call(app.querySelectorAll('.tile'), function (t) {
+      t.onclick = function () {
+        if (API.demo) { document.getElementById('v-core').value = t.dataset.core; document.getElementById('v-go').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      };
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function slot(big, small, cls) { return '<div class="slot ' + (cls || '') + '"><b>' + big + '</b><span>' + small + '</span></div>'; }
+  function footer() {
+    if (API.demo) return '';
+    return '<nav class="foot"><a href="legal.html">特定商取引法に基づく表記</a><a href="legal.html#privacy">プライバシーポリシー</a></nav>';
+  }
+
+  // ---------- quiz ----------
+  function startQuiz() { state = { likert: [], pairs: [], i: 0 }; renderQuestion(); }
+
+  function renderQuestion() {
+    var i = state.i, isPair = i >= LC.LIKERT.length;
+    var body;
+    if (!isPair) {
+      var cur = state.likert[i];
+      body = '<p class="eyebrow">あてはまる？</p><p class="qtext">' + LC.LIKERT[i].q + '</p>' +
+        '<div class="likert"><div class="dots">' + [1, 2, 3, 4, 5].map(function (v) {
+          var label = ['そう思わない', 'あまりそう思わない', 'どちらでもない', 'ややそう思う', 'そう思う'][v - 1];
+          return '<button data-v="' + v + '" aria-label="' + label + '"' + (cur === v ? ' class="on"' : '') + '></button>';
+        }).join('') + '</div><div class="ends"><span>そう思わない</span><span>そう思う</span></div></div>';
+    } else {
+      var p = LC.PAIRS[i - LC.LIKERT.length], c = state.pairs[i - LC.LIKERT.length];
+      body = '<p class="eyebrow">恋人にされて、より嬉しいのは？</p>' +
+        '<div class="choices"><button data-v="a"' + (c === 'a' ? ' class="on"' : '') + '>' + p.qa + '</button><button data-v="b"' + (c === 'b' ? ' class="on"' : '') + '>' + p.qb + '</button></div>';
+    }
+    app.innerHTML =
+      '<div class="progress"><div class="meta"><span>' + (isPair ? 'パート2 愛情言語' : 'パート1 恋のクセ') + '</span><span>' + (i + 1) + ' / ' + TOTAL + '</span></div>' +
+      '<div class="bar"><i style="width:' + Math.round((i / TOTAL) * 100) + '%"></i></div></div>' +
+      '<section class="qcard">' + body + '</section>' +
+      '<div class="qnav"><button class="linkbtn" id="back">' + (i === 0 ? 'トップに戻る' : 'ひとつ前へ') + '</button></div>';
+
+    Array.prototype.forEach.call(app.querySelectorAll('.qcard button'), function (b) {
+      b.onclick = function () {
+        if (isPair) state.pairs[i - LC.LIKERT.length] = b.dataset.v; else state.likert[i] = Number(b.dataset.v);
+        b.classList.add('on');
+        setTimeout(function () { if (state.i + 1 >= TOTAL) finish(); else { state.i += 1; renderQuestion(); } }, 160);
+      };
+    });
+    document.getElementById('back').onclick = function () { if (state.i === 0) renderIntro(); else { state.i -= 1; renderQuestion(); } };
+  }
+
+  function finish() {
+    var r = LC.score(state.likert, state.pairs);
+    save('lc_last', { code: r.code, pct: r.pct });
+    showResult(r.code, r.pct);
+  }
+
+  // ---------- result ----------
+  function showResult(code, pct) {
+    var p = LC.parseCode(code);
+    if (!p) return renderIntro();
+    if (!pct) { var last = load('lc_last', null); if (last && last.code === code) pct = last.pct; }
+    setHash(code);
+    var t = LC.TYPES[p.core], a = LC.ATT[p.att];
+
+    var axes = pct ? '<section class="panel axes"><span class="eyebrow">あなたの傾き</span>' + LC.AXES.map(function (ax, i) {
+      var v = pct[i], toPos = v > 50, w = Math.abs(v - 50);
+      return '<div class="axis"><div class="names"><span>' + (toPos ? ax.negName : '<b>' + ax.negName + '</b>') + '</span><span>' + (toPos ? '<b>' + ax.posName + '</b>' : ax.posName) + '</span></div>' +
+        '<div class="track"><i style="left:' + (toPos ? 50 : 50 - w) + '%;width:' + Math.max(w, 1.5) + '%"></i></div>' +
+        '<div class="label">' + ax.label + '　' + (toPos ? ax.posName : ax.negName) + ' ' + Math.max(v, 100 - v) + '%</div></div>';
+    }).join('') + '</section>' : '';
+
+    app.innerHTML =
+      '<section class="codecard" style="--qc:' + ATT_COLOR[p.att] + '">' +
+      '<span class="eyebrow">あなたのラブコード</span>' +
+      '<div class="code">' + p.core + '<em>-' + p.ll.join('') + '</em></div>' +
+      '<h2>' + t[0] + '</h2><p>' + t[1] + '</p>' +
+      '<div class="chips"><span class="chip att">' + a.name + '</span>' + p.ll.map(function (k, i) { return '<span class="chip">' + (i ? 'サブ ' : 'メイン ') + LC.LL[k].name + '</span>'; }).join('') + '</div>' +
+      '</section>' +
+      axes +
+      '<section class="sec"><h3>' + a.name + 'のあなた <span class="tag free">無料</span></h3><p>' + a.body + '</p></section>' +
+      '<section class="sec"><h3>' + t[0] + 'の物語 <span class="tag free">無料</span></h3><p>' + LC.STORY[p.core] + '</p></section>' +
+      '<section class="sec"><h3>' + t[0] + 'の恋愛あるある <span class="tag free">無料</span></h3>' + list(LC.ARUARU[p.core]) + '</section>' +
+      '<section class="sec"><h3>あなたに響く愛情言語 <span class="tag free">無料</span></h3><dl class="kv">' + p.ll.map(function (k) {
+        return '<div><dt>' + LC.LL[k].name + '（' + LC.LL[k].en + '）</dt><dd style="margin:0">' + LC.LL[k].short + '</dd></div>';
+      }).join('') + '</dl></section>' +
+      '<div id="premium"></div><div id="upgrade"></div>' +
+      '<div class="actions" style="display:flex;flex-wrap:wrap;gap:12px">' +
+      '<button class="btn ghost small" id="share">結果をコピー</button><button class="btn ghost small" id="again">もう一度診断する</button><button class="btn ghost small" id="top">トップへ</button></div>' +
+      footer();
+
+    document.getElementById('again').onclick = startQuiz;
+    document.getElementById('top').onclick = renderIntro;
+    document.getElementById('share').onclick = function (e) {
+      var text = '私のラブコードは ' + code + '「' + t[0] + '」でした。' + t[1] + '。 #ラブコード診断';
+      var btn = e.currentTarget;
+      var done = function () { btn.textContent = 'コピーしました'; };
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () { btn.textContent = text; });
+      else btn.textContent = text;
+    };
+
+    var owned = getPaid(code);
+    if (owned) loadPremium(code, owned); else renderPlans(code, null);
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- 購入 ----------
+  var PLAN_INFO = {
+    lite: { name: 'ライト', lead: '自分の取扱説明書', items: ['恋人から見たあなたと、今週からできる一歩', '恋の強み・つまずき・要注意サイン', '合う恋人と、気をつけたい相手', '恋のペース、アプローチ、デート、LINE', '愛情言語の取扱説明、もらって嬉しいことリスト、おすすめのデート', '相手の愛情言語の見分け方', 'つい言ってしまう一言の言い換え', '恋のQ&A', 'うまくいくための5つのことと、セルフケア', '恋人に見せる取扱説明書'] },
+    standard: { name: 'スタンダード', lead: 'ライトの全部＋恋の実践編', items: ['ライトの内容すべて', 'ケンカのパターンと、ケンカ中にやらないほうがいいこと', '仲直りの4ステップと、ケンカの基本ルール', '長続きする二人の習慣と、マンネリしたとき', '嫉妬、失恋、復縁', '同棲・結婚を考えたとき', 'マッチングアプリでの恋', '片思い・付き合いたて・長く付き合っている時期のアドバイス', '16タイプとの付き合いやすさと、付き合うときのコツ', '相手のコードを入れて見る相性チェック'] },
+    pair: { name: 'ペア', lead: '2人分＋2人だけの相性レポート', items: ['あなたと相手、2人分のスタンダード', '2人の間で起きやすいズレの具体例', 'そのまま使える会話のテンプレ', '2人の愛情言語の届け方', '2人におすすめの習慣'] }
+  };
+  var PLAN_KEYS = ['lite', 'standard', 'pair'];
+  var plans = null;
+
+  function getPaid(code) {
+    var v = load('lc_paid', {})[code];
+    if (!v) return null;
+    return typeof v === 'string' ? { sid: v, plan: 'lite' } : v;
+  }
+  function savePaid(code, sid, plan) {
+    var paid = load('lc_paid', {}), cur = paid[code];
+    var curRank = cur && cur.plan && plans ? plans[cur.plan].rank : 0;
+    if (!plans || !cur || plans[plan].rank >= curRank) { paid[code] = { sid: sid, plan: plan }; save('lc_paid', paid); }
+  }
+  function yen(n) { return n.toLocaleString('ja-JP'); }
+
+  // owned: 購入済みのプラン（なければ null）。上のプランだけを差額で並べる
+  function renderPlans(code, owned) {
+    var el = document.getElementById(owned ? 'upgrade' : 'premium');
+    var ownedRank = owned ? plans[owned.plan].rank : 0;
+    var keys = PLAN_KEYS.filter(function (k) { return plans[k].rank > ownedRank; });
+    if (!keys.length) { el.innerHTML = ''; return; }
+    var cards = keys.map(function (k) {
+      var info = PLAN_INFO[k], price = plans[k].price - (owned ? plans[owned.plan].price : 0);
+      var star = k === 'standard' && !owned;
+      return '<div class="plan' + (star ? ' star' : '') + '">' +
+        (star ? '<span class="badge">いちばん人気</span>' : '') +
+        '<span class="eyebrow">' + info.name.toUpperCase() + '</span>' +
+        '<h4>' + info.lead + '</h4>' +
+        '<div class="price">' + yen(price) + '<small> 円（税込）' + (owned ? '・差額' : '') + '</small></div>' +
+        (k === 'pair' ? '<p class="note">1人あたり ' + yen(plans.pair.price / 2) + '円</p>' : '') +
+        '<ul>' + info.items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
+        (k === 'pair' ? '<label class="note" for="pair-partner">相手のラブコード（先に相手にも無料診断してもらってね）</label><input type="text" id="pair-partner" placeholder="例：CKSM-A" autocomplete="off">' : '') +
+        '<button class="btn' + (star ? '' : ' ghost') + '" data-plan="' + k + '">' + (owned ? info.name + 'にアップグレード' : info.name + 'を購入') + '</button>' +
+        '</div>';
+    }).join('');
+    el.innerHTML = '<section class="sec"><span class="eyebrow">' + (owned ? 'もっと読む' : '詳しいレポート') + '</span>' +
+      '<h3>' + (owned ? '差額だけで、上のプランにアップグレードできます' : '恋をうまくいかせるための、あなた専用の取扱説明書') + '</h3>' +
+      '<div class="plans">' + cards + '</div><p class="err" id="buy-err" hidden></p>' +
+      '<p class="note">買い切りです。クレジットカード、Apple Pay、Google Pay に対応。決済は Stripe で安全に処理されます。</p></section>';
+
+    Array.prototype.forEach.call(el.querySelectorAll('button[data-plan]'), function (btn) {
+      btn.onclick = function () {
+        var plan = btn.dataset.plan, err = document.getElementById('buy-err'), partner = null;
+        if (plan === 'pair') {
+          partner = normalize(document.getElementById('pair-partner').value);
+          if (!LC.parseCode(partner)) { err.hidden = false; err.textContent = '相手のコードを「CKSM-A」のような形で入力してください。'; return; }
+        }
+        var label = btn.textContent;
+        btn.disabled = true; btn.textContent = '決済ページを準備中…'; err.hidden = true;
+        API.checkout({ code: code, plan: plan, partner: partner, upgradeFrom: owned ? owned.sid : null }).then(function (res) {
+          if (res.url) { location.href = res.url; return; }
+          if (res.sessionId) { savePaid(code, res.sessionId, plan); showResult(code, null); return; }
+          throw new Error(res.error || '決済ページを開けませんでした');
+        }).catch(function (x) {
+          btn.disabled = false; btn.textContent = label;
+          err.hidden = false; err.textContent = x.message;
+        });
+      };
+    });
+  }
+
+  function loadPremium(code, owned) {
+    var el = document.getElementById('premium');
+    el.innerHTML = '<p class="muted">レポートを読み込んでいます…</p>';
+    API.report(owned.sid).then(function (rep) {
+      if (!rep || rep.error) throw new Error((rep && rep.error) || 'レポートを読み込めませんでした');
+      renderPremium(code, rep);
+      renderPlans(code, { sid: owned.sid, plan: rep.plan });
+    }).catch(function (x) {
+      el.innerHTML = '<p class="err">' + x.message + '</p>';
+    });
+  }
+
+  function normalize(raw) { return (raw || '').trim().toUpperCase().replace(/[－ー―‐]/g, '-'); }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+  function tag(plan) { return ' <span class="tag paid">' + PLAN_INFO[plan].name + '</span>'; }
+  function list(items, cls) { return '<ul class="' + (cls || 'dots') + '">' + items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>'; }
+  function kv(label, body) { return '<div><span class="k">' + label + '</span>' + (body.charAt(0) === '<' ? body : '<p>' + body + '</p>') + '</div>'; }
+  function stars(score) { var n = Math.max(1, Math.min(5, Math.round(score / 20))); return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); }
+
+  // 恋人に見せる取扱説明書をコピー用の平文にする
+  function guideText(p, g) {
+    var lines = ['【' + LC.TYPES[p.core][0] + '（' + p.core + '-' + p.ll.join('') + '）の取扱説明書】', g.att, g.pace];
+    lines.push('この人に愛情がいちばん伝わるのは「' + g.ll.map(function (x) { return x.name; }).join('」と「') + '」です。たとえば「' + g.ll[0].action + '」だけでも、ちゃんと伝わります。');
+    return lines.join('\n');
+  }
+
+  function selfHtml(p, l) {
+    var a = LC.ATT[p.att];
+    return '<section class="sec"><h3>恋人から見たあなた' + tag('lite') + '</h3><p>' + l.seen + '</p>' +
+      '<div class="kv">' + kv('今週からできる一歩', '<div class="ask">' + l.step + '</div>') + '</div></section>' +
+      '<section class="sec"><h3>' + a.name + '（' + a.base + '）を深く知る' + tag('lite') + '</h3><p>' + l.portrait + '</p><p>' + l.loop + '</p>' +
+      '<div class="kv">' + kv('強み', list(l.strengths)) + kv('つまずきやすいところ', list(l.pitfalls)) + kv('こんなときは要注意', list(l.signs)) + '</div></section>' +
+      '<section class="sec"><h3>合う恋人と、気をつけたい相手' + tag('lite') + '</h3><div class="kv">' + kv('あなたに合う恋人', l.match) + kv('気をつけたい相手', l.caution) + '</div></section>' +
+      '<section class="sec"><h3>恋のペース「' + l.pace.title + '」' + tag('lite') + '</h3><p>' + l.pace.body + '</p>' +
+      '<div class="kv">' + kv('アプローチ・告白', l.pace.approach) + kv('デート', l.pace.date) + kv('連絡・LINE', l.pace.line) + '</div></section>' +
+      '<section class="sec"><h3>愛情言語の取扱説明' + tag('lite') + '</h3>' + l.ll.map(function (x) {
+        return '<div class="panel"><span class="eyebrow">' + LC.LL[x.key].name + '</span><div class="kv">' +
+          kv('こうされると満たされる', x.need) + kv('気をつけたいこと', x.give) + kv('足りていないサイン', x.starving) +
+          kv('もらって嬉しいことリスト', list(x.joys)) + (x.key === l.ll[0].key ? kv('おすすめのデート', list(l.dates)) : '') + kv('あなたが贈るときのコツ', x.giveTips) + kv('相手の愛情言語が違うとき', x.receive) +
+          kv('恋人へのお願いの例文', x.phrases.map(function (s) { return '<div class="ask">「' + s + '」</div>'; }).join('')) + '</div></div>';
+      }).join('') + '</section>' +
+      '<section class="sec"><h3>' + a.name + '×愛情言語' + tag('lite') + '</h3><div class="kv">' + l.cross.map(function (c) { return kv(LC.LL[c.key].name, c.text); }).join('') + '</div></section>' +
+      '<section class="sec"><h3>相手の愛情言語の見分け方' + tag('lite') + '</h3><p>' + l.spot.intro + '</p><div class="kv">' + l.spot.hints.map(function (h) { return kv(h[0], h[1]); }).join('') + '</div><p>' + l.spot.outro + '</p></section>' +
+      '<section class="sec"><h3>つい言ってしまう一言の言い換え' + tag('lite') + '</h3><div class="rephrase">' + l.rephrase.map(function (r) {
+        return '<div><span class="before">「' + r[0] + '」</span><span class="after">「' + r[1] + '」</span></div>';
+      }).join('') + '</div></section>' +
+      '<section class="sec"><h3>うまくいくための5つのこと' + tag('lite') + '</h3><ol class="tips">' + l.tips.map(function (x) { return '<li><span><strong>' + x.t + '</strong><br><span class="muted">' + x.why + '</span></span></li>'; }).join('') + '</ol></section>' +
+      '<section class="sec"><h3>恋のQ&amp;A' + tag('lite') + '</h3><div class="qa">' + l.qa.map(function (x) { return '<div><p class="q">' + x.q + '</p><p>' + x.a + '</p></div>'; }).join('') + '</div></section>' +
+      '<section class="sec"><h3>自分を満たすためのセルフケア' + tag('lite') + '</h3>' + list(l.selfcare) + '</section>' +
+      '<section class="sec"><h3>愛着スタイルは変わるの？' + tag('lite') + '</h3><p>' + l.change + '</p></section>' +
+      '<section class="sec panel guide"><h3>恋人に見せる取扱説明書' + tag('lite') + '</h3>' +
+      '<p class="note">恋人や気になる人に、そのまま送れる文章です。「この人」はあなたのことです。</p>' +
+      '<p>' + l.guide.att + '</p><p>' + l.guide.pace + '</p>' +
+      '<p>この人に愛情がいちばん伝わるのは「' + l.guide.ll.map(function (x) { return x.name; }).join('」と「') + '」です。たとえば次のようなことです。</p>' +
+      list(l.guide.ll.map(function (x) { return x.action; })) +
+      '<div><button class="btn small copy-guide" data-text="' + esc(guideText(p, l.guide)) + '">取扱説明書をコピー</button></div></section>';
+  }
+
+  function standardHtml(p, s, withTool) {
+    return '<section class="sec"><h3>ケンカと別れの危機' + tag('standard') + '</h3><div class="kv">' +
+      kv('ケンカのパターン', s.crisis.pattern) + kv('ケンカ中にやらないほうがいいこと', list(s.crisis.dont)) +
+      kv('別れそうになったとき', s.crisis.breakup) +
+      kv('仲直りの4ステップ', '<ol class="tips">' + s.crisis.makeup.map(function (x) { return '<li><span>' + x + '</span></li>'; }).join('') + '</ol>') + '</div></section>' +
+      '<section class="sec"><h3>ケンカの基本ルール' + tag('standard') + '</h3><p>' + s.fightRules.intro + '</p>' + list(s.fightRules.rules) + '</section>' +
+      '<section class="sec"><h3>長続きする二人の習慣' + tag('standard') + '</h3>' + list(s.habits) + '</section>' +
+      '<section class="sec"><h3>マンネリしたとき' + tag('standard') + '</h3><p>' + s.rut + '</p></section>' +
+      '<section class="sec"><h3>嫉妬との付き合い方' + tag('standard') + '</h3><p>' + s.jealousy + '</p></section>' +
+      '<section class="sec"><h3>失恋したとき' + tag('standard') + '</h3><p>' + s.afterBreakup + '</p></section>' +
+      '<section class="sec"><h3>復縁したくなったら' + tag('standard') + '</h3><p>' + s.reunion + '</p></section>' +
+      '<section class="sec"><h3>同棲・結婚を考えたとき' + tag('standard') + '</h3><p>' + s.marriage + '</p></section>' +
+      '<section class="sec"><h3>マッチングアプリでの恋' + tag('standard') + '</h3><p>' + s.app + '</p></section>' +
+      '<section class="sec"><h3>恋の段階別アドバイス' + tag('standard') + '</h3><div class="kv">' +
+      kv('片思い', s.stages.crush) + kv('付き合いたて', s.stages.early) + kv('長く付き合っている', s.stages.long) + '</div></section>' +
+      '<section class="sec"><h3>16タイプとの付き合いやすさ' + tag('standard') + '</h3>' +
+      '<p class="note">★が少ない相手は「合わない」相手ではなく、すれ違いやすいところがはっきりしている相手です。同じ★の中では、ペースや判断の仕方が近い順に並んでいます。タイプ名をタップすると、その人と付き合うときのコツが開きます。</p>' +
+      s.compat.map(function (g) {
+        return '<div class="cgroup"><h4>' + LC.ATT[g.att].name + 'の人と <span class="st" aria-label="付き合いやすさ 5段階中' + g.ease + '">' + stars(g.ease * 20) + '</span></h4><p>' + g.text + '</p><div class="ranking">' + g.types.map(function (c) {
+          var near = c.samePace && c.sameJudge ? 'ペースも判断の仕方も近い' : c.samePace ? 'ペースが近い' : c.sameJudge ? '判断の仕方が近い' : 'ペースも判断の仕方も違う';
+          return '<details><summary><code>' + c.core + '</code><span class="nm">' + c.name + '</span><span class="near">' + near + '</span></summary><p>' + c.howto + '</p></details>';
+        }).join('') + '</div></div>';
+      }).join('') + '</section>' +
+      (withTool ? '<section class="sec panel"><h3>相性チェック' + tag('standard') + '</h3>' +
+        '<p class="muted">相手にも診断してもらい、そのコードを入れてください。愛情言語まで含めて見られます。</p>' +
+        '<div class="compat-form"><input type="text" id="partner" placeholder="例：CKSM-A" aria-label="相手のラブコード" autocomplete="off"><button class="btn small" id="compat-go">相性を見る</button></div>' +
+        '<div class="compat-out" id="compat-out"></div></section>' : '');
+  }
+
+  function togetherHtml(p, rep) {
+    var t = rep.together, o = LC.parseCode(rep.partner.code);
+    return '<section class="codecard pairhead" style="--qc:var(--accent)"><span class="eyebrow">2人の相性レポート' + tag('pair') + '</span>' +
+      '<div class="pair-codes"><span>' + p.core + '-' + p.ll.join('') + '<small>' + LC.TYPES[p.core][0] + '</small></span><b>×</b><span>' + o.core + '-' + o.ll.join('') + '<small>' + LC.TYPES[o.core][0] + '</small></span></div>' +
+      '<p>' + t.att + '</p></section>' +
+      '<section class="sec"><h3>2人の間で起きやすいズレ' + tag('pair') + '</h3>' + list(t.gaps) + '</section>' +
+      '<section class="sec"><h3>そのまま使える会話のテンプレ' + tag('pair') + '</h3>' + t.talks.map(function (x) {
+        return '<div class="ask"><span class="who">' + x.who + '</span>「' + x.line + '」</div>';
+      }).join('') + '</section>' +
+      '<section class="sec"><h3>ペースとケンカの仕方' + tag('pair') + '</h3><div class="kv"><p>' + t.pace + '</p><p>' + t.judge + '</p></div></section>' +
+      '<section class="sec"><h3>2人の愛情言語' + tag('pair') + '</h3><p>' + (t.ll.shared.length ? '二人に共通する愛情言語は「' + t.ll.shared.join('・') + '」です。' : '') + t.ll.summary + '</p>' +
+      '<div class="kv">' + kv('あなたから相手へ', '<div class="kv">' + t.ll.toPartner.map(function (x) { return kv(x.name, x.action); }).join('') + '</div>') +
+      kv('相手からあなたへ', '<div class="kv">' + t.ll.toYou.map(function (x) { return kv(x.name, x.action); }).join('') + '</div>') + '</div></section>' +
+      '<section class="sec"><h3>2人におすすめの習慣' + tag('pair') + '</h3><p>' + t.ritual + '</p></section>';
+  }
+
+  function renderPremium(code, rep) {
+    var p = LC.parseCode(code), el = document.getElementById('premium');
+    var html = '';
+    if (rep.together) html += togetherHtml(p, rep);
+    html += '<h2 class="part">' + (rep.together ? 'あなたのレポート' : 'あなたのレポート（' + PLAN_INFO[rep.plan].name + '）') + '</h2>';
+    html += selfHtml(p, rep.lite);
+    if (rep.standard) html += standardHtml(p, rep.standard, true);
+    if (rep.partner) {
+      var o = LC.parseCode(rep.partner.code);
+      html += '<details class="partner-report"><summary><h2 class="part">相手のレポート（' + rep.partner.code + '「' + LC.TYPES[o.core][0] + '」）</h2><span class="note">タップで開く</span></summary>' +
+        '<div class="stack">' + selfHtml(o, rep.partner.lite) + standardHtml(o, rep.partner.standard, false) + '</div></details>';
+    }
+    el.innerHTML = '<div class="stack">' + html + '</div>';
+    var go = document.getElementById('compat-go');
+    if (go) go.onclick = function () {
+      document.getElementById('compat-out').innerHTML = compat(p, rep.standard, normalize(document.getElementById('partner').value));
+    };
+    Array.prototype.forEach.call(el.querySelectorAll('.copy-guide'), function (btn) {
+      btn.onclick = function () {
+        var text = btn.dataset.text;
+        var done = function () { btn.textContent = 'コピーしました'; };
+        var fail = function () { var pre = document.createElement('pre'); pre.className = 'guide-text'; pre.textContent = text; btn.replaceWith(pre); };
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, fail); else fail();
+      };
+    });
+  }
+
+  function compat(me, s, raw) {
+    var o = LC.parseCode(raw);
+    if (!o) return '<p class="err">コードの形が正しくありません。「CKSM-A」や「EOFH-WP」のように入力してください。</p>';
+    var t = LC.TYPES[o.core];
+    var paceKey = me.pace[0] === o.pace[0] ? (me.pace[0] === 'F' ? 'sameF' : 'sameS') : 'diffF';
+    var judgeKey = me.pace[1] === o.pace[1] ? (me.pace[1] === 'H' ? 'sameH' : 'sameM') : 'diffH';
+    var shared = me.ll.filter(function (k) { return o.ll.indexOf(k) >= 0; });
+    var llText = shared.length
+      ? '「' + llNames(shared) + '」が、二人に共通する愛情言語です。そこを意識して増やすだけで、お互いの満足度が上がりやすいペアです。'
+      : '共通の愛情言語がない二人です。あなたが' + llNames(me.ll) + 'で愛を伝えても、相手には届きにくいかもしれません。相手には「' + s.actions[o.ll[0]] + '」を試してみてください。逆に、相手からの愛は' + llNames(o.ll) + 'の形で届いているかもしれません。それも愛情だと気づいてあげてください。';
+    return '<p><strong>相手は ' + o.core + '-' + o.ll.join('') + '「' + t[0] + '」</strong>、' + LC.ATT[o.att].name + 'です。</p>' +
+      '<div class="kv">' + kv('不安のクセの相性', s.attPairs[o.att]) + kv('ペース', s.pacePairs[paceKey]) + kv('ケンカのとき', s.pacePairs[judgeKey]) + kv('愛情言語', llText) + '</div>' +
+      '<p class="note">2人だけのズレの具体例や会話のテンプレは、ペアプランで読めます。</p>';
+  }
+
+  // ---------- boot ----------
+  function boot() {
+    API.plans().then(function (p) { plans = p; route(); }).catch(function () {
+      app.innerHTML = '<p class="err">読み込みに失敗しました。ページを再読み込みしてください。</p>';
+    });
+  }
+  function route() {
+    var sid = null;
+    try { sid = new URLSearchParams(location.search).get('session_id'); } catch (e) { sid = null; }
+    if (sid) {
+      app.innerHTML = '<p class="muted">お支払いを確認しています…</p>';
+      API.report(sid).then(function (rep) {
+        if (rep && rep.code) { savePaid(rep.code, sid, rep.plan); setHash(rep.code); showResult(rep.code, null); return; }
+        app.innerHTML = '<section class="panel"><p class="err">' + ((rep && rep.error) || '購入情報を確認できませんでした') + '</p>' +
+          '<p class="note">コンビニ払いなどでお支払いが完了していない場合は、完了後にこのページを開き直してください。</p><div><button class="btn small" id="top">トップへ</button></div></section>';
+        document.getElementById('top').onclick = renderIntro;
+      });
+      return;
+    }
+    var code = (location.hash || '').slice(1);
+    if (LC.parseCode(code)) showResult(code, null); else renderIntro();
+  }
+  boot();
+})();
+
+</script>
