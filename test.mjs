@@ -21,7 +21,7 @@ for (let i = 0; i < 10000; i++) {
 // 答えが抜けていても（すばやい2回タップで質問が飛んだ場合など）、傾きの数字が NaN にならない
 const holes = LC.score(LC.LIKERT.map((_, i) => (i % 3 ? 4 : undefined)), LC.PAIRS.map((_, i) => (i % 4 ? 'a' : undefined)));
 assert.ok(LC.parseCode(holes.code) && holes.pct.every((v) => Number.isFinite(v) && v >= 0 && v <= 100), 'pct に数字でない値がある');
-assert.ok(/if \(answered\) return;/.test(readFileSync(new URL('./public/app.js', import.meta.url), 'utf8')), '答えの2回押しを防ぐ処理がない');
+assert.ok(/if \(answered \|\| Date\.now\(\) - shownAt < 350\) return;/.test(readFileSync(new URL('./public/app.js', import.meta.url), 'utf8')), '答えの2回押しを防ぐ処理がない');
 
 // 2) 全コード×全プランで文章が欠けていない。文字数も測る
 const LLs = ['W', 'T', 'G', 'A', 'P'];

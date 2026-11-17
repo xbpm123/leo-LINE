@@ -1788,10 +1788,11 @@ window.LC_API = {
       '<div class="qnav"><button class="linkbtn" id="back">' + (i === 0 ? 'トップに戻る' : 'ひとつ前へ') + '</button></div>';
 
     // 答えを押してから次の質問に替わるまでの間は、もう一度押されても受け付けない（2回数えると質問が1つ飛ぶ）
-    var answered = false;
+    // 質問が替わった直後（0.35秒）のタップも受け付けない（2回タップの2回目が、次の質問の答えになってしまう）
+    var answered = false, shownAt = Date.now();
     Array.prototype.forEach.call(app.querySelectorAll('.qcard button'), function (b) {
       b.onclick = function () {
-        if (answered) return;
+        if (answered || Date.now() - shownAt < 350) return;
         answered = true;
         if (isPair) state.pairs[i - LC.LIKERT.length] = b.dataset.v; else state.likert[i] = Number(b.dataset.v);
         b.classList.add('on');
