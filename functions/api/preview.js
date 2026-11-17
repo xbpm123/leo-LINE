@@ -1,4 +1,4 @@
-// GET /api/preview?code=EOSH-WP  →  { code, lead, fade, chars }
+// GET /api/preview?code=EOSH-WP  →  { code, seen, step, strengths, lead, fade, chars }
 // 有料レポートの冒頭（1文と少し）と、続きの文字数を返す。購入前の結果ページで「読みかけ」として見せる
 import { buildPreview } from '../../lib/preview.js';
 import { json } from '../../lib/http.js';

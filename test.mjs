@@ -18,6 +18,10 @@ for (let i = 0; i < 10000; i++) {
   const s = LC.score(LC.LIKERT.map(() => 1 + Math.floor(Math.random() * 5)), LC.PAIRS.map(() => (Math.random() < .5 ? 'a' : 'b')));
   assert.ok(LC.parseCode(s.code), s.code);
 }
+// 答えが抜けていても（すばやい2回タップで質問が飛んだ場合など）、傾きの数字が NaN にならない
+const holes = LC.score(LC.LIKERT.map((_, i) => (i % 3 ? 4 : undefined)), LC.PAIRS.map((_, i) => (i % 4 ? 'a' : undefined)));
+assert.ok(LC.parseCode(holes.code) && holes.pct.every((v) => Number.isFinite(v) && v >= 0 && v <= 100), 'pct に数字でない値がある');
+assert.ok(/if \(answered\) return;/.test(readFileSync(new URL('./public/app.js', import.meta.url), 'utf8')), '答えの2回押しを防ぐ処理がない');
 
 // 2) 全コード×全プランで文章が欠けていない。文字数も測る
 const LLs = ['W', 'T', 'G', 'A', 'P'];
@@ -148,20 +152,22 @@ const appJs = readFileSync('./public/app.js', 'utf8');
 for (const m of appJs.matchAll(/track(?:Once)?\('([a-z0-9_]+)'/g)) assert.ok(m[1].endsWith('_') ? EVENTS.some((e) => e.startsWith(m[1])) : EVENTS.includes(m[1]), 'lib/events.js に ' + m[1] + ' がない');
 for (const plan of Object.keys(PLANS)) assert.ok(EVENTS.includes('buy_click_' + plan) && EVENTS.includes('purchase_' + plan));
 
-// 8) 購入前に見せる「続きの冒頭」：1文目と、2文目の書き出しだけ。続きの大半は出さない
+// 8) 購入前に無料で見せる範囲：最初の章と「強み」は全部、「つまずきやすいところ」は1つ目と2つ目の書き出しだけ。続きの大半は出さない
 const { buildPreview, countChars } = await import('./lib/preview.js');
 const { onRequestGet: getPreview } = await import('./functions/api/preview.js');
 for (const code of codes) {
-  const pv = buildPreview(code), seen = buildReport(code, 'lite').lite.seen;
-  assert.ok(pv.lead.endsWith('。') && seen.startsWith(pv.lead + pv.fade), code);
-  assert.ok(pv.fade.length > 0 && pv.fade.length <= 14 && pv.lead.length + pv.fade.length < seen.length, code + ' の冒頭が長すぎる');
+  const pv = buildPreview(code), lt = buildReport(code, 'lite').lite;
+  assert.ok(pv.seen === lt.seen && pv.step === lt.step && pv.strengths.join() === lt.strengths.join(), code);
+  assert.ok(pv.lead === lt.pitfalls[0] && lt.pitfalls[1].startsWith(pv.fade) && pv.fade.length > 0 && pv.fade.length < lt.pitfalls[1].length, code + ' の読みかけが長すぎる');
+  assert.deepStrictEqual(Object.keys(pv).sort(), ['chars', 'code', 'fade', 'lead', 'seen', 'step', 'strengths'], code);
+  assert.ok(countChars([pv.seen, pv.step, pv.strengths, pv.lead]) < countChars(lt) * 0.12, code + ' の無料の範囲が広すぎる');
   assert.ok(pv.chars.lite > 2000 && pv.chars.standard > pv.chars.lite, code);
 }
 assert.strictEqual(buildPreview('bad'), null);
 assert.ok(countChars({ a: 'あい', b: ['う'] }) === 3);
 assert.strictEqual((await getPreview({ request: new Request('https://x/api/preview?code=bad') })).status, 400);
 const pvRes = await getPreview({ request: new Request('https://x/api/preview?code=EOSH-WP') }).then((r) => r.json());
-assert.ok(pvRes.lead && !JSON.stringify(pvRes).includes('portrait'));
+assert.ok(pvRes.lead && pvRes.seen && !JSON.stringify(pvRes).includes('portrait'));
 
 // 9) 決済をやめて戻る先は、結果ページ（やめたことが分かる印つき）
 await post({ code: 'EOSH-WP', plan: 'lite' });
@@ -183,6 +189,8 @@ for (const item of LC.LIKERT) assert.ok(item.ex && item.ex.length >= 10 && item.
 // 13) 改行の位置：語の途中や、句読点の前では切らない。最後に1〜2文字だけ残さない
 vm.runInNewContext(readFileSync('./public/phrase.js', 'utf8'), ctx);
 const split = (t) => Array.from(ctx.window.LCPhrase.split(t));
+// 「・」のあとでは切らせない（見出しの「恐れ・回避」が割れないように、つなぎ文字を入れる）
+assert.ok(ctx.window.LCPhrase.html('ゆらぎ型（恐れ・回避）を深く知る').includes('（恐れ・\u2060回避）\u2060を<wbr>深く知る'));
 assert.deepStrictEqual(split('返信が遅いと、嫌われたかもと考えてしまう'), ['返信が', '遅いと、', '嫌われたかもと', '考えてしまう']);
 assert.deepStrictEqual(split('仕事で落ち込んだ日に、「今日はつらかった」と話せる').slice(-2), ['「今日はつらかった」と', '話せる']);
 assert.deepStrictEqual(split('静かに想いを咲かせ続ける人').slice(-1), ['続ける人']);

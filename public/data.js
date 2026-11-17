@@ -158,12 +158,13 @@ window.LC = (function () {
   // answers: LIKERT は 1〜5、PAIRS は 'a' / 'b'
   function score(likert, pairs) {
     var sums = [0, 0, 0, 0];
-    LIKERT.forEach(function (item, i) { sums[item.ax] += item.s * (likert[i] - 3); });
+    // 答えが入っていない質問は「どちらでもない」として数える（合計が数字でなくなるのを防ぐ）
+    LIKERT.forEach(function (item, i) { var v = likert[i] >= 1 && likert[i] <= 5 ? likert[i] : 3; sums[item.ax] += item.s * (v - 3); });
     var letters = sums.map(function (v, i) { return v > 0 ? AXES[i].pos : AXES[i].neg; });
     var pct = sums.map(function (v) { return Math.round(((v + 10) / 20) * 100); });
 
     var ll = { W: 0, T: 0, G: 0, A: 0, P: 0 };
-    PAIRS.forEach(function (p, i) { ll[pairs[i] === 'a' ? p.a : p.b] += 1; });
+    PAIRS.forEach(function (p, i) { if (pairs[i] === 'a' || pairs[i] === 'b') ll[pairs[i] === 'a' ? p.a : p.b] += 1; });
     var ranked = LL_ORDER.slice().sort(function (x, y) { return ll[y] - ll[x]; });
     var picks = ll[ranked[0]] - ll[ranked[1]] <= 1 ? ranked.slice(0, 2) : ranked.slice(0, 1);
 

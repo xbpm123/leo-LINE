@@ -145,8 +145,12 @@
       '<section class="qcard">' + body + '</section>' +
       '<div class="qnav"><button class="linkbtn" id="back">' + (i === 0 ? 'トップに戻る' : 'ひとつ前へ') + '</button></div>';
 
+    // 答えを押してから次の質問に替わるまでの間は、もう一度押されても受け付けない（2回数えると質問が1つ飛ぶ）
+    var answered = false;
     Array.prototype.forEach.call(app.querySelectorAll('.qcard button'), function (b) {
       b.onclick = function () {
+        if (answered) return;
+        answered = true;
         if (isPair) state.pairs[i - LC.LIKERT.length] = b.dataset.v; else state.likert[i] = Number(b.dataset.v);
         b.classList.add('on');
         if (i === 9) track('quiz_q10'); else if (i === 19) track('quiz_q20');
@@ -179,10 +183,12 @@
     var owned = getPaid(code);
 
     var axes = pct ? '<section class="panel axes"><span class="eyebrow">あなたの傾き</span>' + LC.AXES.map(function (ax, i) {
-      var v = pct[i], toPos = v > 50, w = Math.abs(v - 50);
+      // 数字が取れていない軸は、コードの文字からどちら寄りかだけを出す（％は出さない）
+      var ok = typeof pct[i] === 'number' && isFinite(pct[i]);
+      var v = ok ? pct[i] : (p.core.charAt(i) === ax.pos ? 51 : 50), toPos = ok ? v > 50 : p.core.charAt(i) === ax.pos, w = ok ? Math.abs(v - 50) : 0;
       return '<div class="axis"><div class="names"><span>' + (toPos ? ax.negName : '<b>' + ax.negName + '</b>') + '</span><span>' + (toPos ? '<b>' + ax.posName + '</b>' : ax.posName) + '</span></div>' +
         '<div class="track"><i style="left:' + (toPos ? 50 : 50 - w) + '%;width:' + Math.max(w, 1.5) + '%"></i></div>' +
-        '<div class="label">' + ax.label + '　' + (toPos ? ax.posName : ax.negName) + ' ' + Math.max(v, 100 - v) + '%</div></div>';
+        '<div class="label">' + ax.label + '　' + (toPos ? ax.posName : ax.negName) + (ok ? ' ' + Math.max(v, 100 - v) + '%' : '') + '</div></div>';
     }).join('') + '</section>' : '';
 
     // シェア先はタイプ別ページ（タイプごとの画像が出る）。1ファイルのデモ版にはそのページが無いので結果のリンクにする
@@ -305,7 +311,8 @@
   }
   function chapterList(items, reading) {
     var head = items.slice(0, 6), rest = items.slice(6);
-    return '<ol class="chapters">' + head.map(function (x, i) { return i === 0 && reading ? '<li class="now">' + x + '<small>読みかけ</small></li>' : '<li>' + x + '</li>'; }).join('') + '</ol>' +
+    // 1章目は無料で読み終えていて、2章目の途中で区切っている
+    return '<ol class="chapters">' + head.map(function (x, i) { return reading && i === 0 ? '<li class="done">' + x + '<small>読みました</small></li>' : reading && i === 1 ? '<li class="now">' + x + '<small>読みかけ</small></li>' : '<li>' + x + '</li>'; }).join('') + '</ol>' +
       (rest.length ? '<details class="more"><summary>ほか' + rest.length + '章</summary><ol class="chapters" start="7">' + rest.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol></details>' : '');
   }
 
@@ -323,9 +330,13 @@
 
     var html;
     if (!owned) {
-      // 読みかけの部分：1文目はそのまま、2文目は1文字ずつ薄くして消えていくように見せる
+      // 無料で読めるところ：最初の章「恋人から見たあなた」は全部、次の章は「強み」まで。
+      // 読みかけの部分：「つまずきやすいところ」の1つ目はそのまま、2つ目は1文字ずつ薄くして消えていくように見せる
       var fade = preview ? Array.prototype.map.call(preview.fade, function (ch, i) { return '<span style="opacity:' + (0.8 * (1 - i / preview.fade.length)).toFixed(2) + '">' + ch + '</span>'; }).join('') : '';
-      html = (preview ? '<section class="sec peek"><h3>恋人から見たあなた</h3><div class="prose"><p>' + preview.lead + '<span aria-hidden="true">' + fade + '</span></p></div></section>' : '') +
+      html = (preview ? '<section class="sec"><h3>恋人から見たあなた</h3>' + prose(preview.seen) +
+        '<div class="kv">' + kv('今週からできる一歩', '<div class="ask">' + preview.step + '</div>') + '</div></section>' +
+        '<section class="sec peek"><h3>' + a.name + '（' + a.base + '）を深く知る</h3><div class="kv">' + kv('強み', list(preview.strengths)) +
+        kv('つまずきやすいところ', '<ul class="dots"><li>' + preview.lead + '</li><li class="fading" aria-hidden="true">' + fade + '</li></ul>') + '</div></section>' : '') +
         '<section class="paywall" id="plans">' +
         (canceled ? '<p class="calm">お支払いは完了していません。料金はかかっていません。続きは、いつでもここから読めます。</p>' : '') +
         '<div class="rule"><span>ここから先は有料です</span></div>' +

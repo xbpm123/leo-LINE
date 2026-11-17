@@ -54,11 +54,15 @@
     return out;
   }
 
+  // keep-all でも切れてしまう位置に、見えない「つなぎ文字」を入れて切らせない。
+  // 「・」のあと（「恐れ・/回避」のように語が割れる）と、閉じかっこのあとに助詞が続くところ（「（回避）/を」のように助詞が行頭に来る）
+  function glue(text) { return text.replace(/・(?=[^\s])/g, '・\u2060').replace(/([」』）])(?=[ぁ-ゖ])/g, '$1\u2060'); }
+
   // HTML の文字列にして返す。タグを含む文字列はそのまま返す
   function html(text) {
     text = String(text);
     if (text.indexOf('<') >= 0) return text;
-    return '<span class="ph">' + split(text).join('<wbr>') + '</span>';
+    return '<span class="ph">' + split(text).map(glue).join('<wbr>') + '</span>';
   }
 
   // すでにページにある要素に適用する（中のタグは残し、文字の部分にだけ <wbr> を入れる）
@@ -72,11 +76,11 @@
       while ((n = walker.nextNode())) nodes.push(n);
       for (var i = 0; i < nodes.length; i++) {
         var parts = split(nodes[i].nodeValue);
-        if (parts.length < 2) continue;
+        if (parts.length < 2) { if (/[・」』）]/.test(nodes[i].nodeValue)) nodes[i].nodeValue = glue(nodes[i].nodeValue); continue; }
         var frag = document.createDocumentFragment();
         for (var j = 0; j < parts.length; j++) {
           if (j) frag.appendChild(document.createElement('wbr'));
-          frag.appendChild(document.createTextNode(parts[j]));
+          frag.appendChild(document.createTextNode(glue(parts[j])));
         }
         nodes[i].parentNode.replaceChild(frag, nodes[i]);
       }

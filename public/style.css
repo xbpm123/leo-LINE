@@ -374,6 +374,7 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
 
 /* 続きの読みかけと、有料の区切り */
 .peek { margin-bottom: -4px; }
+#premium > .sec + .sec { margin-top: 28px; }
 .paywall { display: grid; gap: 16px; scroll-margin-top: 76px; }
 .paywall .rule { display: flex; align-items: center; gap: 14px; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
 .paywall .rule::before, .paywall .rule::after { content: ""; flex: 1; border-top: 1.5px dashed var(--line); }
@@ -384,6 +385,9 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
 .chapters li { padding: 5px 0 5px 4px; }
 .chapters li::marker { font-family: var(--latin); font-weight: 700; color: var(--muted); font-size: 13px; }
 .chapters li.now { color: var(--ink); font-weight: 700; }
+.chapters li.done { color: var(--muted); }
+.chapters li.done small { margin-left: 10px; font-size: 11px; font-weight: 700; color: var(--muted); background: var(--tint); border-radius: 6px; padding: 2px 8px; white-space: nowrap; }
+ul.dots li.fading::before { opacity: .5; }
 .chapters li.now small { margin-left: 10px; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; white-space: nowrap; }
 details.more summary { cursor: pointer; font-size: 14px; font-weight: 700; color: var(--muted); padding: 6px 0; }
 details.more .chapters { margin-top: 2px; }
