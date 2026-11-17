@@ -16,13 +16,22 @@
 AIっぽい言い回しは yomiyasu（v1.0.4）の基準で直してある。
 
 購入済みのプランからは差額でアップグレードできる（ライト→スタンダード 1,000円など）。
-価格は `lib/plans.js` だけ直せば全体に反映される。
+価格は `lib/plans.js` を直せば、購入の金額と画面の料金表に反映される。
+ただし検索・AI向けに HTML へ直接書いた料金（`public/index.html` の料金表・よくある質問・構造化データ、`public/llms.txt`、`public/legal.html`）は手で直す。直し忘れると `npm test` が落ちる。
+
+## ターゲットとデザイン
+
+- 主なターゲット: 20代の女性（とくに22〜29歳）。交際中、片思い、曖昧な関係、マッチングアプリで出会いを探している人。恋に不安を感じやすい「たしかめ型」「ゆらぎ型」がいちばん刺さる層
+- デザイン: 白地・大きな見出し・余白多め。アクセントは1色（ローズレッド）で、愛着スタイル4つにだけ色を付ける。フォントは端末のゴシック体（ヒラギノ角ゴ / Noto Sans JP）、英字コードだけ Outfit
+- 導入ページ（`public/index.html` の `#lp`）は静的な HTML。検索エンジンや AI のクローラーが JavaScript なしで読める。診断と結果は同じページの `#app` に `app.js` が描く
 
 ## 構成
 
 | 場所 | 中身 |
 |---|---|
-| `public/` | サイト本体（静的ファイル）。`data.js` は無料部分の文章と質問、`app.js` は画面 |
+| `public/` | サイト本体（静的ファイル）。`index.html` は導入ページ、`data.js` は無料部分の文章と質問、`app.js` は診断と結果の画面 |
+| `public/robots.txt` `sitemap.xml` `llms.txt` `_headers` | 検索エンジン・AI向けの案内と、配信時のヘッダー |
+| `tools/og.html` `tools/icon.html` | SNSで共有されたときの画像（`public/og.png`）とホーム画面アイコンの元 |
 | `lib/premium.js` | 有料レポートの文章。サーバー側だけにあり、支払い確認後に返す |
 | `lib/plans.js` | 料金プランと差額の計算 |
 | `functions/api/plans.js` | 料金表を画面に返す |
@@ -56,6 +65,16 @@ DB もサーバーも不要。購入の証明は Stripe の Checkout Session ID�
 6. 動作確認できたら STRIPE_SECRET_KEY を `sk_live_...` に入れ替えて本番開始
 
 独自ドメインは Cloudflare Pages の「カスタムドメイン」から追加できる。
+ドメインを変えたら、`public/` の中の `https://lovecode-9ax.pages.dev` をすべて新しいドメインに置き換える（index.html の canonical・OGP・構造化データ、legal.html、robots.txt、sitemap.xml、llms.txt）。
+
+公開後にやること（SEO）:
+- Google Search Console にサイトを登録して、`sitemap.xml` を送信する
+- Bing Webmaster Tools にも登録する（ChatGPT や Copilot の検索は Bing の索引を使う）
+
+OG画像を作り直すとき（Mac の Chrome を使う）:
+```sh
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars --force-device-scale-factor=1 --window-size=1200,630 --screenshot="$PWD/public/og.png" "file://$PWD/tools/og.html"
+```
 
 ## ローカル確認
 
@@ -68,4 +87,4 @@ echo 'STRIPE_SECRET_KEY=sk_test_...' > .dev.vars && npm run dev   # 本番と同
 ## メモ
 - 診断結果はブラウザの localStorage にだけ保存。購入済みレポートは同じブラウザなら再表示できる。
   別端末で見たい人には、Stripe の領収メールに URL を入れる、などを後で追加するとよい。
-- 文章を直すときは `public/data.js`（無料）と `lib/premium.js`（有料）だけ触ればいい。
+- 文章を直すときは `public/data.js`（無料）と `lib/premium.js`（有料）を触る。タイプ名やキャッチコピーを変えたら、`public/index.html` の16タイプ一覧と `public/llms.txt` も合わせる（ずれると `npm test` が落ちる）。

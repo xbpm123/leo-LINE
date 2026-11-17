@@ -80,6 +80,14 @@ window.LC = (function () {
     EKSM: ['要塞', '守りは固く、内側は誰より繊細な人']
   };
 
+  // タイプの絵文字（タイルと結果カードに出す）
+  var EMOJI = {
+    COFH: '🌻', COFM: '⛵', COSH: '🍵', COSM: '🌳',
+    EOFH: '🎆', EOFM: '🔍', EOSH: '🌙', EOSM: '⛅',
+    CKFH: '🍃', CKFM: '⛺', CKSH: '🐈‍⬛', CKSM: '📚',
+    EKFH: '🎢', EKFM: '🎪', EKSH: '🦔', EKSM: '🏰'
+  };
+
   // 恋愛あるある（無料）。シェアされやすいよう、各タイプ4つずつ
   var ARUARU = {
     COFH: ['好きな人ができると、友達にすぐバレる', '「好き」と言うのに、特に勇気はいらない', 'デートの帰り道に、もう次の予定を立てている', '恋人が落ち込んでいると、元気づけようとして張り切りすぎる'],
@@ -142,5 +150,5 @@ window.LC = (function () {
     return { code: letters.join('') + '-' + picks.join(''), pct: pct, llScores: ll };
   }
 
-  return { AXES: AXES, LIKERT: LIKERT, PAIRS: PAIRS, LL: LL, LL_ORDER: LL_ORDER, ATT: ATT, TYPES: TYPES, ARUARU: ARUARU, STORY: STORY, parseCode: parseCode, score: score };
+  return { AXES: AXES, LIKERT: LIKERT, PAIRS: PAIRS, LL: LL, LL_ORDER: LL_ORDER, ATT: ATT, TYPES: TYPES, EMOJI: EMOJI, ARUARU: ARUARU, STORY: STORY, parseCode: parseCode, score: score };
 })();

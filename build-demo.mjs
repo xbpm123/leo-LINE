@@ -16,13 +16,18 @@ window.LC_API = {
   report: function (sid) { var s = sid.split('|'); return Promise.resolve(buildReport(s[1], s[2], s[3] || null)); }
 };`;
 
+// 本文（ヘッダー・導入ページ・#app）は本番の index.html からそのまま使う。デモに無いページへのリンクは外す
+const index = read('./public/index.html');
+const body = index.slice(index.indexOf('<!--BODY-->'), index.indexOf('<!--/BODY-->')).replace(/<!--NODEMO-->[\s\S]*?<!--\/NODEMO-->/g, '');
+if (!body.includes('id="lp"') || !body.includes('id="app"')) throw new Error('index.html から本文を取り出せませんでした');
+
 const html = `<title>ラブコード診断</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&display=swap">
 <style>
 ${read('./public/style.css')}
 </style>
-<main class="wrap" id="app"></main>
+${body}
 <script>
 ${read('./public/data.js')}
 </script>

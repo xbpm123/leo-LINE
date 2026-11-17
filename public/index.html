@@ -3,16 +3,311 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ラブコード診断</title>
-<meta name="description" content="恋の不安のクセ×愛情の受け取り方で、あなたの恋愛をコードにする診断。30問・約5分。">
+<title>ラブコード診断｜恋の不安のクセ×愛情言語でわかる無料の恋愛タイプ診断</title>
+<meta name="description" content="ラブコード診断は、恋をすると出てくる不安のクセ（愛着スタイル）と愛情言語から、あなたの恋愛タイプを16タイプのコードで表す無料の恋愛診断です。30問・約5分、登録なし。">
+<link rel="canonical" href="https://lovecode-9ax.pages.dev/">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121013" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ラブコード診断">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:url" content="https://lovecode-9ax.pages.dev/">
+<meta property="og:title" content="ラブコード診断｜その恋の不安、クセかも。">
+<meta property="og:description" content="30問・約5分。恋の不安のクセと愛情言語から、あなたの恋愛を16タイプのコードにします。無料・登録なし。">
+<meta property="og:image" content="https://lovecode-9ax.pages.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&display=swap">
 <link rel="stylesheet" href="style.css">
+<script>
+  // 結果ページや購入後の戻りで開いたときは、導入ページを一瞬も見せない
+  if (/^#[CE][OK][FS][HM]-/.test(location.hash) || /[?&]session_id=/.test(location.search)) document.documentElement.className = 'boot-app';
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://lovecode-9ax.pages.dev/#website",
+      "url": "https://lovecode-9ax.pages.dev/",
+      "name": "ラブコード診断",
+      "alternateName": "LOVE CODE",
+      "inLanguage": "ja",
+      "description": "恋の不安のクセ（愛着スタイル）と愛情言語から、恋愛タイプを16タイプのコードで表す無料の恋愛診断。",
+      "publisher": { "@id": "https://lovecode-9ax.pages.dev/#org" }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://lovecode-9ax.pages.dev/#org",
+      "name": "ラブコード診断 運営事務局",
+      "url": "https://lovecode-9ax.pages.dev/"
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://lovecode-9ax.pages.dev/#app",
+      "name": "ラブコード診断",
+      "url": "https://lovecode-9ax.pages.dev/",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "JavaScript が必要です",
+      "inLanguage": "ja",
+      "isAccessibleForFree": true,
+      "description": "30問・約5分の恋愛タイプ診断。無料で16タイプの結果が見られ、詳しいレポートは980円から購入できます。",
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "JPY",
+        "lowPrice": "0",
+        "highPrice": "2980",
+        "offerCount": "4"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://lovecode-9ax.pages.dev/#faq",
+      "mainEntity": [
+        { "@type": "Question", "name": "ラブコード診断とは何ですか？", "acceptedAnswer": { "@type": "Answer", "text": "恋をしたときに出てくる不安のクセ（愛着スタイル）と、愛情の受け取り方（愛情言語）から、あなたの恋愛タイプを「EOSH-WP」のような英字のコードで表す無料の恋愛診断です。30問・約5分で、登録なしで受けられます。" } },
+        { "@type": "Question", "name": "無料でどこまでわかりますか？", "acceptedAnswer": { "@type": "Answer", "text": "あなたのラブコード、16タイプのうちどのタイプか、タイプの説明と物語、恋愛あるある、あなたに響く愛情言語まで無料で読めます。" } },
+        { "@type": "Question", "name": "有料レポートはいくらですか？", "acceptedAnswer": { "@type": "Answer", "text": "ライトが980円、スタンダードが1,980円、ペアが2,980円です。すべて税込の買い切りで、月額料金はかかりません。購入したプランから上のプランへは、差額でアップグレードできます。" } },
+        { "@type": "Question", "name": "質問は何問ですか？どのくらい時間がかかりますか？", "acceptedAnswer": { "@type": "Answer", "text": "全部で30問、約5分です。前半の20問は5段階で答え、後半の10問は2つのうち嬉しいほうを選びます。" } },
+        { "@type": "Question", "name": "MBTIや16Personalitiesと関係はありますか？", "acceptedAnswer": { "@type": "Answer", "text": "関係ありません。ラブコード診断は恋愛に絞った独自の診断で、性格全般の4文字タイプを判定するものではありません。成人の愛着研究と「5つの愛の言語」の考え方を参考に、質問を独自に作っています。" } },
+        { "@type": "Question", "name": "愛着スタイルとは何ですか？", "acceptedAnswer": { "@type": "Answer", "text": "人と親しくなるときに出てくる心のクセのことです。相手の気持ちを確かめたくなる「不安」と、距離を取りたくなる「回避」の2つの強さで、安定・不安・回避・恐れ回避の4つに分かれます。ラブコード診断では、ひだまり型・たしかめ型・ひとり時間型・ゆらぎ型と呼んでいます。" } },
+        { "@type": "Question", "name": "愛情言語とは何ですか？", "acceptedAnswer": { "@type": "Answer", "text": "「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。ラブコード診断では、5つのうちあなたに響く1〜2個がコードの後ろに付きます。" } },
+        { "@type": "Question", "name": "診断結果は当たりますか？", "acceptedAnswer": { "@type": "Answer", "text": "エンタメとして楽しむための診断で、医学的・心理学的な診断ではありません。結果は、答えたときの状況や気持ちによって変わることがあります。自分の恋のクセを言葉にするきっかけとして使ってください。" } },
+        { "@type": "Question", "name": "回答や結果はどこかに保存されますか？", "acceptedAnswer": { "@type": "Answer", "text": "回答と結果は、お使いのブラウザの中にだけ保存されます。運営者のサーバーには送られません。会員登録もいりません。" } },
+        { "@type": "Question", "name": "恋人や好きな人との相性はわかりますか？", "acceptedAnswer": { "@type": "Answer", "text": "わかります。相手にも無料の診断を受けてもらい、そのコードを入力すると相性が見られます（スタンダード以上）。ペアプランでは、2人だけの相性レポートが読めます。" } }
+      ]
+    }
+  ]
+}
+</script>
 </head>
-<body>
-<!--APP-->
-<main class="wrap" id="app"></main>
+<body data-view="lp">
+<!--BODY-->
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="./" id="brand" aria-label="ラブコード診断 トップ">
+      <svg viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8" fill="var(--accent)"/><path transform="translate(5 5.2) scale(.75)" fill="#fff" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      ラブコード診断
+    </a>
+    <button class="btn small" data-start>無料で診断する <span class="arrow" aria-hidden="true">→</span></button>
+  </div>
+</header>
+
+<div class="lp" id="lp">
+
+  <section class="hero">
+    <div class="container">
+      <div class="faces" aria-hidden="true">
+        <span style="--qt:var(--t-co)">🌻</span><span style="--qt:var(--t-ck)">🐈‍⬛</span><span style="--qt:var(--t-eo)">🎆</span><span style="--qt:var(--t-eo)">🌙</span><span style="--qt:var(--t-ek)">🦔</span><span style="--qt:var(--t-ck)">⛺</span><span style="--qt:var(--t-ek)">🎢</span><span style="--qt:var(--t-co)">🌳</span>
+      </div>
+      <h1><span class="kicker">ラブコード診断｜無料の恋愛タイプ診断</span>その恋の不安、クセかも。30問で、あなたの恋愛をコードにします。</h1>
+      <p class="lead">恋をすると出てくる「不安のクセ」と、愛を感じる「愛情言語」。この2つから、あなたの恋愛タイプを <code>EOSH-WP</code> のような英字のコードで表します。</p>
+      <div class="cta">
+        <button class="btn big" data-start>無料で診断する <span class="arrow" aria-hidden="true">→</span></button>
+        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ見られます</li></ul>
+        <p class="resume" id="resume" hidden></p>
+      </div>
+      <div id="demo-tools"></div>
+    </div>
+  </section>
+
+  <section class="scene" aria-labelledby="h-scene">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-scene">既読のまま、3時間。<br>あなたはどう思う？</h2>
+        <p class="sub">同じ場面でも、感じ方は人によって違います。その違いが「恋のクセ」です。</p>
+      </div>
+      <div class="scene-grid">
+        <div class="chat" role="img" aria-label="メッセージを2通送ったあと、既読のまま3時間返信がない画面">
+          <div class="who"><i>🙂</i>気になる人</div>
+          <p class="b">今日はありがとう！楽しかった😊</p>
+          <p class="b">また来週も会えたらうれしいな</p>
+          <span class="meta">既読 21:03</span>
+          <span class="gap">3時間たっても返信なし</span>
+          <div class="wait"><span></span><span></span><span></span></div>
+        </div>
+        <div class="reacts">
+          <div class="react" style="--qc:var(--q-co)"><p class="t">ひだまり型<small>安定</small></p><p class="q">「忙しいのかな。明日には返ってくるでしょ」</p></div>
+          <div class="react" style="--qc:var(--q-eo)"><p class="t">たしかめ型<small>不安</small></p><p class="q">「何か変なこと言った？ 嫌われたかも……」</p></div>
+          <div class="react" style="--qc:var(--q-ck)"><p class="t">ひとり時間型<small>回避</small></p><p class="q">「返信はいつでもいいよ。自分もそういう日あるし」</p></div>
+          <div class="react" style="--qc:var(--q-ek)"><p class="t">ゆらぎ型<small>恐れ・回避</small></p><p class="q">「もう一通送りたい。でも、重いと思われたくない」</p></div>
+        </div>
+      </div>
+      <p class="after">この4つは「愛着スタイル」と呼ばれる心のクセです。ラブコード診断は、ここに恋のペース、判断の仕方、愛情言語を足して、あなたの恋愛タイプを出します。</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-aru">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-aru">こんな恋愛あるある、<br>ありませんか？</h2>
+      </div>
+      <div class="aru-card">
+        <ul class="aru">
+          <li><span class="em" style="--qt:var(--t-eo)">📱</span>返信が来るまで、何度もスマホを見てしまう</li>
+          <li><span class="em" style="--qt:var(--t-ek)">✍️</span>送る前に、メッセージを何度も直す</li>
+          <li><span class="em" style="--qt:var(--t-ck)">🐈‍⬛</span>甘えたい日と、放っておいてほしい日の差が激しい</li>
+          <li><span class="em" style="--qt:var(--t-co)">🌻</span>好きな人ができると、友達にすぐバレる</li>
+          <li><span class="em" style="--qt:var(--t-eo)">🌙</span>「この先どうなるんだろう」と夜に考え込む</li>
+          <li><span class="em" style="--qt:var(--t-ek)">🦔</span>好きな人ほど、そっけなくしてしまう</li>
+          <li><span class="em" style="--qt:var(--t-ck)">⛺</span>恋人がいても、趣味の時間は譲らない</li>
+          <li><span class="em" style="--qt:var(--t-co)">🍵</span>家でのんびり過ごすデートがいちばん好き</li>
+        </ul>
+        <p class="foot-note">あるあるは、タイプごとに違います。あなたのあるあるは、診断結果で読めます。</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-how" style="padding-top:0">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-how">診断の流れ</h2>
+      </div>
+      <ol class="steps">
+        <li><h3>30問に答える</h3><p>「あてはまる？」に5段階で答えるだけ。考え込まずに、直感で選んでください。約5分で終わります。</p></li>
+        <li><h3>ラブコードが出る</h3><p>4つの軸から決まる16タイプに、あなたに響く愛情言語を足して、ひとつのコードになります。</p></li>
+        <li><h3>結果を読む</h3><p>タイプの説明、物語、恋愛あるある、愛情言語は無料です。もっと知りたい人には、有料の取扱説明書があります。</p></li>
+      </ol>
+      <div class="anatomy-box">
+        <h3>コードの読み方（例：EOSH-WP）</h3>
+        <div class="anatomy" aria-label="EOSH-WP の読み方">
+          <div class="slot"><b>E</b><span>たしかめたい</span><small>C：安心している</small></div>
+          <div class="slot"><b>O</b><span>近づく</span><small>K：距離を保つ</small></div>
+          <div class="slot"><b>S</b><span>じっくり</span><small>F：すぐ動く</small></div>
+          <div class="slot"><b>H</b><span>気持ち</span><small>M：頭</small></div>
+          <span class="dash" aria-hidden="true">-</span>
+          <div class="slot ll"><b>W</b><span>言葉</span><small>メイン</small></div>
+          <div class="slot ll"><b>P</b><span>スキンシップ</span><small>サブ</small></div>
+        </div>
+        <p class="note">前の2文字が愛着スタイル、次の2文字が恋のペースと判断の仕方。ハイフンの後ろは、言葉(W)・一緒の時間(T)・贈り物(G)・行動(A)・スキンシップ(P)のうち、あなたに響く愛情言語です。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="types" aria-labelledby="h-types">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-types">16のラブタイプ</h2>
+        <p class="sub">4つの愛着スタイルに、4タイプずつ。あなたはどれに近いですか？</p>
+      </div>
+      <div class="typegrid">
+        <div class="typerow" style="--qc:var(--q-co);--qt:var(--t-co)">
+          <h3>ひだまり型<span class="base">安定タイプ｜好きな人を信じることと、自分を大事にすることが両立できる</span></h3>
+          <div class="tiles">
+            <div class="tile"><span class="em">🌻</span><strong>ひまわり<code>COFH</code></strong><span class="d">好きをまっすぐ照らす人</span></div>
+            <div class="tile"><span class="em">⛵</span><strong>船長<code>COFM</code></strong><span class="d">二人の進路を迷わず決める人</span></div>
+            <div class="tile"><span class="em">🍵</span><strong>縁側<code>COSH</code></strong><span class="d">ゆっくり深く、包み込む人</span></div>
+            <div class="tile"><span class="em">🌳</span><strong>大樹<code>COSM</code></strong><span class="d">何年たっても揺るがない人</span></div>
+          </div>
+        </div>
+        <div class="typerow" style="--qc:var(--q-eo);--qt:var(--t-eo)">
+          <h3>たしかめ型<span class="base">不安タイプ｜好きになるほど、相手の気持ちを確かめたくなる</span></h3>
+          <div class="tiles">
+            <div class="tile"><span class="em">🎆</span><strong>花火<code>EOFH</code></strong><span class="d">一瞬で燃え上がる、大きな愛の人</span></div>
+            <div class="tile"><span class="em">🔍</span><strong>名探偵<code>EOFM</code></strong><span class="d">小さなサインも見逃さない人</span></div>
+            <div class="tile"><span class="em">🌙</span><strong>月見草<code>EOSH</code></strong><span class="d">静かに想いを咲かせ続ける人</span></div>
+            <div class="tile"><span class="em">⛅</span><strong>天気予報士<code>EOSM</code></strong><span class="d">恋の雲行きを先読みする人</span></div>
+          </div>
+        </div>
+        <div class="typerow" style="--qc:var(--q-ck);--qt:var(--t-ck)">
+          <h3>ひとり時間型<span class="base">回避タイプ｜恋人も大切、自分の時間も同じくらい大切</span></h3>
+          <div class="tiles">
+            <div class="tile"><span class="em">🍃</span><strong>風来坊<code>CKFH</code></strong><span class="d">ときめきに素直、でも縛られない人</span></div>
+            <div class="tile"><span class="em">⛺</span><strong>ソロキャンパー<code>CKFM</code></strong><span class="d">自分の世界ごと愛してほしい人</span></div>
+            <div class="tile"><span class="em">🐈‍⬛</span><strong>黒猫<code>CKSH</code></strong><span class="d">気まぐれに甘える、懐くと深い人</span></div>
+            <div class="tile"><span class="em">📚</span><strong>書斎の住人<code>CKSM</code></strong><span class="d">静かな信頼を積み上げる人</span></div>
+          </div>
+        </div>
+        <div class="typerow" style="--qc:var(--q-ek);--qt:var(--t-ek)">
+          <h3>ゆらぎ型<span class="base">恐れ・回避タイプ｜近づきたい気持ちと、傷つくのが怖い気持ちが同時にある</span></h3>
+          <div class="tiles">
+            <div class="tile"><span class="em">🎢</span><strong>ジェットコースター<code>EKFH</code></strong><span class="d">近づくと怖く、離れると寂しい人</span></div>
+            <div class="tile"><span class="em">🎪</span><strong>綱渡り師<code>EKFM</code></strong><span class="d">頭でバランスを取りすぎる人</span></div>
+            <div class="tile"><span class="em">🦔</span><strong>ハリネズミ<code>EKSH</code></strong><span class="d">近づきたいのに、トゲが出る人</span></div>
+            <div class="tile"><span class="em">🏰</span><strong>要塞<code>EKSM</code></strong><span class="d">守りは固く、内側は誰より繊細な人</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-price">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-price">まずは無料で。<br>続きが読みたくなったら。</h2>
+        <p class="sub">有料レポートは買い切りです。月額料金はかかりません。</p>
+      </div>
+      <div class="pricing">
+        <div class="free"><h3>無料</h3><p class="yen">0<small> 円</small></p><p>あなたのコードとタイプ、タイプの物語、恋愛あるある、愛情言語の概要。</p></div>
+        <div><h3>ライト</h3><p class="yen"><span data-price="lite">980</span><small> 円（税込）</small></p><p>自分の取扱説明書。恋の強みとつまずき、合う相手、LINEやデートのペース、恋人に見せる取扱説明書など。</p></div>
+        <div><h3>スタンダード</h3><p class="yen"><span data-price="standard">1,980</span><small> 円（税込）</small></p><p>ライトの全部と、恋の実践編。ケンカ、嫉妬、失恋、復縁、結婚、マッチングアプリ、16タイプとの付き合い方、相性チェック。</p></div>
+        <div><h3>ペア</h3><p class="yen"><span data-price="pair">2,980</span><small> 円（税込）</small></p><p>2人分のスタンダードと、2人だけの相性レポート。起きやすいズレと、そのまま使える会話の例。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-basis" style="padding-top:0">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-basis">何をもとにした診断？</h2>
+      </div>
+      <div class="basis">
+        <div><h3>愛着スタイル</h3><p>人と親しくなるときの心のクセです。成人の愛着研究では、「不安」と「回避」の2つの強さで、安定・不安・回避・恐れ回避の4つに分けて考えます。コードの前半2文字がこれにあたります。</p></div>
+        <div><h3>5つの愛情言語</h3><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。</p></div>
+      </div>
+      <p class="note disclaimer">質問はこの2つの考え方を参考に、独自に作っています。エンタメとしてお楽しみください。医学的・心理学的な診断ではありません。回答と結果はお使いのブラウザの中にだけ保存され、運営者のサーバーには送られません。</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-faq" style="padding-top:0">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-faq">よくある質問</h2>
+      </div>
+      <div class="faq">
+        <details><summary>ラブコード診断とは何ですか？</summary><p>恋をしたときに出てくる不安のクセ（愛着スタイル）と、愛情の受け取り方（愛情言語）から、あなたの恋愛タイプを「EOSH-WP」のような英字のコードで表す無料の恋愛診断です。30問・約5分で、登録なしで受けられます。</p></details>
+        <details><summary>無料でどこまでわかりますか？</summary><p>あなたのラブコード、16タイプのうちどのタイプか、タイプの説明と物語、恋愛あるある、あなたに響く愛情言語まで無料で読めます。</p></details>
+        <details><summary>有料レポートはいくらですか？</summary><p>ライトが980円、スタンダードが1,980円、ペアが2,980円です。すべて税込の買い切りで、月額料金はかかりません。購入したプランから上のプランへは、差額でアップグレードできます。</p></details>
+        <details><summary>質問は何問ですか？どのくらい時間がかかりますか？</summary><p>全部で30問、約5分です。前半の20問は5段階で答え、後半の10問は2つのうち嬉しいほうを選びます。</p></details>
+        <details><summary>MBTIや16Personalitiesと関係はありますか？</summary><p>関係ありません。ラブコード診断は恋愛に絞った独自の診断で、性格全般の4文字タイプを判定するものではありません。成人の愛着研究と「5つの愛の言語」の考え方を参考に、質問を独自に作っています。</p></details>
+        <details><summary>愛着スタイルとは何ですか？</summary><p>人と親しくなるときに出てくる心のクセのことです。相手の気持ちを確かめたくなる「不安」と、距離を取りたくなる「回避」の2つの強さで、安定・不安・回避・恐れ回避の4つに分かれます。ラブコード診断では、ひだまり型・たしかめ型・ひとり時間型・ゆらぎ型と呼んでいます。</p></details>
+        <details><summary>愛情言語とは何ですか？</summary><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。ラブコード診断では、5つのうちあなたに響く1〜2個がコードの後ろに付きます。</p></details>
+        <details><summary>診断結果は当たりますか？</summary><p>エンタメとして楽しむための診断で、医学的・心理学的な診断ではありません。結果は、答えたときの状況や気持ちによって変わることがあります。自分の恋のクセを言葉にするきっかけとして使ってください。</p></details>
+        <details><summary>回答や結果はどこかに保存されますか？</summary><p>回答と結果は、お使いのブラウザの中にだけ保存されます。運営者のサーバーには送られません。会員登録もいりません。</p></details>
+        <details><summary>恋人や好きな人との相性はわかりますか？</summary><p>わかります。相手にも無料の診断を受けてもらい、そのコードを入力すると相性が見られます（スタンダード以上）。ペアプランでは、2人だけの相性レポートが読めます。</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="last" aria-labelledby="h-last">
+    <div class="container">
+      <h2 id="h-last">次は、あなたの恋の番。</h2>
+      <div class="cta">
+        <button class="btn big" data-start>無料で診断する <span class="arrow" aria-hidden="true">→</span></button>
+        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ見られます</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!--NODEMO-->
+  <footer class="site-foot">
+    <div class="container">
+      <nav><a href="legal.html">特定商取引法に基づく表記</a><a href="legal.html#privacy">プライバシーポリシー</a></nav>
+      <p>© ラブコード診断</p>
+    </div>
+  </footer>
+  <!--/NODEMO-->
+</div>
+
+<main class="wrap" id="app" hidden></main>
+<div class="stickybuy" id="stickybuy" aria-hidden="true"><div><p id="stickybuy-text"></p><button class="btn" id="stickybuy-go">プランを見る</button></div></div>
+<!--/BODY-->
 <script src="data.js"></script>
 <script>
   // 本番用：Cloudflare Pages Functions の API を叩く
@@ -29,6 +324,5 @@
   };
 </script>
 <script src="app.js"></script>
-<!--/APP-->
 </body>
 </html>

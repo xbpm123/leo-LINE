@@ -87,4 +87,32 @@ assert.strictEqual((await get('cs_test_lite').then((r) => r.json())).standard, u
 sessions.cs_test_pair = { payment_status: 'paid', metadata: { code: 'EOSH-WP', plan: 'pair', partner: 'CKSM-A' } };
 const pr = await get('cs_test_pair').then((r) => r.json());
 assert.ok(pr.together && pr.partner.code === 'CKSM-A' && pr.standard);
+
+// 5) 導入ページ（静的HTML）が、データ・料金・構造化データとずれていない
+const index = readFileSync('./public/index.html', 'utf8');
+const llms = readFileSync('./public/llms.txt', 'utf8');
+for (const [core, [name, tagline]] of Object.entries(LC.TYPES)) {
+  assert.ok(index.includes(`${name}<code>${core}</code>`) && index.includes(tagline), 'index.html に ' + core + ' がない');
+  assert.ok(index.includes(LC.EMOJI[core]), 'index.html に ' + core + ' の絵文字がない');
+  assert.ok(llms.includes(`${core} ${name}「${tagline}」`), 'llms.txt に ' + core + ' がない');
+}
+for (const att of Object.values(LC.ATT)) assert.ok(index.includes(att.name) && llms.includes(att.name), att.name);
+for (const [key, plan] of Object.entries(PLANS)) {
+  const yen = plan.price.toLocaleString('ja-JP');
+  assert.ok(index.includes(`<span data-price="${key}">${yen}</span>`), 'index.html の ' + key + ' の料金が lib/plans.js と違う');
+  assert.ok(index.includes(`${plan.name}が${yen}円`), 'よくある質問の ' + key + ' の料金が lib/plans.js と違う');
+  assert.ok(llms.includes(`${plan.name} ${yen}円`), 'llms.txt の ' + key + ' の料金が lib/plans.js と違う');
+}
+const ld = JSON.parse(index.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+const faq = ld['@graph'].find((x) => x['@type'] === 'FAQPage').mainEntity;
+const shown = [...index.matchAll(/<details><summary>(.*?)<\/summary><p>(.*?)<\/p><\/details>/g)].map((m) => [m[1], m[2]]);
+assert.ok(faq.length >= 8 && faq.length === shown.length, 'よくある質問の数が構造化データと違う');
+faq.forEach((q, i) => {
+  assert.strictEqual(q.name, shown[i][0]);
+  assert.strictEqual(q.acceptedAnswer.text, shown[i][1]);
+});
+const offer = ld['@graph'].find((x) => x['@type'] === 'WebApplication').offers;
+assert.strictEqual(offer.highPrice, String(Math.max(...Object.values(PLANS).map((x) => x.price))));
+assert.ok(index.includes('<!--BODY-->') && index.includes('<!--/BODY-->'));
+assert.strictEqual(index.match(/<h1[ >]/g).length, 1);
 console.log('all tests passed');

@@ -1,214 +1,635 @@
 <title>ラブコード診断</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&display=swap">
 <style>
-/* Layout: 1カラム（最大680px）。診断は1問1カード、結果は「コード札」を頂点に縦に積む */
+/* Layout: 導入ページ（#lp）は中央寄せの縦積みセクション（最大1040px）。
+   診断と結果（#app）は最大640pxの1カラム。上に固定ヘッダー、結果ページの下に購入バー。 */
 :root {
-  --bg: #f3f1f7;
+  --bg: #ffffff;
+  --tint: #fff5f2;
+  --card: #f6f4f3;
   --surface: #ffffff;
-  --ink: #251e35;
-  --muted: #6b6480;
-  --line: #dcd6e8;
-  --accent: #d6416c;
+  --ink: #1a1719;
+  --ink2: #443f43;
+  --muted: #6e686d;
+  --line: #e8e3e2;
+  --accent: #d62246;
   --accent-ink: #ffffff;
-  --accent-soft: #fbe4eb;
-  --q-co: #c97a12;
-  --q-eo: #d6416c;
-  --q-ck: #2f72b8;
-  --q-ek: #7651c2;
-  --display: 'Dela Gothic One', 'Hiragino Sans', 'Yu Gothic', sans-serif;
-  --body: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  --accent-soft: #fde8ec;
+  --dark: #17141a;
+  --dark-card: #231f26;
+  --dark-ink: #f5f1f3;
+  --dark-muted: #b5adb3;
+  --q-co: #a8610b;
+  --q-eo: #d62246;
+  --q-ck: #2460b5;
+  --q-ek: #6a45bf;
+  --t-co: #fcf0da;
+  --t-eo: #fde8ec;
+  --t-ck: #e5eefb;
+  --t-ek: #efe9fb;
+  --sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "Yu Gothic UI", "Yu Gothic", Meiryo, system-ui, sans-serif;
+  --latin: "Outfit", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --shadow: 0 1px 2px rgba(26, 23, 25, .05), 0 16px 40px -16px rgba(26, 23, 25, .18);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #16121e; --surface: #211b2c; --ink: #efebf6; --muted: #a79fba; --line: #3a3149;
-    --accent: #ff7598; --accent-ink: #1a0f16; --accent-soft: #3d1f2b;
+    --bg: #121013; --tint: #191517; --card: #1e1b20; --surface: #1e1b20;
+    --ink: #f3eff1; --ink2: #d9d3d7; --muted: #a39ca2; --line: #343036;
+    --accent: #ff6b88; --accent-ink: #1f0a10; --accent-soft: #3a1822;
+    --dark: #1e1b20; --dark-card: #2a262d; --dark-ink: #f3eff1; --dark-muted: #a39ca2;
     --q-co: #f0aa4a; --q-eo: #ff7598; --q-ck: #6aa8ea; --q-ek: #a98af0;
+    --t-co: #2e2412; --t-eo: #3a1822; --t-ck: #16263b; --t-ek: #251c3d;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 16px 40px -16px rgba(0, 0, 0, .6);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #16121e; --surface: #211b2c; --ink: #efebf6; --muted: #a79fba; --line: #3a3149;
-  --accent: #ff7598; --accent-ink: #1a0f16; --accent-soft: #3d1f2b;
+  --bg: #121013; --tint: #191517; --card: #1e1b20; --surface: #1e1b20;
+  --ink: #f3eff1; --ink2: #d9d3d7; --muted: #a39ca2; --line: #343036;
+  --accent: #ff6b88; --accent-ink: #1f0a10; --accent-soft: #3a1822;
+  --dark: #1e1b20; --dark-card: #2a262d; --dark-ink: #f3eff1; --dark-muted: #a39ca2;
   --q-co: #f0aa4a; --q-eo: #ff7598; --q-ck: #6aa8ea; --q-ek: #a98af0;
+  --t-co: #2e2412; --t-eo: #3a1822; --t-ck: #16263b; --t-ek: #251c3d;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 16px 40px -16px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
 
+/* ---------- base ---------- */
 * { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
-  background: var(--bg); color: var(--ink);
-  font-family: var(--body); font-size: 16px; line-height: 1.8;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-size: 16px; line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+  line-break: strict; overflow-wrap: anywhere;
 }
-.wrap { max-width: 680px; margin: 0 auto; padding-block: 32px 64px; display: grid; gap: 28px; }
-h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.35; }
+/* 見出しや短い文は、文節の切れ目で改行する（長い本文は行の端まで詰めたほうが読みやすい） */
+h1, h2, h3, h4, .btn, .lead, .sub, .qtext, .tagline, .choices button, .react .q, .aru li, .tile, .locked li, ul.aruaru li, .stickybuy p, .faq summary, .steps p, .after { word-break: auto-phrase; }
+[hidden] { display: none !important; }
+.nw { white-space: nowrap; }
+.boot-app #lp { display: none; }
+h1, h2, h3, h4 { margin: 0; line-height: 1.4; font-weight: 700; text-wrap: balance; letter-spacing: .01em; }
 p { margin: 0; }
+a { color: inherit; }
 button { font: inherit; color: inherit; cursor: pointer; }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
+.container, .wrap, .top-in {
+  margin-inline: auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+.container { max-width: 1080px; }
+.wrap { max-width: 680px; padding-block: 28px 96px; display: grid; gap: 28px; }
+
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  border: 0; border-radius: 999px; padding: 14px 28px; font-weight: 700;
+  border: 0; border-radius: 12px; padding: 14px 26px; min-height: 52px;
+  font-weight: 700; font-size: 16px; line-height: 1.3; text-decoration: none;
   background: var(--accent); color: var(--accent-ink);
-  transition: transform .15s ease;
+  transition: transform .15s ease, box-shadow .15s ease;
 }
-.btn:hover { transform: translateY(-1px); }
-.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
-.btn.small { padding: 8px 16px; font-size: 14px; }
-.eyebrow { font-size: 12px; letter-spacing: .14em; color: var(--muted); font-weight: 700; }
+.btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px -8px var(--accent); }
+.btn:disabled { opacity: .6; transform: none; box-shadow: none; cursor: default; }
+.btn.big { font-size: 18px; padding: 16px 34px; min-height: 60px; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.btn.ghost:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.btn.small { padding: 8px 16px; min-height: 40px; font-size: 14px; border-radius: 10px; }
+.btn .arrow { font-family: var(--latin); }
+.eyebrow { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weight: 700; }
 .muted { color: var(--muted); }
-.panel { background: var(--surface); border-radius: 20px; padding: 24px; display: grid; gap: 14px; }
+.note { font-size: 13px; color: var(--muted); line-height: 1.75; }
+.err { color: var(--accent); font-size: 14px; }
+.panel { background: var(--card); border-radius: 20px; padding: 24px; display: grid; gap: 14px; }
+.linkbtn { border: 0; background: none; color: var(--muted); font-size: 14px; padding: 8px 0; text-decoration: underline; text-underline-offset: 3px; }
+select, input[type="text"] {
+  font: inherit; color: var(--ink); background: var(--surface); border: 1.5px solid var(--line);
+  border-radius: 10px; padding: 10px 12px; min-width: 0;
+}
 
-/* ---------- intro ---------- */
-.hero { display: grid; gap: 18px; padding-top: 16px; }
-.hero h1 { font-family: var(--display); font-weight: 400; font-size: clamp(36px, 9vw, 56px); letter-spacing: .02em; }
-.hero h1 small { display: block; font-family: var(--body); font-size: 15px; font-weight: 700; color: var(--accent); letter-spacing: .1em; }
-.hero .lead { font-size: 17px; max-width: 34em; }
-.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+/* ---------- header ---------- */
+.top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.top-in { max-width: 1080px; height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; text-decoration: none; border: 0; background: none; padding: 0; white-space: nowrap; }
+.brand svg { width: 28px; height: 28px; flex: none; }
+body:not([data-view="lp"]) .top .btn { display: none; }
 
-.anatomy { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
-.anatomy .slot { flex: 1 1 64px; min-width: 0; border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 8px; text-align: center; display: grid; gap: 2px; }
-.anatomy .slot b { font-family: var(--display); font-weight: 400; font-size: 26px; line-height: 1.2; }
-.anatomy .slot span { font-size: 11px; color: var(--muted); line-height: 1.5; }
-.anatomy .dash { align-self: center; font-family: var(--display); font-size: 24px; color: var(--muted); }
-.anatomy .slot.ll { border-color: var(--accent); }
+/* ---------- 導入ページ ---------- */
+.lp section { padding-block: clamp(56px, 9vw, 104px); }
+.lp h2 { font-size: clamp(26px, 5.2vw, 42px); text-align: center; }
+.lp .sub { text-align: center; color: var(--muted); max-width: 36em; margin: 14px auto 0; }
+.lp .head { margin-bottom: clamp(28px, 5vw, 48px); }
 
-.typegrid { display: grid; gap: 18px; }
-.typerow { display: grid; gap: 8px; }
-.typerow h3 { font-size: 15px; display: flex; gap: 8px; align-items: baseline; }
-.typerow h3 .base { font-size: 12px; color: var(--muted); font-weight: 500; }
-.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-@media (max-width: 520px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.tile { border: 0; text-align: left; background: var(--surface); border-radius: 14px; padding: 12px; display: grid; gap: 2px; border-top: 4px solid var(--qc); }
-.tile code { font-family: var(--display); font-size: 14px; color: var(--qc); }
-.tile strong { font-size: 15px; line-height: 1.4; }
-.tile span { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.hero { text-align: center; padding-top: clamp(40px, 8vw, 88px) !important; }
+.faces { display: flex; justify-content: center; margin-bottom: 26px; }
+.faces span { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font-size: 26px; border: 3px solid var(--bg); margin-left: -10px; background: var(--qt, var(--card)); }
+.faces span:first-child { margin-left: 0; }
+.faces span:nth-child(4), .faces span:nth-child(5) { width: 64px; height: 64px; font-size: 31px; margin-top: -5px; z-index: 1; }
+@media (max-width: 420px) { .faces span { width: 44px; height: 44px; font-size: 21px; } .faces span:nth-child(4), .faces span:nth-child(5) { width: 52px; height: 52px; font-size: 25px; } }
+.hero .kicker { font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: .08em; margin-bottom: 14px; display: block; }
+.hero h1 { font-size: clamp(30px, 6.6vw, 54px); line-height: 1.32; max-width: 17em; margin-inline: auto; }
+.hero .lead { font-size: clamp(16px, 2.4vw, 18px); color: var(--muted); max-width: 33em; margin: 22px auto 0; }
+.hero code, .lp code { font-family: var(--latin); font-weight: 700; color: var(--ink); background: var(--card); border-radius: 6px; padding: 1px 7px; font-size: .95em; white-space: nowrap; }
+.cta { display: grid; justify-items: center; gap: 12px; margin-top: 32px; }
+.cta .facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: 13px; color: var(--muted); padding: 0; margin: 0; list-style: none; }
+.cta .facts li::before { content: "✓ "; color: var(--accent); font-weight: 700; }
+.resume { font-size: 14px; }
 
+/* 既読スルーの場面 */
+.scene { background: var(--tint); }
+.scene-grid { display: grid; gap: 28px; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); align-items: center; }
+@media (max-width: 820px) { .scene-grid { grid-template-columns: minmax(0, 1fr); } .chat { margin-inline: auto; } }
+.chat { width: 100%; max-width: 360px; background: var(--surface); border-radius: 28px; padding: 18px 16px 22px; box-shadow: var(--shadow); display: grid; gap: 8px; }
+.chat .who { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 8px; font-weight: 700; font-size: 15px; }
+.chat .who i { width: 34px; height: 34px; border-radius: 50%; background: var(--t-ck); display: grid; place-items: center; font-style: normal; font-size: 18px; }
+.chat .b { justify-self: end; max-width: 82%; background: var(--ink); color: var(--bg); border-radius: 18px 18px 4px 18px; padding: 9px 14px; font-size: 15px; line-height: 1.6; }
+.chat .meta { justify-self: end; font-size: 11px; color: var(--muted); }
+.chat .gap { justify-self: center; font-size: 12px; color: var(--muted); background: var(--card); border-radius: 99px; padding: 3px 14px; margin: 10px 0 2px; }
+.chat .wait { justify-self: start; display: flex; gap: 5px; padding: 12px 14px; background: var(--card); border-radius: 18px 18px 18px 4px; }
+.chat .wait span { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); opacity: .35; animation: blink 1.4s infinite; }
+.chat .wait span:nth-child(2) { animation-delay: .2s; } .chat .wait span:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: .9; } }
+.reacts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 480px) { .reacts { grid-template-columns: minmax(0, 1fr); } }
+.react { background: var(--surface); border-radius: 18px; padding: 16px 18px; display: grid; gap: 6px; border-left: 5px solid var(--qc); }
+.react .t { font-size: 13px; font-weight: 700; color: var(--qc); }
+.react .t small { color: var(--muted); font-weight: 500; font-size: 12px; margin-left: 6px; }
+.react .q { font-weight: 700; line-height: 1.6; }
+.scene .after { text-align: center; max-width: 36em; margin: 32px auto 0; color: var(--ink2); }
+
+/* あるある（濃い色のカード） */
+.aru-card { background: var(--dark); color: var(--dark-ink); border-radius: 28px; padding: clamp(18px, 3vw, 28px); box-shadow: var(--shadow); }
+.aru { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+@media (max-width: 860px) { .aru { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.aru li { background: var(--dark-card); border-radius: 18px; padding: 18px 14px; display: grid; gap: 10px; justify-items: center; text-align: center; font-size: 14px; font-weight: 700; line-height: 1.6; align-content: start; text-wrap: balance; }
+.aru .em { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; font-size: 26px; background: var(--qt); }
+@media (max-width: 560px) {
+  .aru { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .aru li { grid-template-columns: 44px minmax(0, 1fr); justify-items: start; align-items: center; text-align: left; padding: 12px 14px; gap: 12px; font-size: 15px; }
+  .aru .em { width: 44px; height: 44px; font-size: 22px; border-radius: 12px; }
+}
+.aru-card .foot-note { text-align: center; color: var(--dark-muted); font-size: 14px; margin-top: 18px; }
+
+/* 流れ・コードの読み方 */
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; counter-reset: step; }
+@media (max-width: 760px) { .steps { grid-template-columns: minmax(0, 1fr); } }
+.steps li { counter-increment: step; background: var(--card); border-radius: 20px; padding: 24px 22px; display: grid; gap: 8px; align-content: start; }
+.steps li::before { content: "0" counter(step); font-family: var(--latin); font-weight: 700; font-size: 15px; color: var(--accent); letter-spacing: .08em; }
+.steps h3 { font-size: 19px; }
+.steps p { color: var(--ink2); font-size: 15px; }
+.anatomy-box { margin-top: 20px; background: var(--card); border-radius: 20px; padding: 26px 22px; display: grid; gap: 16px; justify-items: center; text-align: center; }
+.anatomy { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; align-items: stretch; }
+.anatomy .slot { width: 84px; background: var(--surface); border-radius: 14px; padding: 12px 6px 10px; display: grid; gap: 2px; align-content: start; }
+.anatomy .slot b { font-family: var(--latin); font-weight: 700; font-size: 34px; line-height: 1.1; }
+.anatomy .slot span { font-size: 12px; font-weight: 700; line-height: 1.4; }
+.anatomy .slot small { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.anatomy .slot.ll b { color: var(--accent); }
+.anatomy .dash { align-self: center; font-family: var(--latin); font-size: 28px; color: var(--muted); }
+@media (max-width: 560px) {
+  .anatomy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .anatomy .slot { width: auto; }
+  .anatomy .dash { display: none; }
+}
+
+/* 16タイプ */
+.types { background: var(--tint); }
+.typegrid { display: grid; gap: 26px; }
+.typerow { display: grid; gap: 10px; }
+.typerow h3 { font-size: 16px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; color: var(--qc); }
+.typerow h3 .base { font-size: 13px; color: var(--muted); font-weight: 500; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 760px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tile { background: var(--surface); border-radius: 16px; padding: 14px; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 2px 12px; align-items: center; }
+.tile .em { grid-row: span 2; width: 44px; height: 44px; border-radius: 12px; background: var(--qt); display: grid; place-items: center; font-size: 22px; }
+.tile strong { font-size: 16px; line-height: 1.4; display: flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; }
+.tile strong code { font-family: var(--latin); font-size: 12px; font-weight: 700; color: var(--qc); background: none; padding: 0; letter-spacing: .04em; }
+.tile span.d { font-size: 12px; color: var(--muted); line-height: 1.5; text-wrap: balance; }
+@media (max-width: 560px) {
+  .tile { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: 16px 8px; gap: 4px; }
+  .tile .em { grid-row: auto; margin-bottom: 4px; }
+  .tile strong { flex-direction: column; align-items: center; font-size: 15px; }
+  .tile span.d { text-wrap: balance; }
+}
+
+/* 料金 */
+.pricing { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+@media (max-width: 900px) { .pricing { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .pricing { grid-template-columns: minmax(0, 1fr); } }
+.pricing > div { border: 1.5px solid var(--line); border-radius: 20px; padding: 22px 18px; display: grid; gap: 8px; align-content: start; background: var(--surface); }
+.pricing > div.free { border-color: var(--ink); }
+.pricing h3 { font-size: 15px; }
+.pricing .yen { font-family: var(--latin); font-weight: 700; font-size: 34px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.pricing .yen small { font-family: var(--sans); font-size: 13px; color: var(--muted); font-weight: 500; }
+.pricing p { font-size: 14px; color: var(--ink2); line-height: 1.7; }
+
+/* 根拠 */
+.basis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .basis { grid-template-columns: minmax(0, 1fr); } }
+.basis > div { background: var(--card); border-radius: 20px; padding: 24px 22px; display: grid; gap: 8px; align-content: start; }
+.basis h3 { font-size: 18px; }
+.basis p { font-size: 15px; color: var(--ink2); }
+.lp .disclaimer { max-width: 44em; margin: 22px auto 0; text-align: center; }
+
+/* FAQ */
+.faq { max-width: 760px; margin-inline: auto; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 16px; align-items: center; padding: 20px 4px; font-weight: 700; font-size: 16px; line-height: 1.6; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; font-family: var(--latin); font-size: 24px; font-weight: 500; color: var(--muted); flex: none; transition: transform .2s ease; }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq details p { padding: 0 4px 22px; color: var(--ink2); font-size: 15px; }
+
+.last { text-align: center; background: var(--tint); }
+.last .cta { margin-top: 28px; }
+
+.site-foot { border-top: 1px solid var(--line); padding-block: 28px 40px; font-size: 13px; color: var(--muted); }
+.site-foot nav, .foot { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; }
+.site-foot .container { display: grid; gap: 10px; }
+.foot a { color: var(--muted); }
+.demo-banner { background: var(--accent-soft); border-radius: 12px; padding: 10px 14px; font-size: 13px; margin: 16px auto 0; max-width: 640px; }
 .viewer { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
 .viewer label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
-select, input[type="text"] {
-  font: inherit; color: var(--ink); background: var(--bg); border: 1.5px solid var(--line);
-  border-radius: 10px; padding: 8px 10px; min-width: 0;
-}
+#demo-tools { max-width: 640px; margin: 20px auto 0; text-align: left; }
 
-.note { font-size: 13px; color: var(--muted); line-height: 1.7; }
-.foot { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; }
-.foot a { color: var(--muted); }
-.demo-banner { background: var(--accent-soft); border-radius: 12px; padding: 10px 14px; font-size: 13px; }
-
-/* ---------- quiz ---------- */
-.progress { display: grid; gap: 6px; }
-.progress .bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+/* ---------- 診断 ---------- */
+.progress { display: grid; gap: 8px; }
+.progress .bar { height: 8px; background: var(--card); border-radius: 99px; overflow: hidden; }
 .progress .bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .25s ease; }
-.progress .meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
-.qcard { background: var(--surface); border-radius: 24px; padding: 32px 24px; display: grid; gap: 28px; min-height: 300px; align-content: center; }
-.qcard .qtext { font-size: 21px; font-weight: 700; line-height: 1.6; text-wrap: balance; text-align: center; }
-.likert { display: grid; gap: 10px; }
+.progress .meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; }
+.qcard { padding: clamp(28px, 7vw, 56px) 0; display: grid; gap: 36px; min-height: 340px; align-content: center; }
+.qcard .eyebrow { text-align: center; }
+.qcard .qtext { font-size: clamp(21px, 5vw, 27px); font-weight: 700; line-height: 1.6; text-wrap: balance; text-align: center; }
+.likert { display: grid; gap: 12px; max-width: 420px; width: 100%; margin-inline: auto; }
 .likert .dots { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-.likert .dots button { border: 2px solid var(--line); background: transparent; border-radius: 50%; padding: 0; flex: none; }
-.likert .dots button:nth-child(1), .likert .dots button:nth-child(5) { width: 52px; height: 52px; }
-.likert .dots button:nth-child(2), .likert .dots button:nth-child(4) { width: 42px; height: 42px; }
-.likert .dots button:nth-child(3) { width: 34px; height: 34px; }
-.likert .dots button.on, .likert .dots button:hover { background: var(--accent); border-color: var(--accent); }
-.likert .ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.likert .dots button { border: 2.5px solid var(--c, var(--muted)); background: transparent; border-radius: 50%; padding: 0; flex: none; transition: background .12s ease, transform .12s ease; }
+.likert .dots button:nth-child(1), .likert .dots button:nth-child(5) { width: 60px; height: 60px; }
+.likert .dots button:nth-child(2), .likert .dots button:nth-child(4) { width: 48px; height: 48px; }
+.likert .dots button:nth-child(3) { width: 38px; height: 38px; --c: var(--line); }
+.likert .dots button:nth-child(n+4) { --c: var(--accent); }
+.likert .dots button:nth-child(3).on { --c: var(--muted); }
+.likert .dots button.on { background: var(--c, var(--muted)); transform: scale(1.06); }
+/* タッチ端末では hover が次の質問まで残るので、マウスのときだけ効かせる */
+@media (hover: hover) {
+  .likert .dots button:nth-child(3):hover { --c: var(--muted); }
+  .likert .dots button:hover { background: var(--c, var(--muted)); transform: scale(1.06); }
+  .choices button:hover { border-color: var(--accent); background: var(--accent-soft); }
+}
+.likert .ends { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: var(--muted); }
+.likert .ends span:last-child { color: var(--accent); }
 .choices { display: grid; gap: 12px; }
-.choices button { border: 2px solid var(--line); background: transparent; border-radius: 16px; padding: 16px 18px; text-align: left; font-weight: 500; line-height: 1.6; }
-.choices button.on, .choices button:hover { border-color: var(--accent); background: var(--accent-soft); }
+.choices button { border: 2px solid var(--line); background: var(--surface); border-radius: 16px; padding: 20px 20px; text-align: left; font-weight: 700; font-size: 17px; line-height: 1.6; transition: border-color .12s ease, background .12s ease; }
+.choices button.on { border-color: var(--accent); background: var(--accent-soft); }
 .qnav { display: flex; justify-content: space-between; align-items: center; }
-.linkbtn { border: 0; background: none; color: var(--muted); font-size: 14px; padding: 6px 0; text-decoration: underline; text-underline-offset: 3px; }
 
-/* ---------- result ---------- */
-.codecard { background: var(--surface); border-radius: 24px; padding: 28px 24px; display: grid; gap: 10px; border-top: 8px solid var(--qc); }
-.codecard .code { font-family: var(--display); font-size: clamp(34px, 10vw, 64px); line-height: 1.1; letter-spacing: .04em; color: var(--qc); white-space: nowrap; }
-.codecard .code em { font-style: normal; color: var(--accent); }
-.codecard h2 { font-size: 26px; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { font-size: 13px; border-radius: 999px; padding: 3px 12px; background: var(--bg); font-weight: 700; }
-.chip.att { background: var(--qc); color: var(--surface); }
+/* ---------- 結果 ---------- */
+.codecard { background: var(--qt, var(--card)); border-radius: 28px; padding: 32px 22px 28px; display: grid; gap: 6px; justify-items: center; text-align: center; }
+.codecard .em { width: 76px; height: 76px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; font-size: 38px; margin: 6px 0 4px; }
+.codecard .code { font-family: var(--latin); font-weight: 700; font-size: clamp(40px, 12vw, 68px); line-height: 1.1; letter-spacing: .03em; color: var(--qc); white-space: nowrap; }
+.codecard .code em { font-style: normal; color: var(--ink); opacity: .55; }
+.codecard h2 { font-size: clamp(26px, 6.5vw, 34px); }
+.codecard .tagline { font-size: 16px; color: var(--ink2); font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px; }
+.chip { font-size: 13px; border-radius: 999px; padding: 4px 13px; background: var(--surface); font-weight: 700; line-height: 1.6; }
+.chip.att { background: var(--qc); color: var(--bg); }
+.sharerow { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.visitor { background: var(--card); border-radius: 20px; padding: 20px; display: grid; gap: 12px; justify-items: center; text-align: center; }
 
-.axes { display: grid; gap: 14px; }
-.axis { display: grid; gap: 4px; }
-.axis .names { display: flex; justify-content: space-between; font-size: 13px; }
-.axis .names b { color: var(--accent); }
-.axis .track { position: relative; height: 10px; background: var(--bg); border-radius: 99px; }
-.axis .track i { position: absolute; top: 0; bottom: 0; background: var(--accent); border-radius: 99px; }
+.axes { display: grid; gap: 18px; }
+.axis { display: grid; gap: 6px; }
+.axis .names { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); }
+.axis .names b { color: var(--ink); }
+.axis .track { position: relative; height: 12px; background: var(--surface); border-radius: 99px; }
+.axis .track::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; background: var(--line); }
+.axis .track i { position: absolute; top: 0; bottom: 0; background: var(--accent); border-radius: 99px; z-index: 1; }
 .axis .label { font-size: 12px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
 
-.sec { display: grid; gap: 12px; }
-.sec h3 { font-size: 19px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.tag { font-family: var(--body); font-size: 11px; letter-spacing: .1em; border-radius: 6px; padding: 1px 8px; font-weight: 700; }
-.tag.free { background: var(--bg); color: var(--muted); }
+.sec { display: grid; gap: 14px; scroll-margin-top: 76px; }
+.sec h3 { font-size: 21px; line-height: 1.5; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.sec > p, .prose p, .kv p, .qa p { color: var(--ink2); line-height: 1.95; }
+.prose { display: grid; gap: 14px; }
+.tag { font-size: 11px; letter-spacing: .06em; border-radius: 6px; padding: 2px 8px; font-weight: 700; line-height: 1.6; white-space: nowrap; }
+.tag.free { background: var(--card); color: var(--muted); }
 .tag.paid { background: var(--accent-soft); color: var(--accent); }
-.kv { display: grid; gap: 10px; }
-.kv div { display: grid; gap: 2px; }
-.kv dt, .kv .k { font-size: 13px; font-weight: 700; color: var(--muted); }
-.ask { border-left: 3px solid var(--accent); padding: 8px 14px; background: var(--bg); border-radius: 0 10px 10px 0; display: flex; gap: 12px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-.tips { margin: 0; padding: 0; list-style: none; counter-reset: tip; display: grid; gap: 12px; }
-.tips li { counter-increment: tip; display: grid; grid-template-columns: 32px 1fr; gap: 10px; align-items: start; }
-.tips li::before { content: counter(tip); font-family: var(--display); font-size: 18px; width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; line-height: 1; }
-.lock { background: var(--surface); border-radius: 20px; padding: 28px 24px; display: grid; gap: 16px; border: 2px dashed var(--accent); }
-.lock ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
-.lock .price { font-family: var(--display); font-size: 32px; }
-.lock .price small { font-family: var(--body); font-size: 13px; color: var(--muted); }
+.kv { display: grid; gap: 18px; margin: 0; }
+.kv > div { display: grid; gap: 6px; }
+.kv dt, .kv .k { font-size: 14px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+.kv dt::before, .kv .k::before { content: ""; width: 4px; height: 16px; border-radius: 2px; background: var(--accent); flex: none; }
+.kv dd { margin: 0; color: var(--ink2); line-height: 1.95; }
+.kv .kv { padding-left: 12px; }
+ul.dots { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+ul.dots li { position: relative; padding-left: 20px; color: var(--ink2); line-height: 1.8; }
+ul.dots li::before { content: ""; position: absolute; left: 3px; top: .72em; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+ul.aruaru { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+ul.aruaru li { background: var(--card); border-radius: 14px; padding: 14px 16px 14px 46px; position: relative; font-weight: 700; line-height: 1.7; }
+ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px; color: var(--accent); font-weight: 700; }
+.ask { border-left: 4px solid var(--accent); padding: 12px 16px; background: var(--card); border-radius: 0 12px 12px 0; font-weight: 700; line-height: 1.8; }
+.ask + .ask { margin-top: 8px; }
+.ask .who { display: block; font-size: 12px; font-weight: 700; color: var(--muted); }
+.tips { margin: 0; padding: 0; list-style: none; counter-reset: tip; display: grid; gap: 16px; }
+.tips li { counter-increment: tip; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: start; color: var(--ink2); line-height: 1.8; }
+.tips li strong { color: var(--ink); }
+.tips li::before { content: counter(tip); font-family: var(--latin); font-weight: 700; font-size: 16px; width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; line-height: 1; }
 .compat-form { display: flex; gap: 8px; flex-wrap: wrap; }
 .compat-form input { flex: 1 1 160px; text-transform: uppercase; }
-.compat-out { display: grid; gap: 10px; }
-.err { color: var(--accent); font-size: 14px; }
+.compat-out { display: grid; gap: 12px; }
 
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-
-/* ---------- plans & long report ---------- */
-.plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; align-items: start; }
-.plan { position: relative; background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; padding: 22px 18px; display: grid; gap: 10px; min-width: 0; }
-.plan.star { border: 2px solid var(--accent); }
-.plan h4 { margin: 0; font-size: 16px; line-height: 1.5; }
-.plan .price { font-family: var(--display); font-size: 30px; line-height: 1.2; font-variant-numeric: tabular-nums; }
-.plan .price small { font-family: var(--body); font-size: 12px; color: var(--muted); }
-.plan ul { margin: 0; padding-left: 1.1em; font-size: 14px; line-height: 1.7; display: grid; gap: 2px; }
+/* 購入 */
+.teaser { background: var(--tint); border-radius: 24px; padding: 28px 22px; display: grid; gap: 16px; scroll-margin-top: 76px; }
+.teaser h3 { font-size: 22px; }
+.locked { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.locked li { background: var(--surface); border-radius: 12px; padding: 12px 14px 12px 42px; position: relative; font-weight: 700; font-size: 15px; line-height: 1.6; }
+.locked li::before { content: "🔒"; position: absolute; left: 13px; top: 11px; font-size: 15px; }
+.plans { display: grid; gap: 14px; }
+.plan { position: relative; background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; padding: 24px 20px; display: grid; gap: 12px; min-width: 0; }
+.plan.star { border: 2.5px solid var(--accent); }
+.plan .eyebrow { font-family: var(--latin); }
+.plan h4 { font-size: 18px; line-height: 1.5; }
+.plan .price { font-family: var(--latin); font-weight: 700; font-size: 36px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.plan .price small { font-family: var(--sans); font-size: 13px; color: var(--muted); font-weight: 500; }
+.plan details summary { cursor: pointer; font-size: 14px; font-weight: 700; color: var(--muted); padding: 4px 0; }
+.plan ul { margin: 6px 0 0; padding: 0; list-style: none; font-size: 14px; line-height: 1.7; display: grid; gap: 6px; color: var(--ink2); }
+.plan ul li { padding-left: 22px; position: relative; }
+.plan ul li::before { content: "✓"; position: absolute; left: 2px; color: var(--accent); font-weight: 700; }
 .plan .btn { width: 100%; }
 .plan input { width: 100%; text-transform: uppercase; }
-.badge { position: absolute; top: -12px; left: 16px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 12px; }
-.stack { display: grid; gap: 28px; }
-.part { font-family: var(--display); font-weight: 400; font-size: 22px; padding-top: 8px; border-top: 1.5px solid var(--line); }
-ul.dots { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
-.ask + .ask { margin-top: 6px; }
-.ranking { display: grid; gap: 6px; }
-.ranking details { background: var(--surface); border-radius: 12px; padding: 10px 14px; }
+.badge { position: absolute; top: -13px; left: 18px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 12px; }
+.stickybuy { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); transform: translateY(110%); transition: transform .25s ease; }
+.stickybuy { visibility: hidden; }
+.stickybuy.show { transform: none; visibility: visible; }
+.stickybuy > div { max-width: 640px; margin-inline: auto; display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+.stickybuy p { font-size: 13px; font-weight: 700; line-height: 1.5; min-width: 0; }
+.stickybuy p small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
+.stickybuy .btn { flex: none; min-height: 46px; padding: 10px 18px; font-size: 15px; }
+
+/* 有料レポート */
+.stack { display: grid; gap: 44px; }
+.part { font-size: 26px; padding-top: 28px; border-top: 2px solid var(--ink); scroll-margin-top: 76px; }
+.toc { background: var(--card); border-radius: 18px; padding: 6px 18px; }
+.toc summary { cursor: pointer; font-weight: 700; padding: 12px 0; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.toc summary::-webkit-details-marker { display: none; }
+.toc summary::after { content: "+"; font-family: var(--latin); font-size: 22px; color: var(--muted); transition: transform .2s ease; }
+.toc[open] summary::after { transform: rotate(45deg); }
+.toc ol { margin: 0; padding: 0 0 14px; list-style: none; counter-reset: toc; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 18px; }
+@media (max-width: 520px) { .toc ol { grid-template-columns: minmax(0, 1fr); } }
+.toc li { counter-increment: toc; }
+.toc button { border: 0; background: none; padding: 7px 0; text-align: left; font-size: 14px; line-height: 1.6; color: var(--ink2); display: flex; gap: 10px; width: 100%; }
+.toc button::before { content: counter(toc, decimal-leading-zero); font-family: var(--latin); font-weight: 700; color: var(--accent); flex: none; }
+.toc button:hover { color: var(--accent); }
+.ranking { display: grid; gap: 8px; }
+.ranking details { background: var(--card); border-radius: 12px; padding: 12px 14px; }
 .ranking summary { display: flex; gap: 10px; align-items: center; cursor: pointer; list-style: none; }
 .ranking summary::-webkit-details-marker { display: none; }
-.ranking code { font-family: var(--display); font-size: 13px; color: var(--muted); }
+.ranking code { font-family: var(--latin); font-weight: 700; font-size: 13px; color: var(--muted); }
 .ranking .nm { flex: 1; font-weight: 700; min-width: 0; }
-.ranking .st { color: var(--accent); letter-spacing: .05em; }
-.ranking .kv { padding-top: 8px; font-size: 14px; }
-.pair-codes { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-family: var(--display); font-size: clamp(22px, 6vw, 32px); }
+.ranking .near { font-size: 12px; color: var(--muted); }
+.ranking details p { padding-top: 10px; font-size: 15px; color: var(--ink2); }
+.pair-codes { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; justify-content: center; font-family: var(--latin); font-weight: 700; font-size: clamp(22px, 6vw, 32px); }
 .pair-codes span { display: grid; }
-.pair-codes small { font-family: var(--body); font-size: 13px; font-weight: 700; color: var(--muted); }
-.pair-codes b { font-weight: 400; color: var(--accent); }
+.pair-codes small { font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--muted); }
+.pair-codes b { color: var(--accent); }
 .partner-report summary { cursor: pointer; list-style: none; display: grid; gap: 4px; }
 .partner-report summary::-webkit-details-marker { display: none; }
-.partner-report[open] summary { margin-bottom: 28px; }
-.cgroup { display: grid; gap: 8px; }
-.cgroup h4 { margin: 8px 0 0; font-size: 15px; }
-.cgroup > p { font-size: 14px; color: var(--muted); }
-.ranking details p { padding-top: 8px; font-size: 14px; }
+.partner-report[open] summary { margin-bottom: 36px; }
+.cgroup { display: grid; gap: 10px; }
+.cgroup h4 { margin: 10px 0 0; font-size: 17px; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+.cgroup h4 .st { color: var(--accent); font-size: 14px; letter-spacing: .05em; }
+.cgroup > p { font-size: 15px; color: var(--ink2); }
 .rephrase { display: grid; gap: 10px; }
-.rephrase > div { display: grid; gap: 4px; background: var(--surface); border-radius: 12px; padding: 12px 14px; }
+.rephrase > div { display: grid; gap: 6px; background: var(--card); border-radius: 14px; padding: 14px 16px; }
 .rephrase .before { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--accent); }
 .rephrase .after { font-weight: 700; }
 .rephrase .after::before { content: "→ "; color: var(--accent); }
-.ask .who { display: block; font-size: 12px; font-weight: 700; color: var(--muted); }
-.guide-text { white-space: pre-wrap; font: inherit; background: var(--bg); border-radius: 10px; padding: 12px; margin: 0; }
-.qa { display: grid; gap: 14px; }
-.qa > div { display: grid; gap: 4px; }
-.qa .q { font-weight: 700; }
-.qa .q::before { content: "Q. "; color: var(--accent); font-family: var(--display); }
-.cgroup h4 { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
-.cgroup h4 .st { color: var(--accent); font-size: 14px; letter-spacing: .05em; }
-.ranking .near { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.guide-text { white-space: pre-wrap; font: inherit; background: var(--surface); border-radius: 10px; padding: 12px; margin: 0; }
+.qa { display: grid; gap: 22px; }
+.qa > div { display: grid; gap: 6px; }
+.qa .q { font-weight: 700; color: var(--ink); }
+.qa .q::before { content: "Q. "; color: var(--accent); font-family: var(--latin); font-weight: 700; }
+.panel .kv dd, .panel p { color: var(--ink2); }
+
+/* 特定商取引法ページ */
+.legal h1 { font-size: 26px; }
+.legal h2 { font-size: 20px; margin-top: 12px; scroll-margin-top: 76px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+  html { scroll-behavior: auto; }
+}
 
 </style>
-<main class="wrap" id="app"></main>
+<!--BODY-->
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="./" id="brand" aria-label="ラブコード診断 トップ">
+      <svg viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8" fill="var(--accent)"/><path transform="translate(5 5.2) scale(.75)" fill="#fff" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      ラブコード診断
+    </a>
+    <button class="btn small" data-start>無料で診断する <span class="arrow" aria-hidden="true">→</span></button>
+  </div>
+</header>
+
+<div class="lp" id="lp">
+
+  <section class="hero">
+    <div class="container">
+      <div class="faces" aria-hidden="true">
+        <span style="--qt:var(--t-co)">🌻</span><span style="--qt:var(--t-ck)">🐈‍⬛</span><span style="--qt:var(--t-eo)">🎆</span><span style="--qt:var(--t-eo)">🌙</span><span style="--qt:var(--t-ek)">🦔</span><span style="--qt:var(--t-ck)">⛺</span><span style="--qt:var(--t-ek)">🎢</span><span style="--qt:var(--t-co)">🌳</span>
+      </div>
+      <h1><span class="kicker">ラブコード診断｜無料の恋愛タイプ診断</span>その恋の不安、クセかも。30問で、あなたの恋愛をコードにします。</h1>
+      <p class="lead">恋をすると出てくる「不安のクセ」と、愛を感じる「愛情言語」。この2つから、あなたの恋愛タイプを <code>EOSH-WP</code> のような英字のコードで表します。</p>
+      <div class="cta">
+        <button class="btn big" data-start>無料で診断する <span class="arrow" aria-hidden="true">→</span></button>
+        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ見られます</li></ul>
+        <p class="resume" id="resume" hidden></p>
+      </div>
+      <div id="demo-tools"></div>
+    </div>
+  </section>
+
+  <section class="scene" aria-labelledby="h-scene">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-scene">既読のまま、3時間。<br>あなたはどう思う？</h2>
+        <p class="sub">同じ場面でも、感じ方は人によって違います。その違いが「恋のクセ」です。</p>
+      </div>
+      <div class="scene-grid">
+        <div class="chat" role="img" aria-label="メッセージを2通送ったあと、既読のまま3時間返信がない画面">
+          <div class="who"><i>🙂</i>気になる人</div>
+          <p class="b">今日はありがとう！楽しかった😊</p>
+          <p class="b">また来週も会えたらうれしいな</p>
+          <span class="meta">既読 21:03</span>
+          <span class="gap">3時間たっても返信なし</span>
+          <div class="wait"><span></span><span></span><span></span></div>
+        </div>
+        <div class="reacts">
+          <div class="react" style="--qc:var(--q-co)"><p class="t">ひだまり型<small>安定</small></p><p class="q">「忙しいのかな。明日には返ってくるでしょ」</p></div>
+          <div class="react" style="--qc:var(--q-eo)"><p class="t">たしかめ型<small>不安</small></p><p class="q">「何か変なこと言った？ 嫌われたかも……」</p></div>
+          <div class="react" style="--qc:var(--q-ck)"><p class="t">ひとり時間型<small>回避</small></p><p class="q">「返信はいつでもいいよ。自分もそういう日あるし」</p></div>
+          <div class="react" style="--qc:var(--q-ek)"><p class="t">ゆらぎ型<small>恐れ・回避</small></p><p class="q">「もう一通送りたい。でも、重いと思われたくない」</p></div>
+        </div>
+      </div>
+      <p class="after">この4つは「愛着スタイル」と呼ばれる心のクセです。ラブコード診断は、ここに恋のペース、判断の仕方、愛情言語を足して、あなたの恋愛タイプを出します。</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-aru">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-aru">こんな恋愛あるある、<br>ありませんか？</h2>
+      </div>
+      <div class="aru-card">
+        <ul class="aru">
+          <li><span class="em" style="--qt:var(--t-eo)">📱</span>返信が来るまで、何度もスマホを見てしまう</li>
+          <li><span class="em" style="--qt:var(--t-ek)">✍️</span>送る前に、メッセージを何度も直す</li>
+          <li><span class="em" style="--qt:var(--t-ck)">🐈‍⬛</span>甘えたい日と、放っておいてほしい日の差が激しい</li>
+          <li><span class="em" style="--qt:var(--t-co)">🌻</span>好きな人ができると、友達にすぐバレる</li>
+          <li><span class="em" style="--qt:var(--t-eo)">🌙</span>「この先どうなるんだろう」と夜に考え込む</li>
+          <li><span class="em" style="--qt:var(--t-ek)">🦔</span>好きな人ほど、そっけなくしてしまう</li>
+          <li><span class="em" style="--qt:var(--t-ck)">⛺</span>恋人がいても、趣味の時間は譲らない</li>
+          <li><span class="em" style="--qt:var(--t-co)">🍵</span>家でのんびり過ごすデートがいちばん好き</li>
+        </ul>
+        <p class="foot-note">あるあるは、タイプごとに違います。あなたのあるあるは、診断結果で読めます。</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-how" style="padding-top:0">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-how">診断の流れ</h2>
+      </div>
+      <ol class="steps">
+        <li><h3>30問に答える</h3><p>「あてはまる？」に5段階で答えるだけ。考え込まずに、直感で選んでください。約5分で終わります。</p></li>
+        <li><h3>ラブコードが出る</h3><p>4つの軸から決まる16タイプに、あなたに響く愛情言語を足して、ひとつのコードになります。</p></li>
+        <li><h3>結果を読む</h3><p>タイプの説明、物語、恋愛あるある、愛情言語は無料です。もっと知りたい人には、有料の取扱説明書があります。</p></li>
+      </ol>
+      <div class="anatomy-box">
+        <h3>コードの読み方（例：EOSH-WP）</h3>
+        <div class="anatomy" aria-label="EOSH-WP の読み方">
+          <div class="slot"><b>E</b><span>たしかめたい</span><small>C：安心している</small></div>
+          <div class="slot"><b>O</b><span>近づく</span><small>K：距離を保つ</small></div>
+          <div class="slot"><b>S</b><span>じっくり</span><small>F：すぐ動く</small></div>
+          <div class="slot"><b>H</b><span>気持ち</span><small>M：頭</small></div>
+          <span class="dash" aria-hidden="true">-</span>
+          <div class="slot ll"><b>W</b><span>言葉</span><small>メイン</small></div>
+          <div class="slot ll"><b>P</b><span>スキンシップ</span><small>サブ</small></div>
+        </div>
+        <p class="note">前の2文字が愛着スタイル、次の2文字が恋のペースと判断の仕方。ハイフンの後ろは、言葉(W)・一緒の時間(T)・贈り物(G)・行動(A)・スキンシップ(P)のうち、あなたに響く愛情言語です。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="types" aria-labelledby="h-types">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-types">16のラブタイプ</h2>
+        <p class="sub">4つの愛着スタイルに、4タイプずつ。あなたはどれに近いですか？</p>
+      </div>
+      <div class="typegrid">
+        <div class="typerow" style="--qc:var(--q-co);--qt:var(--t-co)">
+          <h3>ひだまり型<span class="base">安定タイプ｜好きな人を信じることと、自分を大事にすることが両立できる</span></h3>
+          <div class="tiles">
+            <div class="tile"><span class="em">🌻</span><strong>ひまわり<code>COFH</code></strong><span class="d">好きをまっすぐ照らす人</span></div>
+            <div class="tile"><span class="em">⛵</span><strong>船長<code>COFM</code></strong><span class="d">二人の進路を迷わず決める人</span></div>
+            <div class="tile"><span class="em">🍵</span><strong>縁側<code>COSH</code></strong><span class="d">ゆっくり深く、包み込む人</span></div>
+            <div class="tile"><span class="em">🌳</span><strong>大樹<code>COSM</code></strong><span class="d">何年たっても揺るがない人</span></div>
+          </div>
+        </div>
+        <div class="typerow" style="--qc:var(--q-eo);--qt:var(--t-eo)">
+          <h3>たしかめ型<span class="base">不安タイプ｜好きになるほど、相手の気持ちを確かめたくなる</span></h3>
+          <div class="tiles">
+            <div class="tile"><span class="em">🎆</span><strong>花火<code>EOFH</code></strong><span class="d">一瞬で燃え上がる、大きな愛の人</span></div>
+            <div class="tile"><span class="em">🔍</span><strong>名探偵<code>EOFM</code></strong><span class="d">小さなサインも見逃さない人</span></div>
+            <div class="tile"><span class="em">🌙</span><strong>月見草<code>EOSH</code></strong><span class="d">静かに想いを咲かせ続ける人</span></div>
+            <div class="tile"><span class="em">⛅</span><strong>天気予報士<code>EOSM</code></strong><span class="d">恋の雲行きを先読みする人</span></div>
+          </div>
+        </div>
+        <div class="typerow" style="--qc:var(--q-ck);--qt:var(--t-ck)">
+          <h3>ひとり時間型<span class="base">回避タイプ｜恋人も大切、自分の時間も同じくらい大切</span></h3>
+          <div class="tiles">
+            <div class="tile"><span class="em">🍃</span><strong>風来坊<code>CKFH</code></strong><span class="d">ときめきに素直、でも縛られない人</span></div>
+            <div class="tile"><span class="em">⛺</span><strong>ソロキャンパー<code>CKFM</code></strong><span class="d">自分の世界ごと愛してほしい人</span></div>
+            <div class="tile"><span class="em">🐈‍⬛</span><strong>黒猫<code>CKSH</code></strong><span class="d">気まぐれに甘える、懐くと深い人</span></div>
+            <div class="tile"><span class="em">📚</span><strong>書斎の住人<code>CKSM</code></strong><span class="d">静かな信頼を積み上げる人</span></div>
+          </div>
+        </div>
+        <div class="typerow" style="--qc:var(--q-ek);--qt:var(--t-ek)">
+          <h3>ゆらぎ型<span class="base">恐れ・回避タイプ｜近づきたい気持ちと、傷つくのが怖い気持ちが同時にある</span></h3>
+          <div class="tiles">
+            <div class="tile"><span class="em">🎢</span><strong>ジェットコースター<code>EKFH</code></strong><span class="d">近づくと怖く、離れると寂しい人</span></div>
+            <div class="tile"><span class="em">🎪</span><strong>綱渡り師<code>EKFM</code></strong><span class="d">頭でバランスを取りすぎる人</span></div>
+            <div class="tile"><span class="em">🦔</span><strong>ハリネズミ<code>EKSH</code></strong><span class="d">近づきたいのに、トゲが出る人</span></div>
+            <div class="tile"><span class="em">🏰</span><strong>要塞<code>EKSM</code></strong><span class="d">守りは固く、内側は誰より繊細な人</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-price">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-price">まずは無料で。<br>続きが読みたくなったら。</h2>
+        <p class="sub">有料レポートは買い切りです。月額料金はかかりません。</p>
+      </div>
+      <div class="pricing">
+        <div class="free"><h3>無料</h3><p class="yen">0<small> 円</small></p><p>あなたのコードとタイプ、タイプの物語、恋愛あるある、愛情言語の概要。</p></div>
+        <div><h3>ライト</h3><p class="yen"><span data-price="lite">980</span><small> 円（税込）</small></p><p>自分の取扱説明書。恋の強みとつまずき、合う相手、LINEやデートのペース、恋人に見せる取扱説明書など。</p></div>
+        <div><h3>スタンダード</h3><p class="yen"><span data-price="standard">1,980</span><small> 円（税込）</small></p><p>ライトの全部と、恋の実践編。ケンカ、嫉妬、失恋、復縁、結婚、マッチングアプリ、16タイプとの付き合い方、相性チェック。</p></div>
+        <div><h3>ペア</h3><p class="yen"><span data-price="pair">2,980</span><small> 円（税込）</small></p><p>2人分のスタンダードと、2人だけの相性レポート。起きやすいズレと、そのまま使える会話の例。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-basis" style="padding-top:0">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-basis">何をもとにした診断？</h2>
+      </div>
+      <div class="basis">
+        <div><h3>愛着スタイル</h3><p>人と親しくなるときの心のクセです。成人の愛着研究では、「不安」と「回避」の2つの強さで、安定・不安・回避・恐れ回避の4つに分けて考えます。コードの前半2文字がこれにあたります。</p></div>
+        <div><h3>5つの愛情言語</h3><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。</p></div>
+      </div>
+      <p class="note disclaimer">質問はこの2つの考え方を参考に、独自に作っています。エンタメとしてお楽しみください。医学的・心理学的な診断ではありません。回答と結果はお使いのブラウザの中にだけ保存され、運営者のサーバーには送られません。</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-faq" style="padding-top:0">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-faq">よくある質問</h2>
+      </div>
+      <div class="faq">
+        <details><summary>ラブコード診断とは何ですか？</summary><p>恋をしたときに出てくる不安のクセ（愛着スタイル）と、愛情の受け取り方（愛情言語）から、あなたの恋愛タイプを「EOSH-WP」のような英字のコードで表す無料の恋愛診断です。30問・約5分で、登録なしで受けられます。</p></details>
+        <details><summary>無料でどこまでわかりますか？</summary><p>あなたのラブコード、16タイプのうちどのタイプか、タイプの説明と物語、恋愛あるある、あなたに響く愛情言語まで無料で読めます。</p></details>
+        <details><summary>有料レポートはいくらですか？</summary><p>ライトが980円、スタンダードが1,980円、ペアが2,980円です。すべて税込の買い切りで、月額料金はかかりません。購入したプランから上のプランへは、差額でアップグレードできます。</p></details>
+        <details><summary>質問は何問ですか？どのくらい時間がかかりますか？</summary><p>全部で30問、約5分です。前半の20問は5段階で答え、後半の10問は2つのうち嬉しいほうを選びます。</p></details>
+        <details><summary>MBTIや16Personalitiesと関係はありますか？</summary><p>関係ありません。ラブコード診断は恋愛に絞った独自の診断で、性格全般の4文字タイプを判定するものではありません。成人の愛着研究と「5つの愛の言語」の考え方を参考に、質問を独自に作っています。</p></details>
+        <details><summary>愛着スタイルとは何ですか？</summary><p>人と親しくなるときに出てくる心のクセのことです。相手の気持ちを確かめたくなる「不安」と、距離を取りたくなる「回避」の2つの強さで、安定・不安・回避・恐れ回避の4つに分かれます。ラブコード診断では、ひだまり型・たしかめ型・ひとり時間型・ゆらぎ型と呼んでいます。</p></details>
+        <details><summary>愛情言語とは何ですか？</summary><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。ラブコード診断では、5つのうちあなたに響く1〜2個がコードの後ろに付きます。</p></details>
+        <details><summary>診断結果は当たりますか？</summary><p>エンタメとして楽しむための診断で、医学的・心理学的な診断ではありません。結果は、答えたときの状況や気持ちによって変わることがあります。自分の恋のクセを言葉にするきっかけとして使ってください。</p></details>
+        <details><summary>回答や結果はどこかに保存されますか？</summary><p>回答と結果は、お使いのブラウザの中にだけ保存されます。運営者のサーバーには送られません。会員登録もいりません。</p></details>
+        <details><summary>恋人や好きな人との相性はわかりますか？</summary><p>わかります。相手にも無料の診断を受けてもらい、そのコードを入力すると相性が見られます（スタンダード以上）。ペアプランでは、2人だけの相性レポートが読めます。</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="last" aria-labelledby="h-last">
+    <div class="container">
+      <h2 id="h-last">次は、あなたの恋の番。</h2>
+      <div class="cta">
+        <button class="btn big" data-start>無料で診断する <span class="arrow" aria-hidden="true">→</span></button>
+        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ見られます</li></ul>
+      </div>
+    </div>
+  </section>
+
+  
+</div>
+
+<main class="wrap" id="app" hidden></main>
+<div class="stickybuy" id="stickybuy" aria-hidden="true"><div><p id="stickybuy-text"></p><button class="btn" id="stickybuy-go">プランを見る</button></div></div>
+
 <script>
 // 無料で見せる範囲のデータ（質問・タイプ名・概要）。有料部分は lib/premium.js（サーバー側）にある。
 window.LC = (function () {
@@ -292,6 +713,14 @@ window.LC = (function () {
     EKSM: ['要塞', '守りは固く、内側は誰より繊細な人']
   };
 
+  // タイプの絵文字（タイルと結果カードに出す）
+  var EMOJI = {
+    COFH: '🌻', COFM: '⛵', COSH: '🍵', COSM: '🌳',
+    EOFH: '🎆', EOFM: '🔍', EOSH: '🌙', EOSM: '⛅',
+    CKFH: '🍃', CKFM: '⛺', CKSH: '🐈‍⬛', CKSM: '📚',
+    EKFH: '🎢', EKFM: '🎪', EKSH: '🦔', EKSM: '🏰'
+  };
+
   // 恋愛あるある（無料）。シェアされやすいよう、各タイプ4つずつ
   var ARUARU = {
     COFH: ['好きな人ができると、友達にすぐバレる', '「好き」と言うのに、特に勇気はいらない', 'デートの帰り道に、もう次の予定を立てている', '恋人が落ち込んでいると、元気づけようとして張り切りすぎる'],
@@ -354,7 +783,7 @@ window.LC = (function () {
     return { code: letters.join('') + '-' + picks.join(''), pct: pct, llScores: ll };
   }
 
-  return { AXES: AXES, LIKERT: LIKERT, PAIRS: PAIRS, LL: LL, LL_ORDER: LL_ORDER, ATT: ATT, TYPES: TYPES, ARUARU: ARUARU, STORY: STORY, parseCode: parseCode, score: score };
+  return { AXES: AXES, LIKERT: LIKERT, PAIRS: PAIRS, LL: LL, LL_ORDER: LL_ORDER, ATT: ATT, TYPES: TYPES, EMOJI: EMOJI, ARUARU: ARUARU, STORY: STORY, parseCode: parseCode, score: score };
 })();
 
 </script>
@@ -971,9 +1400,9 @@ window.LC_API = {
 <script>
 (function () {
   var LC = window.LC, API = window.LC_API;
-  var app = document.getElementById('app');
+  var app = document.getElementById('app'), lp = document.getElementById('lp');
   var ATT_COLOR = { CO: 'var(--q-co)', EO: 'var(--q-eo)', CK: 'var(--q-ck)', EK: 'var(--q-ek)' };
-  var ATT_ORDER = ['CO', 'EO', 'CK', 'EK'];
+  var ATT_TINT = { CO: 'var(--t-co)', EO: 'var(--t-eo)', CK: 'var(--t-ck)', EK: 'var(--t-ek)' };
   var TOTAL = LC.LIKERT.length + LC.PAIRS.length;
   var state = { likert: [], pairs: [], i: 0 };
 
@@ -984,81 +1413,73 @@ window.LC_API = {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* 保存できなくても診断は動く */ }
   }
   function setHash(code) {
-    try { history.replaceState(null, '', location.pathname + (code ? '#' + code : '')); } catch (e) { /* 表示には影響しない */ }
+    // 購入後の戻りに付く session_id だけ外す（utm などのほかのパラメータは残す）
+    try {
+      var q = new URLSearchParams(location.search); q.delete('session_id');
+      var qs = q.toString();
+      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + (code ? '#' + code : ''));
+    } catch (e) { /* 表示には影響しない */ }
   }
   function llNames(list) { return list.map(function (k) { return LC.LL[k].name; }).join('・'); }
 
-  // ---------- intro ----------
+  // 画面の切り替え。'lp'（導入ページ）のときだけ静的な HTML を見せ、それ以外は #app に描く
+  function view(name) {
+    document.documentElement.classList.remove('boot-app');
+    document.body.dataset.view = name;
+    lp.hidden = name !== 'lp';
+    app.hidden = name === 'lp';
+    if (name !== 'result') sticky(null);
+  }
+
+  // ---------- 導入ページ ----------
   function renderIntro() {
     setHash('');
-    var rows = ATT_ORDER.map(function (att) {
-      var a = LC.ATT[att];
-      var tiles = Object.keys(LC.TYPES).filter(function (c) { return c.slice(0, 2) === att; }).map(function (c) {
-        var t = LC.TYPES[c];
-        return '<button class="tile" style="--qc:' + ATT_COLOR[att] + '" data-core="' + c + '"><code>' + c + '</code><strong>' + t[0] + '</strong><span>' + t[1] + '</span></button>';
-      }).join('');
-      return '<div class="typerow"><h3>' + a.name + '<span class="base">' + a.base + 'タイプ</span></h3><div class="tiles">' + tiles + '</div></div>';
-    }).join('');
+    view('lp');
+    var last = load('lc_last', null), el = document.getElementById('resume');
+    if (el) {
+      if (last && LC.parseCode(last.code)) {
+        el.hidden = false;
+        el.innerHTML = '<button class="linkbtn" id="resume-go">前回の結果（' + last.code + '）を見る</button>';
+        document.getElementById('resume-go').onclick = function () { showResult(last.code, last.pct); };
+      } else {
+        el.hidden = true;
+      }
+    }
+    window.scrollTo(0, 0);
+  }
 
-    var demo = API.demo ? (
-      '<section class="panel"><span class="eyebrow">制作者用ビューア</span>' +
-      '<p class="muted">16タイプ×愛情言語15通り＝240パターンの結果を直接確認できます。</p>' +
+  // デモ版だけ：全パターンを確認するための道具を導入ページに足す
+  function setupDemo() {
+    var el = document.getElementById('demo-tools');
+    if (!el) return;
+    el.innerHTML =
+      '<div class="demo-banner">デモ版です。決済はStripeにつながず、「購入する」を押すとそのまま有料レポートが開きます。</div>' +
+      '<section class="panel" style="margin-top:12px"><span class="eyebrow">制作者用ビューア</span>' +
+      '<p class="muted">16タイプ×愛情言語の結果を直接確認できます。</p>' +
       '<div class="viewer">' +
       '<label for="v-core">タイプ<select id="v-core">' + Object.keys(LC.TYPES).map(function (c) { return '<option value="' + c + '">' + c + ' ' + LC.TYPES[c][0] + '</option>'; }).join('') + '</select></label>' +
       '<label for="v-ll1">メイン<select id="v-ll1">' + LC.LL_ORDER.map(function (k) { return '<option value="' + k + '">' + k + ' ' + LC.LL[k].name + '</option>'; }).join('') + '</select></label>' +
       '<label for="v-ll2">サブ<select id="v-ll2"><option value="">なし</option>' + LC.LL_ORDER.map(function (k) { return '<option value="' + k + '">' + k + ' ' + LC.LL[k].name + '</option>'; }).join('') + '</select></label>' +
-      '<button class="btn small" id="v-go">この結果を見る</button></div></section>'
-    ) : '';
-
-    app.innerHTML =
-      (API.demo ? '<div class="demo-banner">デモ版です。決済はStripeにつながず、「購入する」を押すとそのまま有料レポートが開きます。</div>' : '') +
-      '<section class="hero">' +
-      '<h1><small>LOVE CODE</small>ラブコード診断</h1>' +
-      '<p class="lead">恋をすると出てくる「不安のクセ」と、あなたが愛を感じる「愛情言語」。この2つから、あなたの恋愛を英字のコードにします。</p>' +
-      '<div class="actions"><button class="btn" id="start">診断をはじめる</button><span class="muted">30問・約5分</span></div>' +
-      (API.demo ? '<div class="actions"><button class="linkbtn" id="random">ランダムに回答して結果を見る（テスト用）</button></div>' : '') +
-      '</section>' +
-      '<section class="panel"><span class="eyebrow">コードの読み方</span>' +
-      '<div class="anatomy">' +
-      slot('E / C', 'たしかめたい<br>安心している') + slot('K / O', '距離を保つ<br>近づく') + slot('F / S', 'すぐ動く<br>じっくり') + slot('H / M', '気持ち<br>頭') +
-      '<span class="dash">-</span>' + slot('W T G A P', '愛情言語<br>1〜2個', 'll') +
-      '</div>' +
-      '<p class="note">前半の2文字が恋愛の愛着スタイル（安定・不安・回避・恐れ回避の4つ）、後半の2文字が恋のペースと判断の仕方。ハイフンの後ろは、言葉(W)・一緒の時間(T)・贈り物(G)・行動(A)・スキンシップ(P)のうち、あなたに響くもの。</p>' +
-      '</section>' +
-      '<section class="typegrid"><span class="eyebrow">16のラブタイプ</span>' + rows + '</section>' +
-      demo +
-      '<p class="note">エンタメとしてお楽しみください。医学的・心理学的な診断ではありません。愛着スタイルは成人の愛着研究（不安・回避の2軸）、愛情言語はゲーリー・チャップマン氏の「5つの愛の言語」の考え方を参考にした独自の質問です。</p>' +
-      footer();
-
-    document.getElementById('start').onclick = startQuiz;
-    var r = document.getElementById('random');
-    if (r) r.onclick = function () {
+      '<button class="btn small" id="v-go">この結果を見る</button></div>' +
+      '<div><button class="linkbtn" id="random">ランダムに回答して結果を見る（テスト用）</button></div></section>';
+    document.getElementById('random').onclick = function () {
       state.likert = LC.LIKERT.map(function () { return 1 + Math.floor(Math.random() * 5); });
       state.pairs = LC.PAIRS.map(function () { return Math.random() < 0.5 ? 'a' : 'b'; });
       finish();
     };
-    var go = document.getElementById('v-go');
-    if (go) go.onclick = function () {
+    document.getElementById('v-go').onclick = function () {
       var a = document.getElementById('v-ll1').value, b = document.getElementById('v-ll2').value;
-      var code = document.getElementById('v-core').value + '-' + a + (b && b !== a ? b : '');
-      showResult(code, null);
+      showResult(document.getElementById('v-core').value + '-' + a + (b && b !== a ? b : ''), null);
     };
-    Array.prototype.forEach.call(app.querySelectorAll('.tile'), function (t) {
-      t.onclick = function () {
-        if (API.demo) { document.getElementById('v-core').value = t.dataset.core; document.getElementById('v-go').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-      };
-    });
-    window.scrollTo(0, 0);
   }
 
-  function slot(big, small, cls) { return '<div class="slot ' + (cls || '') + '"><b>' + big + '</b><span>' + small + '</span></div>'; }
   function footer() {
     if (API.demo) return '';
     return '<nav class="foot"><a href="legal.html">特定商取引法に基づく表記</a><a href="legal.html#privacy">プライバシーポリシー</a></nav>';
   }
 
-  // ---------- quiz ----------
-  function startQuiz() { state = { likert: [], pairs: [], i: 0 }; renderQuestion(); }
+  // ---------- 診断 ----------
+  function startQuiz() { state = { likert: [], pairs: [], i: 0 }; view('quiz'); renderQuestion(); window.scrollTo(0, 0); }
 
   function renderQuestion() {
     var i = state.i, isPair = i >= LC.LIKERT.length;
@@ -1066,9 +1487,9 @@ window.LC_API = {
     if (!isPair) {
       var cur = state.likert[i];
       body = '<p class="eyebrow">あてはまる？</p><p class="qtext">' + LC.LIKERT[i].q + '</p>' +
-        '<div class="likert"><div class="dots">' + [1, 2, 3, 4, 5].map(function (v) {
+        '<div class="likert"><div class="dots" role="group" aria-label="5段階で答える">' + [1, 2, 3, 4, 5].map(function (v) {
           var label = ['そう思わない', 'あまりそう思わない', 'どちらでもない', 'ややそう思う', 'そう思う'][v - 1];
-          return '<button data-v="' + v + '" aria-label="' + label + '"' + (cur === v ? ' class="on"' : '') + '></button>';
+          return '<button data-v="' + v + '" aria-label="' + label + '" title="' + label + '"' + (cur === v ? ' class="on"' : '') + '></button>';
         }).join('') + '</div><div class="ends"><span>そう思わない</span><span>そう思う</span></div></div>';
     } else {
       var p = LC.PAIRS[i - LC.LIKERT.length], c = state.pairs[i - LC.LIKERT.length];
@@ -1077,7 +1498,7 @@ window.LC_API = {
     }
     app.innerHTML =
       '<div class="progress"><div class="meta"><span>' + (isPair ? 'パート2 愛情言語' : 'パート1 恋のクセ') + '</span><span>' + (i + 1) + ' / ' + TOTAL + '</span></div>' +
-      '<div class="bar"><i style="width:' + Math.round((i / TOTAL) * 100) + '%"></i></div></div>' +
+      '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + TOTAL + '" aria-valuenow="' + i + '"><i style="width:' + Math.round((i / TOTAL) * 100) + '%"></i></div></div>' +
       '<section class="qcard">' + body + '</section>' +
       '<div class="qnav"><button class="linkbtn" id="back">' + (i === 0 ? 'トップに戻る' : 'ひとつ前へ') + '</button></div>';
 
@@ -1097,13 +1518,16 @@ window.LC_API = {
     showResult(r.code, r.pct);
   }
 
-  // ---------- result ----------
+  // ---------- 結果 ----------
   function showResult(code, pct) {
     var p = LC.parseCode(code);
     if (!p) return renderIntro();
     if (!pct) { var last = load('lc_last', null); if (last && last.code === code) pct = last.pct; }
     setHash(code);
+    view('result');
+    sticky(null);
     var t = LC.TYPES[p.core], a = LC.ATT[p.att];
+    var owned = getPaid(code);
 
     var axes = pct ? '<section class="panel axes"><span class="eyebrow">あなたの傾き</span>' + LC.AXES.map(function (ax, i) {
       var v = pct[i], toPos = v > 50, w = Math.abs(v - 50);
@@ -1112,37 +1536,50 @@ window.LC_API = {
         '<div class="label">' + ax.label + '　' + (toPos ? ax.posName : ax.negName) + ' ' + Math.max(v, 100 - v) + '%</div></div>';
     }).join('') + '</section>' : '';
 
+    var shareUrl = location.origin + location.pathname + '#' + code;
+    var shareText = '私のラブコードは ' + code + '「' + t[0] + '」でした。' + t[1] + '。';
+    // 自分で診断した結果でも、購入済みでもないとき（シェアされたリンクを開いた人）には診断への入口を出す
+    var visitor = !pct && !owned ? '<section class="visitor"><p><strong>これは ' + code + '「' + t[0] + '」の結果ページです。</strong><br>あなたのラブコードも調べてみませんか？</p>' +
+      '<button class="btn" id="visitor-start">無料で診断する <span class="arrow" aria-hidden="true">→</span></button><p class="note">30問・約5分・登録なし</p></section>' : '';
+    var free = ' <span class="tag free">無料</span>';
+
     app.innerHTML =
-      '<section class="codecard" style="--qc:' + ATT_COLOR[p.att] + '">' +
-      '<span class="eyebrow">あなたのラブコード</span>' +
+      '<section class="codecard" style="--qc:' + ATT_COLOR[p.att] + ';--qt:' + ATT_TINT[p.att] + '">' +
+      '<span class="eyebrow">' + (pct ? 'あなたのラブコード' : 'ラブコード') + '</span>' +
+      '<div class="em" aria-hidden="true">' + LC.EMOJI[p.core] + '</div>' +
       '<div class="code">' + p.core + '<em>-' + p.ll.join('') + '</em></div>' +
-      '<h2>' + t[0] + '</h2><p>' + t[1] + '</p>' +
+      '<h2>' + t[0] + '</h2><p class="tagline">' + t[1] + '</p>' +
       '<div class="chips"><span class="chip att">' + a.name + '</span>' + p.ll.map(function (k, i) { return '<span class="chip">' + (i ? 'サブ ' : 'メイン ') + LC.LL[k].name + '</span>'; }).join('') + '</div>' +
       '</section>' +
+      '<div class="sharerow">' +
+      '<a class="btn ghost small" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText + ' #ラブコード診断') + '&url=' + encodeURIComponent(shareUrl) + '">Xでシェア</a>' +
+      '<a class="btn ghost small" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText) + '">LINEで送る</a>' +
+      '<button class="btn ghost small" id="share">結果をコピー</button></div>' +
+      visitor +
       axes +
-      '<section class="sec"><h3>' + a.name + 'のあなた <span class="tag free">無料</span></h3><p>' + a.body + '</p></section>' +
-      '<section class="sec"><h3>' + t[0] + 'の物語 <span class="tag free">無料</span></h3><p>' + LC.STORY[p.core] + '</p></section>' +
-      '<section class="sec"><h3>' + t[0] + 'の恋愛あるある <span class="tag free">無料</span></h3>' + list(LC.ARUARU[p.core]) + '</section>' +
-      '<section class="sec"><h3>あなたに響く愛情言語 <span class="tag free">無料</span></h3><dl class="kv">' + p.ll.map(function (k) {
-        return '<div><dt>' + LC.LL[k].name + '（' + LC.LL[k].en + '）</dt><dd style="margin:0">' + LC.LL[k].short + '</dd></div>';
+      '<section class="sec"><h3>' + a.name + 'のあなた' + free + '</h3>' + prose(a.body) + '</section>' +
+      '<section class="sec"><h3>' + t[0] + 'の物語' + free + '</h3>' + prose(LC.STORY[p.core]) + '</section>' +
+      '<section class="sec"><h3>' + t[0] + 'の恋愛あるある' + free + '</h3>' + list(LC.ARUARU[p.core], 'aruaru') + '</section>' +
+      '<section class="sec"><h3>あなたに響く愛情言語' + free + '</h3><dl class="kv">' + p.ll.map(function (k) {
+        return '<div><dt>' + LC.LL[k].name + '（' + LC.LL[k].en + '）</dt><dd>' + LC.LL[k].short + '</dd></div>';
       }).join('') + '</dl></section>' +
       '<div id="premium"></div><div id="upgrade"></div>' +
-      '<div class="actions" style="display:flex;flex-wrap:wrap;gap:12px">' +
-      '<button class="btn ghost small" id="share">結果をコピー</button><button class="btn ghost small" id="again">もう一度診断する</button><button class="btn ghost small" id="top">トップへ</button></div>' +
+      '<div class="sharerow"><button class="btn ghost small" id="again">' + (pct || owned ? 'もう一度診断する' : '自分も診断する') + '</button><button class="btn ghost small" id="top">トップへ</button></div>' +
       footer();
 
     document.getElementById('again').onclick = startQuiz;
     document.getElementById('top').onclick = renderIntro;
+    var vs = document.getElementById('visitor-start');
+    if (vs) vs.onclick = startQuiz;
     document.getElementById('share').onclick = function (e) {
-      var text = '私のラブコードは ' + code + '「' + t[0] + '」でした。' + t[1] + '。 #ラブコード診断';
+      var text = shareText + ' #ラブコード診断 ' + shareUrl;
       var btn = e.currentTarget;
       var done = function () { btn.textContent = 'コピーしました'; };
       if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () { btn.textContent = text; });
       else btn.textContent = text;
     };
 
-    var owned = getPaid(code);
-    if (owned) loadPremium(code, owned); else renderPlans(code, null);
+    mountPremium(code, owned);
     window.scrollTo(0, 0);
   }
 
@@ -1153,7 +1590,19 @@ window.LC_API = {
     pair: { name: 'ペア', lead: '2人分＋2人だけの相性レポート', items: ['あなたと相手、2人分のスタンダード', '2人の間で起きやすいズレの具体例', 'そのまま使える会話のテンプレ', '2人の愛情言語の届け方', '2人におすすめの習慣'] }
   };
   var PLAN_KEYS = ['lite', 'standard', 'pair'];
-  var plans = null;
+  var plans = null, plansPromise = null;
+
+  // 料金表は一度だけ取りにいく。失敗したら次の呼び出しでやり直す
+  function ensurePlans() {
+    if (plans) return Promise.resolve(plans);
+    if (!plansPromise) {
+      plansPromise = API.plans().then(function (p) {
+        if (!p || !p.lite) throw new Error('料金プランを読み込めませんでした');
+        plans = p; return p;
+      }).catch(function (e) { plansPromise = null; throw e; });
+    }
+    return plansPromise;
+  }
 
   function getPaid(code) {
     var v = load('lc_paid', {})[code];
@@ -1167,30 +1616,75 @@ window.LC_API = {
   }
   function yen(n) { return n.toLocaleString('ja-JP'); }
 
+  function mountPremium(code, owned) {
+    var el = document.getElementById('premium');
+    el.innerHTML = '<p class="muted">読み込んでいます…</p>';
+    ensurePlans().then(function () {
+      if (owned) { loadPremium(code, owned); } else { el.innerHTML = ''; renderPlans(code, null); }
+    }, function () {
+      el.innerHTML = '<p class="err">料金プランを読み込めませんでした。</p><div><button class="btn small ghost" id="retry">もう一度読み込む</button></div>';
+      document.getElementById('retry').onclick = function () { mountPremium(code, owned); };
+    });
+  }
+
+  // 結果ページの下に固定する購入バー。プラン一覧がまだ下にあるあいだだけ出す
+  var stickyOff = null;
+  function sticky(label) {
+    var el = document.getElementById('stickybuy');
+    if (stickyOff) { stickyOff(); stickyOff = null; }
+    if (!el) return;
+    el.classList.remove('show'); el.setAttribute('aria-hidden', 'true');
+    if (!label) return;
+    document.getElementById('stickybuy-text').innerHTML = label;
+    document.getElementById('stickybuy-go').onclick = function () {
+      var target = document.getElementById('plans');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    var ticking = false;
+    var check = function () {
+      ticking = false;
+      var target = document.getElementById('plans');
+      var on = !!target && window.scrollY > 240 && target.getBoundingClientRect().top > window.innerHeight;
+      el.classList.toggle('show', on); el.setAttribute('aria-hidden', on ? 'false' : 'true');
+    };
+    var onScroll = function () { if (!ticking) { ticking = true; requestAnimationFrame(check); } };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    stickyOff = function () { window.removeEventListener('scroll', onScroll); };
+  }
+
   // owned: 購入済みのプラン（なければ null）。上のプランだけを差額で並べる
   function renderPlans(code, owned) {
     var el = document.getElementById(owned ? 'upgrade' : 'premium');
+    if (!el) return;
+    var p = LC.parseCode(code), t = LC.TYPES[p.core], a = LC.ATT[p.att];
     var ownedRank = owned ? plans[owned.plan].rank : 0;
     var keys = PLAN_KEYS.filter(function (k) { return plans[k].rank > ownedRank; });
     if (!keys.length) { el.innerHTML = ''; return; }
     var cards = keys.map(function (k) {
       var info = PLAN_INFO[k], price = plans[k].price - (owned ? plans[owned.plan].price : 0);
       var star = k === 'standard' && !owned;
+      var head = info.items.slice(0, 4), rest = info.items.slice(4);
       return '<div class="plan' + (star ? ' star' : '') + '">' +
-        (star ? '<span class="badge">いちばん人気</span>' : '') +
-        '<span class="eyebrow">' + info.name.toUpperCase() + '</span>' +
+        (star ? '<span class="badge">おすすめ</span>' : '') +
+        '<span class="eyebrow">' + info.name + '</span>' +
         '<h4>' + info.lead + '</h4>' +
         '<div class="price">' + yen(price) + '<small> 円（税込）' + (owned ? '・差額' : '') + '</small></div>' +
         (k === 'pair' ? '<p class="note">1人あたり ' + yen(plans.pair.price / 2) + '円</p>' : '') +
-        '<ul>' + info.items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
+        '<ul>' + head.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
+        (rest.length ? '<details><summary>ほかに' + rest.length + '項目</summary><ul>' + rest.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></details>' : '') +
         (k === 'pair' ? '<label class="note" for="pair-partner">相手のラブコード（先に相手にも無料診断してもらってね）</label><input type="text" id="pair-partner" placeholder="例：CKSM-A" autocomplete="off">' : '') +
         '<button class="btn' + (star ? '' : ' ghost') + '" data-plan="' + k + '">' + (owned ? info.name + 'にアップグレード' : info.name + 'を購入') + '</button>' +
         '</div>';
     }).join('');
-    el.innerHTML = '<section class="sec"><span class="eyebrow">' + (owned ? 'もっと読む' : '詳しいレポート') + '</span>' +
-      '<h3>' + (owned ? '差額だけで、上のプランにアップグレードできます' : '恋をうまくいかせるための、あなた専用の取扱説明書') + '</h3>' +
+    var lead = owned
+      ? '<span class="eyebrow">もっと読む</span><h3>差額だけで、上のプランにアップグレードできます</h3>'
+      : '<span class="eyebrow">ここから先は有料レポート</span><h3>' + t[0] + 'のあなた専用の、恋の取扱説明書</h3>' +
+        '<p>無料の結果は入口です。レポートでは、' + a.name + 'のクセが恋のどの場面で出やすいか、そのときどうすればいいかまで、具体的に書いています。</p>' +
+        '<ul class="locked"><li>恋人から見た「' + t[0] + '」のあなた</li><li>恋の強み・つまずき・要注意サイン</li><li>あなたに合う恋人と、気をつけたい相手</li><li>つい言ってしまう一言の言い換え</li><li>恋人に見せる取扱説明書</li></ul>';
+    el.innerHTML = '<section class="teaser" id="' + (owned ? 'upgrade-plans' : 'plans') + '">' + lead +
       '<div class="plans">' + cards + '</div><p class="err" id="buy-err" hidden></p>' +
-      '<p class="note">買い切りです。クレジットカード、Apple Pay、Google Pay に対応。決済は Stripe で安全に処理されます。</p></section>';
+      '<p class="note">買い切りです。月額料金はかかりません。クレジットカード、Apple Pay、Google Pay に対応。決済は Stripe で安全に処理されます。</p></section>';
+    if (!owned) sticky(t[0] + 'の取扱説明書を読む<small>買い切り ' + yen(plans.lite.price) + '円〜</small>');
 
     Array.prototype.forEach.call(el.querySelectorAll('button[data-plan]'), function (btn) {
       btn.onclick = function () {
@@ -1229,8 +1723,25 @@ window.LC_API = {
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
   function tag(plan) { return ' <span class="tag paid">' + PLAN_INFO[plan].name + '</span>'; }
   function list(items, cls) { return '<ul class="' + (cls || 'dots') + '">' + items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>'; }
-  function kv(label, body) { return '<div><span class="k">' + label + '</span>' + (body.charAt(0) === '<' ? body : '<p>' + body + '</p>') + '</div>'; }
+  function kv(label, body) { return '<div><span class="k">' + label + '</span>' + (body.charAt(0) === '<' ? body : para(body)) + '</div>'; }
   function stars(score) { var n = Math.max(1, Math.min(5, Math.round(score / 20))); return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); }
+
+  // 長い文章を2文ごとの段落に分けて読みやすくする。「」や（）の中の句点では切らない
+  function para(text) {
+    text = String(text);
+    if (text.length < 110 || text.indexOf('<') >= 0) return '<p>' + text + '</p>';
+    var out = [], buf = '', depth = 0, n = 0;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text.charAt(i);
+      buf += ch;
+      if (ch === '「' || ch === '（') depth += 1;
+      else if (ch === '」' || ch === '）') depth = Math.max(0, depth - 1);
+      else if (ch === '。' && depth === 0) { n += 1; if (n === 2) { out.push(buf); buf = ''; n = 0; } }
+    }
+    if (buf) { if (out.length && buf.length < 30) out[out.length - 1] += buf; else out.push(buf); }
+    return out.map(function (x) { return '<p>' + x + '</p>'; }).join('');
+  }
+  function prose(text) { return '<div class="prose">' + para(text) + '</div>'; }
 
   // 恋人に見せる取扱説明書をコピー用の平文にする
   function guideText(p, g) {
@@ -1241,12 +1752,12 @@ window.LC_API = {
 
   function selfHtml(p, l) {
     var a = LC.ATT[p.att];
-    return '<section class="sec"><h3>恋人から見たあなた' + tag('lite') + '</h3><p>' + l.seen + '</p>' +
+    return '<section class="sec"><h3>恋人から見たあなた' + tag('lite') + '</h3>' + prose(l.seen) +
       '<div class="kv">' + kv('今週からできる一歩', '<div class="ask">' + l.step + '</div>') + '</div></section>' +
-      '<section class="sec"><h3>' + a.name + '（' + a.base + '）を深く知る' + tag('lite') + '</h3><p>' + l.portrait + '</p><p>' + l.loop + '</p>' +
+      '<section class="sec"><h3>' + a.name + '（' + a.base + '）を深く知る' + tag('lite') + '</h3>' + prose(l.portrait) + prose(l.loop) +
       '<div class="kv">' + kv('強み', list(l.strengths)) + kv('つまずきやすいところ', list(l.pitfalls)) + kv('こんなときは要注意', list(l.signs)) + '</div></section>' +
       '<section class="sec"><h3>合う恋人と、気をつけたい相手' + tag('lite') + '</h3><div class="kv">' + kv('あなたに合う恋人', l.match) + kv('気をつけたい相手', l.caution) + '</div></section>' +
-      '<section class="sec"><h3>恋のペース「' + l.pace.title + '」' + tag('lite') + '</h3><p>' + l.pace.body + '</p>' +
+      '<section class="sec"><h3>恋のペース「' + l.pace.title + '」' + tag('lite') + '</h3>' + prose(l.pace.body) +
       '<div class="kv">' + kv('アプローチ・告白', l.pace.approach) + kv('デート', l.pace.date) + kv('連絡・LINE', l.pace.line) + '</div></section>' +
       '<section class="sec"><h3>愛情言語の取扱説明' + tag('lite') + '</h3>' + l.ll.map(function (x) {
         return '<div class="panel"><span class="eyebrow">' + LC.LL[x.key].name + '</span><div class="kv">' +
@@ -1255,14 +1766,14 @@ window.LC_API = {
           kv('恋人へのお願いの例文', x.phrases.map(function (s) { return '<div class="ask">「' + s + '」</div>'; }).join('')) + '</div></div>';
       }).join('') + '</section>' +
       '<section class="sec"><h3>' + a.name + '×愛情言語' + tag('lite') + '</h3><div class="kv">' + l.cross.map(function (c) { return kv(LC.LL[c.key].name, c.text); }).join('') + '</div></section>' +
-      '<section class="sec"><h3>相手の愛情言語の見分け方' + tag('lite') + '</h3><p>' + l.spot.intro + '</p><div class="kv">' + l.spot.hints.map(function (h) { return kv(h[0], h[1]); }).join('') + '</div><p>' + l.spot.outro + '</p></section>' +
+      '<section class="sec"><h3>相手の愛情言語の見分け方' + tag('lite') + '</h3>' + prose(l.spot.intro) + '<div class="kv">' + l.spot.hints.map(function (h) { return kv(h[0], h[1]); }).join('') + '</div>' + prose(l.spot.outro) + '</section>' +
       '<section class="sec"><h3>つい言ってしまう一言の言い換え' + tag('lite') + '</h3><div class="rephrase">' + l.rephrase.map(function (r) {
         return '<div><span class="before">「' + r[0] + '」</span><span class="after">「' + r[1] + '」</span></div>';
       }).join('') + '</div></section>' +
       '<section class="sec"><h3>うまくいくための5つのこと' + tag('lite') + '</h3><ol class="tips">' + l.tips.map(function (x) { return '<li><span><strong>' + x.t + '</strong><br><span class="muted">' + x.why + '</span></span></li>'; }).join('') + '</ol></section>' +
-      '<section class="sec"><h3>恋のQ&amp;A' + tag('lite') + '</h3><div class="qa">' + l.qa.map(function (x) { return '<div><p class="q">' + x.q + '</p><p>' + x.a + '</p></div>'; }).join('') + '</div></section>' +
+      '<section class="sec"><h3>恋のQ&amp;A' + tag('lite') + '</h3><div class="qa">' + l.qa.map(function (x) { return '<div><p class="q">' + x.q + '</p>' + para(x.a) + '</div>'; }).join('') + '</div></section>' +
       '<section class="sec"><h3>自分を満たすためのセルフケア' + tag('lite') + '</h3>' + list(l.selfcare) + '</section>' +
-      '<section class="sec"><h3>愛着スタイルは変わるの？' + tag('lite') + '</h3><p>' + l.change + '</p></section>' +
+      '<section class="sec"><h3>愛着スタイルは変わるの？' + tag('lite') + '</h3>' + prose(l.change) + '</section>' +
       '<section class="sec panel guide"><h3>恋人に見せる取扱説明書' + tag('lite') + '</h3>' +
       '<p class="note">恋人や気になる人に、そのまま送れる文章です。「この人」はあなたのことです。</p>' +
       '<p>' + l.guide.att + '</p><p>' + l.guide.pace + '</p>' +
@@ -1276,14 +1787,14 @@ window.LC_API = {
       kv('ケンカのパターン', s.crisis.pattern) + kv('ケンカ中にやらないほうがいいこと', list(s.crisis.dont)) +
       kv('別れそうになったとき', s.crisis.breakup) +
       kv('仲直りの4ステップ', '<ol class="tips">' + s.crisis.makeup.map(function (x) { return '<li><span>' + x + '</span></li>'; }).join('') + '</ol>') + '</div></section>' +
-      '<section class="sec"><h3>ケンカの基本ルール' + tag('standard') + '</h3><p>' + s.fightRules.intro + '</p>' + list(s.fightRules.rules) + '</section>' +
+      '<section class="sec"><h3>ケンカの基本ルール' + tag('standard') + '</h3>' + prose(s.fightRules.intro) + list(s.fightRules.rules) + '</section>' +
       '<section class="sec"><h3>長続きする二人の習慣' + tag('standard') + '</h3>' + list(s.habits) + '</section>' +
-      '<section class="sec"><h3>マンネリしたとき' + tag('standard') + '</h3><p>' + s.rut + '</p></section>' +
-      '<section class="sec"><h3>嫉妬との付き合い方' + tag('standard') + '</h3><p>' + s.jealousy + '</p></section>' +
-      '<section class="sec"><h3>失恋したとき' + tag('standard') + '</h3><p>' + s.afterBreakup + '</p></section>' +
-      '<section class="sec"><h3>復縁したくなったら' + tag('standard') + '</h3><p>' + s.reunion + '</p></section>' +
-      '<section class="sec"><h3>同棲・結婚を考えたとき' + tag('standard') + '</h3><p>' + s.marriage + '</p></section>' +
-      '<section class="sec"><h3>マッチングアプリでの恋' + tag('standard') + '</h3><p>' + s.app + '</p></section>' +
+      '<section class="sec"><h3>マンネリしたとき' + tag('standard') + '</h3>' + prose(s.rut) + '</section>' +
+      '<section class="sec"><h3>嫉妬との付き合い方' + tag('standard') + '</h3>' + prose(s.jealousy) + '</section>' +
+      '<section class="sec"><h3>失恋したとき' + tag('standard') + '</h3>' + prose(s.afterBreakup) + '</section>' +
+      '<section class="sec"><h3>復縁したくなったら' + tag('standard') + '</h3>' + prose(s.reunion) + '</section>' +
+      '<section class="sec"><h3>同棲・結婚を考えたとき' + tag('standard') + '</h3>' + prose(s.marriage) + '</section>' +
+      '<section class="sec"><h3>マッチングアプリでの恋' + tag('standard') + '</h3>' + prose(s.app) + '</section>' +
       '<section class="sec"><h3>恋の段階別アドバイス' + tag('standard') + '</h3><div class="kv">' +
       kv('片思い', s.stages.crush) + kv('付き合いたて', s.stages.early) + kv('長く付き合っている', s.stages.long) + '</div></section>' +
       '<section class="sec"><h3>16タイプとの付き合いやすさ' + tag('standard') + '</h3>' +
@@ -1291,7 +1802,7 @@ window.LC_API = {
       s.compat.map(function (g) {
         return '<div class="cgroup"><h4>' + LC.ATT[g.att].name + 'の人と <span class="st" aria-label="付き合いやすさ 5段階中' + g.ease + '">' + stars(g.ease * 20) + '</span></h4><p>' + g.text + '</p><div class="ranking">' + g.types.map(function (c) {
           var near = c.samePace && c.sameJudge ? 'ペースも判断の仕方も近い' : c.samePace ? 'ペースが近い' : c.sameJudge ? '判断の仕方が近い' : 'ペースも判断の仕方も違う';
-          return '<details><summary><code>' + c.core + '</code><span class="nm">' + c.name + '</span><span class="near">' + near + '</span></summary><p>' + c.howto + '</p></details>';
+          return '<details><summary><code>' + c.core + '</code><span class="nm">' + LC.EMOJI[c.core] + ' ' + c.name + '</span><span class="near">' + near + '</span></summary><p>' + c.howto + '</p></details>';
         }).join('') + '</div></div>';
       }).join('') + '</section>' +
       (withTool ? '<section class="sec panel"><h3>相性チェック' + tag('standard') + '</h3>' +
@@ -1302,18 +1813,30 @@ window.LC_API = {
 
   function togetherHtml(p, rep) {
     var t = rep.together, o = LC.parseCode(rep.partner.code);
-    return '<section class="codecard pairhead" style="--qc:var(--accent)"><span class="eyebrow">2人の相性レポート' + tag('pair') + '</span>' +
+    return '<section class="codecard pairhead" style="--qc:var(--accent);--qt:var(--tint)"><span class="eyebrow">2人の相性レポート' + tag('pair') + '</span>' +
       '<div class="pair-codes"><span>' + p.core + '-' + p.ll.join('') + '<small>' + LC.TYPES[p.core][0] + '</small></span><b>×</b><span>' + o.core + '-' + o.ll.join('') + '<small>' + LC.TYPES[o.core][0] + '</small></span></div>' +
       '<p>' + t.att + '</p></section>' +
       '<section class="sec"><h3>2人の間で起きやすいズレ' + tag('pair') + '</h3>' + list(t.gaps) + '</section>' +
       '<section class="sec"><h3>そのまま使える会話のテンプレ' + tag('pair') + '</h3>' + t.talks.map(function (x) {
         return '<div class="ask"><span class="who">' + x.who + '</span>「' + x.line + '」</div>';
       }).join('') + '</section>' +
-      '<section class="sec"><h3>ペースとケンカの仕方' + tag('pair') + '</h3><div class="kv"><p>' + t.pace + '</p><p>' + t.judge + '</p></div></section>' +
-      '<section class="sec"><h3>2人の愛情言語' + tag('pair') + '</h3><p>' + (t.ll.shared.length ? '二人に共通する愛情言語は「' + t.ll.shared.join('・') + '」です。' : '') + t.ll.summary + '</p>' +
+      '<section class="sec"><h3>ペースとケンカの仕方' + tag('pair') + '</h3>' + prose(t.pace) + prose(t.judge) + '</section>' +
+      '<section class="sec"><h3>2人の愛情言語' + tag('pair') + '</h3>' + prose((t.ll.shared.length ? '二人に共通する愛情言語は「' + t.ll.shared.join('・') + '」です。' : '') + t.ll.summary) +
       '<div class="kv">' + kv('あなたから相手へ', '<div class="kv">' + t.ll.toPartner.map(function (x) { return kv(x.name, x.action); }).join('') + '</div>') +
       kv('相手からあなたへ', '<div class="kv">' + t.ll.toYou.map(function (x) { return kv(x.name, x.action); }).join('') + '</div>') + '</div></section>' +
-      '<section class="sec"><h3>2人におすすめの習慣' + tag('pair') + '</h3><p>' + t.ritual + '</p></section>';
+      '<section class="sec"><h3>2人におすすめの習慣' + tag('pair') + '</h3>' + prose(t.ritual) + '</section>';
+  }
+
+  // 長いレポートの頭に目次を付ける。見出しの文字（プラン名のタグは除く）をそのまま使う
+  function tocHtml(root) {
+    var secs = Array.prototype.filter.call(root.children, function (x) { return x.classList.contains('sec'); });
+    if (secs.length < 4) return '';
+    var items = secs.map( function (sec, i) {
+      var h = sec.querySelector('h3');
+      sec.id = 'sec-' + i;
+      return '<li><button data-to="sec-' + i + '">' + esc(h.firstChild.textContent.trim()) + '</button></li>';
+    }).join('');
+    return '<details class="toc"><summary>目次（' + secs.length + '項目）</summary><ol>' + items + '</ol></details>';
   }
 
   function renderPremium(code, rep) {
@@ -1325,10 +1848,18 @@ window.LC_API = {
     if (rep.standard) html += standardHtml(p, rep.standard, true);
     if (rep.partner) {
       var o = LC.parseCode(rep.partner.code);
-      html += '<details class="partner-report"><summary><h2 class="part">相手のレポート（' + rep.partner.code + '「' + LC.TYPES[o.core][0] + '」）</h2><span class="note">タップで開く</span></summary>' +
+      html += '<details class="partner-report"><summary><h2 class="part">相手のレポート（<span class="nw">' + rep.partner.code + '</span>「' + LC.TYPES[o.core][0] + '」）</h2><span class="note">タップで開く</span></summary>' +
         '<div class="stack">' + selfHtml(o, rep.partner.lite) + standardHtml(o, rep.partner.standard, false) + '</div></details>';
     }
-    el.innerHTML = '<div class="stack">' + html + '</div>';
+    el.innerHTML = '<div class="stack" id="report">' + html + '</div>';
+    var stack = document.getElementById('report');
+    var toc = tocHtml(stack);
+    if (toc) {
+      stack.insertAdjacentHTML('afterbegin', toc);
+      Array.prototype.forEach.call(stack.querySelectorAll('.toc button'), function (b) {
+        b.onclick = function () { var to = document.getElementById(b.dataset.to); if (to) to.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+      });
+    }
     var go = document.getElementById('compat-go');
     if (go) go.onclick = function () {
       document.getElementById('compat-out').innerHTML = compat(p, rep.standard, normalize(document.getElementById('partner').value));
@@ -1358,16 +1889,30 @@ window.LC_API = {
       '<p class="note">2人だけのズレの具体例や会話のテンプレは、ペアプランで読めます。</p>';
   }
 
-  // ---------- boot ----------
+  // ---------- 起動 ----------
   function boot() {
-    API.plans().then(function (p) { plans = p; route(); }).catch(function () {
-      app.innerHTML = '<p class="err">読み込みに失敗しました。ページを再読み込みしてください。</p>';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-start]'), function (b) { b.onclick = startQuiz; });
+    var brand = document.getElementById('brand');
+    if (brand) brand.onclick = function (e) { e.preventDefault(); renderIntro(); };
+    if (API.demo) setupDemo();
+    // 導入ページの料金は HTML に直接書いてあるが、lib/plans.js の値が変わったらそちらに合わせる
+    ensurePlans().then(function (p) {
+      Array.prototype.forEach.call(document.querySelectorAll('[data-price]'), function (el) {
+        var k = el.dataset.price; if (p[k]) el.textContent = yen(p[k].price);
+      });
+    }, function () { /* 取れなくても導入ページと診断は動く */ });
+    // 同じタブで結果のリンク（#コード）を開いたときにも結果を出す
+    window.addEventListener('hashchange', function () {
+      var code = (location.hash || '').slice(1);
+      if (LC.parseCode(code)) showResult(code, null);
     });
+    route();
   }
   function route() {
     var sid = null;
     try { sid = new URLSearchParams(location.search).get('session_id'); } catch (e) { sid = null; }
     if (sid) {
+      view('result');
       app.innerHTML = '<p class="muted">お支払いを確認しています…</p>';
       API.report(sid).then(function (rep) {
         if (rep && rep.code) { savePaid(rep.code, sid, rep.plan); setHash(rep.code); showResult(rep.code, null); return; }
