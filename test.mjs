@@ -97,11 +97,13 @@ for (const [core, [name, tagline]] of Object.entries(LC.TYPES)) {
   assert.ok(llms.includes(`${core} ${name}「${tagline}」`), 'llms.txt に ' + core + ' がない');
 }
 for (const att of Object.values(LC.ATT)) assert.ok(index.includes(att.name) && llms.includes(att.name), att.name);
-for (const [key, plan] of Object.entries(PLANS)) {
+// 料金はトップページには出さない（結果を見たあとに初めて見せる）。特商法ページと llms.txt には書いておく
+const legal = readFileSync('./public/legal.html', 'utf8');
+assert.ok(!/[0-9]円/.test(index) && !index.includes('有料'), 'トップページに料金や有料レポートの話が入っている');
+for (const plan of Object.values(PLANS)) {
   const yen = plan.price.toLocaleString('ja-JP');
-  assert.ok(index.includes(`<span data-price="${key}">${yen}</span>`), 'index.html の ' + key + ' の料金が lib/plans.js と違う');
-  assert.ok(index.includes(`${plan.name}が${yen}円`), 'よくある質問の ' + key + ' の料金が lib/plans.js と違う');
-  assert.ok(llms.includes(`${plan.name} ${yen}円`), 'llms.txt の ' + key + ' の料金が lib/plans.js と違う');
+  assert.ok(legal.includes(`${plan.name} ${yen}円`), '特商法ページの ' + plan.name + ' の料金が lib/plans.js と違う');
+  assert.ok(llms.includes(`${plan.name} ${yen}円`), 'llms.txt の ' + plan.name + ' の料金が lib/plans.js と違う');
 }
 const ld = JSON.parse(index.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
 const faq = ld['@graph'].find((x) => x['@type'] === 'FAQPage').mainEntity;
@@ -111,8 +113,38 @@ faq.forEach((q, i) => {
   assert.strictEqual(q.name, shown[i][0]);
   assert.strictEqual(q.acceptedAnswer.text, shown[i][1]);
 });
-const offer = ld['@graph'].find((x) => x['@type'] === 'WebApplication').offers;
-assert.strictEqual(offer.highPrice, String(Math.max(...Object.values(PLANS).map((x) => x.price))));
 assert.ok(index.includes('<!--BODY-->') && index.includes('<!--/BODY-->'));
 assert.strictEqual(index.match(/<h1[ >]/g).length, 1);
+
+// 6) タイプ別ページと sitemap.xml が、データから作り直したものと同じ（作り直し忘れを見つける）
+const { render, SITE } = await import('./tools/build-types.mjs');
+const sitemapNow = readFileSync('./public/sitemap.xml', 'utf8');
+const built = render(sitemapNow.match(/<lastmod>(.*?)<\/lastmod>/)[1]);
+assert.strictEqual(Object.keys(built).length, 17);
+for (const [path, body] of Object.entries(built)) {
+  assert.strictEqual(readFileSync('./public/' + path, 'utf8'), body, path + ' が古い。npm run build:types で作り直す');
+}
+for (const core of Object.keys(LC.TYPES)) {
+  const slug = core.toLowerCase();
+  assert.ok(index.includes(`href="types/${slug}"`), 'index.html から ' + slug + ' へのリンクがない');
+  assert.ok(llms.includes(`${SITE}/types/${slug}`), 'llms.txt に ' + slug + ' のページがない');
+  assert.ok(readFileSync(`./public/og/${slug}.png`).length > 10000, slug + ' のシェア画像がない');
+}
+
+// 7) 計測API：知らない名前は受け付けない。データベースが無くても、書き込みに失敗しても、サイトは止めない
+const { onRequestPost: postEvent } = await import('./functions/api/event.js');
+const { EVENTS, jstDay } = await import('./lib/events.js');
+const ev = (body, env = {}) => postEvent({ request: new Request('https://x/api/event', { method: 'POST', body }), env });
+assert.strictEqual((await ev('{"name":"hack"}')).status, 400);
+assert.strictEqual((await ev('not json')).status, 400);
+assert.strictEqual((await ev('{"name":"quiz_done"}')).status, 204);
+let bound;
+const db = { prepare: () => ({ bind: (...a) => { bound = a; return { run: async () => ({}) }; } }) };
+assert.strictEqual((await ev('{"name":"quiz_done"}', { DB: db })).status, 204);
+assert.deepStrictEqual(bound, [jstDay(), 'quiz_done']);
+assert.strictEqual((await ev('{"name":"lp_view"}', { DB: { prepare: () => { throw new Error('down'); } } })).status, 204);
+assert.strictEqual(jstDay(Date.UTC(2026, 0, 1, 15, 0)), '2026-01-02');
+const appJs = readFileSync('./public/app.js', 'utf8');
+for (const m of appJs.matchAll(/track(?:Once)?\('([a-z0-9_]+)'/g)) assert.ok(m[1].endsWith('_') ? EVENTS.some((e) => e.startsWith(m[1])) : EVENTS.includes(m[1]), 'lib/events.js に ' + m[1] + ' がない');
+for (const plan of Object.keys(PLANS)) assert.ok(EVENTS.includes('buy_click_' + plan) && EVENTS.includes('purchase_' + plan));
 console.log('all tests passed');

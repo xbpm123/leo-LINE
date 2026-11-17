@@ -16,8 +16,10 @@
 AIっぽい言い回しは yomiyasu（v1.0.4）の基準で直してある。
 
 購入済みのプランからは差額でアップグレードできる（ライト→スタンダード 1,000円など）。
-価格は `lib/plans.js` を直せば、購入の金額と画面の料金表に反映される。
-ただし検索・AI向けに HTML へ直接書いた料金（`public/index.html` の料金表・よくある質問・構造化データ、`public/llms.txt`、`public/legal.html`）は手で直す。直し忘れると `npm test` が落ちる。
+価格は `lib/plans.js` を直せば、購入の金額と結果ページの料金表に反映される。
+`public/legal.html`（特商法ページ）と `public/llms.txt` に書いた料金は手で直す。直し忘れると `npm test` が落ちる。
+
+トップページ（導入ページ）には、料金も有料レポートの話も出さない。値段を先に見せると「やってみたい」より先に品定めが始まるため。料金は、診断の結果を見たあとに初めて出す。
 
 ## ターゲットとデザイン
 
@@ -32,6 +34,10 @@ AIっぽい言い回しは yomiyasu（v1.0.4）の基準で直してある。
 | `public/` | サイト本体（静的ファイル）。`index.html` は導入ページ、`data.js` は無料部分の文章と質問、`app.js` は診断と結果の画面 |
 | `public/robots.txt` `sitemap.xml` `llms.txt` `_headers` | 検索エンジン・AI向けの案内と、配信時のヘッダー |
 | `tools/og.html` `tools/icon.html` | SNSで共有されたときの画像（`public/og.png`）とホーム画面アイコンの元 |
+| `tools/build-types.mjs` | 16タイプの個別ページ（`public/types/`）と `sitemap.xml` を `data.js` から作る。`npm run build:types` |
+| `tools/build-og.mjs` | タイプ別のシェア画像（`public/og/`）を作る。`npm run build:og`（Mac の Chrome が必要） |
+| `functions/api/event.js` `lib/events.js` | 計測。何人がどこまで進んだかを1日ごとの合計で数える |
+| `wrangler.toml` | Cloudflare Pages の設定（計測用データベースのつなぎ込み） |
 | `lib/premium.js` | 有料レポートの文章。サーバー側だけにあり、支払い確認後に返す |
 | `lib/plans.js` | 料金プランと差額の計算 |
 | `functions/api/plans.js` | 料金表を画面に返す |
@@ -65,7 +71,7 @@ DB もサーバーも不要。購入の証明は Stripe の Checkout Session ID�
 6. 動作確認できたら STRIPE_SECRET_KEY を `sk_live_...` に入れ替えて本番開始
 
 独自ドメインは Cloudflare Pages の「カスタムドメイン」から追加できる。
-ドメインを変えたら、`public/` の中の `https://lovecode-9ax.pages.dev` をすべて新しいドメインに置き換える（index.html の canonical・OGP・構造化データ、legal.html、robots.txt、sitemap.xml、llms.txt）。
+ドメインを変えたら、`public/` の中の `https://lovecode-9ax.pages.dev` をすべて新しいドメインに置き換える（index.html の canonical・OGP・構造化データ、legal.html、robots.txt、llms.txt）。`tools/build-types.mjs` の `SITE` も直して `npm run build:types` を実行する（タイプ別ページと sitemap.xml が作り直される）。
 
 公開後にやること（SEO）:
 - Google Search Console にサイトを登録して、`sitemap.xml` を送信する
@@ -87,4 +93,21 @@ echo 'STRIPE_SECRET_KEY=sk_test_...' > .dev.vars && npm run dev   # 本番と同
 ## メモ
 - 診断結果はブラウザの localStorage にだけ保存。購入済みレポートは同じブラウザなら再表示できる。
   別端末で見たい人には、Stripe の領収メールに URL を入れる、などを後で追加するとよい。
-- 文章を直すときは `public/data.js`（無料）と `lib/premium.js`（有料）を触る。タイプ名やキャッチコピーを変えたら、`public/index.html` の16タイプ一覧と `public/llms.txt` も合わせる（ずれると `npm test` が落ちる）。
+- 文章を直すときは `public/data.js`（無料）と `lib/premium.js`（有料）を触る。`data.js` を直したら `npm run build:types` でタイプ別ページを作り直す。タイプ名やキャッチコピーを変えたら、`public/index.html` の16タイプ一覧と `public/llms.txt` も合わせ、`npm run build:og` でシェア画像も作り直す（ずれると `npm test` が落ちる）。
+
+## 計測（何人がどこまで進んだか）
+
+```sh
+npm run stats    # 日付・出来事・回数の一覧が出る
+```
+
+- 数えているもの: 導入ページを開いた → 診断を始めた → 10問目 → 20問目 → 結果を見た → 料金プランを見た → 購入ボタンを押した → 購入した、のそれぞれの回数。ほかにシェア、招待、タイプ別ページの閲覧。一覧は `lib/events.js`
+- 回答・診断結果・IPアドレスは受け取らないし保存しない。Cookie も使わない。同じ人が2回来たら2回と数える
+- 保存先は Cloudflare D1 の `lovecode-stats`（無料枠）。表は `tools/stats-schema.sql`
+
+## 購入までの流れを助ける仕組み
+
+- タイプ別ページ `/types/<コード>`: 検索からの入口と、シェアの着地先。「診断する」は `/?start=1` で1問目から始まる
+- シェア: 結果ページのシェアはタイプ別ページのURLを送る（タイプごとの画像が出る）
+- 招待: 結果ページの「相手にも診断してもらう」が `/?invite=<自分のコード>` を送る。相手が診断を終えると「コードを送る」が出て、ペアプランの相手コード欄には招待した人のコードが最初から入る
+- 別端末: 購入後のレポートに「レポートのURLをコピー」がある（`/?session_id=...`）。このURLを開けばどの端末でも読める

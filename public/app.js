@@ -13,14 +13,41 @@
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* 保存できなくても診断は動く */ }
   }
   function setHash(code) {
-    // 購入後の戻りに付く session_id だけ外す（utm などのほかのパラメータは残す）
+    // 一度使えば用が済むパラメータだけ外す（utm などのほかのパラメータは残す）
     try {
-      var q = new URLSearchParams(location.search); q.delete('session_id');
+      var q = new URLSearchParams(location.search); q.delete('session_id'); q.delete('start'); q.delete('invite');
       var qs = q.toString();
       history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + (code ? '#' + code : ''));
     } catch (e) { /* 表示には影響しない */ }
   }
   function llNames(list) { return list.map(function (k) { return LC.LL[k].name; }).join('・'); }
+  function sget(key) { try { return sessionStorage.getItem(key); } catch (e) { return null; } }
+  function sset(key, value) { try { sessionStorage.setItem(key, value); } catch (e) { /* なくても動く */ } }
+
+  // 計測：「何人がどこまで進んだか」の合計だけを数える。回答や結果は送らない（名前の一覧は lib/events.js）
+  function track(name) {
+    if (API.demo) return;
+    try { if (navigator.sendBeacon) navigator.sendBeacon('/api/event', JSON.stringify({ name: name })); } catch (e) { /* 計測できなくても動く */ }
+  }
+  // 同じタブで何度も数えたくないもの用
+  function trackOnce(name, key) {
+    var k = 'lc_t_' + (key || name);
+    if (sget(k)) return;
+    sset(k, '1'); track(name);
+  }
+  // 招待リンク（?invite=コード）で来た人が、誰に招待されたか
+  function inviter() { var c = sget('lc_invite'); return c && LC.parseCode(c) ? c : null; }
+  function lineUrl(text, url) { return 'https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(text); }
+  function copyButton(id, text, event) {
+    var btn = document.getElementById(id);
+    if (!btn) return;
+    btn.onclick = function () {
+      var done = function () { btn.textContent = 'コピーしました'; };
+      if (event) track(event);
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () { btn.textContent = text; });
+      else btn.textContent = text;
+    };
+  }
 
   // 画面の切り替え。'lp'（導入ページ）のときだけ静的な HTML を見せ、それ以外は #app に描く
   function view(name) {
@@ -35,6 +62,12 @@
   function renderIntro() {
     setHash('');
     view('lp');
+    trackOnce('lp_view');
+    var inv = inviter(), banner = document.getElementById('invite-banner');
+    if (banner) {
+      banner.hidden = !inv;
+      if (inv) banner.textContent = inv + '「' + LC.TYPES[LC.parseCode(inv).core][0] + '」の人から、診断の招待が届いています。診断して、あなたのコードを教えてあげましょう。';
+    }
     var last = load('lc_last', null), el = document.getElementById('resume');
     if (el) {
       if (last && LC.parseCode(last.code)) {
@@ -79,7 +112,7 @@
   }
 
   // ---------- 診断 ----------
-  function startQuiz() { state = { likert: [], pairs: [], i: 0 }; view('quiz'); renderQuestion(); window.scrollTo(0, 0); }
+  function startQuiz() { state = { likert: [], pairs: [], i: 0 }; track('quiz_start'); view('quiz'); renderQuestion(); window.scrollTo(0, 0); }
 
   function renderQuestion() {
     var i = state.i, isPair = i >= LC.LIKERT.length;
@@ -106,6 +139,7 @@
       b.onclick = function () {
         if (isPair) state.pairs[i - LC.LIKERT.length] = b.dataset.v; else state.likert[i] = Number(b.dataset.v);
         b.classList.add('on');
+        if (i === 9) track('quiz_q10'); else if (i === 19) track('quiz_q20');
         setTimeout(function () { if (state.i + 1 >= TOTAL) finish(); else { state.i += 1; renderQuestion(); } }, 160);
       };
     });
@@ -115,6 +149,7 @@
   function finish() {
     var r = LC.score(state.likert, state.pairs);
     save('lc_last', { code: r.code, pct: r.pct });
+    track('quiz_done');
     showResult(r.code, r.pct);
   }
 
@@ -136,7 +171,20 @@
         '<div class="label">' + ax.label + '　' + (toPos ? ax.posName : ax.negName) + ' ' + Math.max(v, 100 - v) + '%</div></div>';
     }).join('') + '</section>' : '';
 
-    var shareUrl = location.origin + location.pathname + '#' + code;
+    // シェア先はタイプ別ページ（タイプごとの画像が出る）。1ファイルのデモ版にはそのページが無いので結果のリンクにする
+    var shareUrl = API.demo ? location.origin + location.pathname + '#' + code : location.origin + '/types/' + p.core.toLowerCase();
+    var mine = !!pct || !!owned, inv = inviter();
+    if (!mine) trackOnce('shared_view', 'shared_' + code);
+    var reply = mine && inv && inv !== code && !API.demo ? '<section class="invite hot"><h3>' + inv + '「' + LC.TYPES[LC.parseCode(inv).core][0] + '」の人に、コードを送る</h3>' +
+      '<p>招待してくれた相手に、あなたのコードを伝えましょう。2人のコードがそろうと、相性が見られます。</p>' +
+      '<div class="sharerow"><a class="btn small" id="reply-line" target="_blank" rel="noopener" href="' + lineUrl('診断したよ！私のラブコードは ' + code + '「' + t[0] + '」でした。', shareUrl) + '">LINEでコードを送る</a>' +
+      '<button class="btn ghost small" id="reply-copy">コードをコピー</button></div></section>' : '';
+    var inviteUrl = location.origin + '/?invite=' + code;
+    var inviteText = 'ラブコード診断やってみて！私は ' + code + '「' + t[0] + '」だった。結果のコードを教えてね。';
+    var invite = mine && !API.demo ? '<section class="invite"><h3>相手にも診断してもらう</h3>' +
+      '<p>恋人や気になる人のコードがわかると、2人の相性が見られます。相手の診断も無料です。</p>' +
+      '<div class="sharerow"><a class="btn small" id="invite-line" target="_blank" rel="noopener" href="' + lineUrl(inviteText, inviteUrl) + '">LINEで診断を送る</a>' +
+      '<button class="btn ghost small" id="invite-copy">招待リンクをコピー</button></div></section>' : '';
     var shareText = '私のラブコードは ' + code + '「' + t[0] + '」でした。' + t[1] + '。';
     // 自分で診断した結果でも、購入済みでもないとき（シェアされたリンクを開いた人）には診断への入口を出す
     var visitor = !pct && !owned ? '<section class="visitor"><p><strong>これは ' + code + '「' + t[0] + '」の結果ページです。</strong><br>あなたのラブコードも調べてみませんか？</p>' +
@@ -152,10 +200,11 @@
       '<div class="chips"><span class="chip att">' + a.name + '</span>' + p.ll.map(function (k, i) { return '<span class="chip">' + (i ? 'サブ ' : 'メイン ') + LC.LL[k].name + '</span>'; }).join('') + '</div>' +
       '</section>' +
       '<div class="sharerow">' +
-      '<a class="btn ghost small" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText + ' #ラブコード診断') + '&url=' + encodeURIComponent(shareUrl) + '">Xでシェア</a>' +
-      '<a class="btn ghost small" target="_blank" rel="noopener" href="https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent(shareUrl) + '&text=' + encodeURIComponent(shareText) + '">LINEで送る</a>' +
+      '<a class="btn ghost small" id="share-x" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText + ' #ラブコード診断') + '&url=' + encodeURIComponent(shareUrl) + '">Xでシェア</a>' +
+      '<a class="btn ghost small" id="share-line" target="_blank" rel="noopener" href="' + lineUrl(shareText, shareUrl) + '">LINEで送る</a>' +
       '<button class="btn ghost small" id="share">結果をコピー</button></div>' +
       visitor +
+      reply +
       axes +
       '<section class="sec"><h3>' + a.name + 'のあなた' + free + '</h3>' + prose(a.body) + '</section>' +
       '<section class="sec"><h3>' + t[0] + 'の物語' + free + '</h3>' + prose(LC.STORY[p.core]) + '</section>' +
@@ -163,6 +212,7 @@
       '<section class="sec"><h3>あなたに響く愛情言語' + free + '</h3><dl class="kv">' + p.ll.map(function (k) {
         return '<div><dt>' + LC.LL[k].name + '（' + LC.LL[k].en + '）</dt><dd>' + LC.LL[k].short + '</dd></div>';
       }).join('') + '</dl></section>' +
+      invite +
       '<div id="premium"></div><div id="upgrade"></div>' +
       '<div class="sharerow"><button class="btn ghost small" id="again">' + (pct || owned ? 'もう一度診断する' : '自分も診断する') + '</button><button class="btn ghost small" id="top">トップへ</button></div>' +
       footer();
@@ -171,13 +221,13 @@
     document.getElementById('top').onclick = renderIntro;
     var vs = document.getElementById('visitor-start');
     if (vs) vs.onclick = startQuiz;
-    document.getElementById('share').onclick = function (e) {
-      var text = shareText + ' #ラブコード診断 ' + shareUrl;
-      var btn = e.currentTarget;
-      var done = function () { btn.textContent = 'コピーしました'; };
-      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () { btn.textContent = text; });
-      else btn.textContent = text;
-    };
+    copyButton('share', shareText + ' #ラブコード診断 ' + shareUrl, 'share_copy');
+    copyButton('invite-copy', inviteText + ' ' + inviteUrl, 'invite_send');
+    copyButton('reply-copy', '私のラブコードは ' + code + '「' + t[0] + '」でした。', 'reply_send');
+    [['share-x', 'share_x'], ['share-line', 'share_line'], ['invite-line', 'invite_send'], ['reply-line', 'reply_send']].forEach(function (x) {
+      var el = document.getElementById(x[0]);
+      if (el) el.addEventListener('click', function () { track(x[1]); });
+    });
 
     mountPremium(code, owned);
     window.scrollTo(0, 0);
@@ -272,7 +322,7 @@
         (k === 'pair' ? '<p class="note">1人あたり ' + yen(plans.pair.price / 2) + '円</p>' : '') +
         '<ul>' + head.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
         (rest.length ? '<details><summary>ほかに' + rest.length + '項目</summary><ul>' + rest.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></details>' : '') +
-        (k === 'pair' ? '<label class="note" for="pair-partner">相手のラブコード（先に相手にも無料診断してもらってね）</label><input type="text" id="pair-partner" placeholder="例：CKSM-A" autocomplete="off">' : '') +
+        (k === 'pair' ? '<label class="note" for="pair-partner">相手のラブコード（先に相手にも無料診断してもらってね）</label><input type="text" id="pair-partner" placeholder="例：CKSM-A" autocomplete="off" value="' + (inviter() && inviter() !== code ? inviter() : '') + '">' : '') +
         '<button class="btn' + (star ? '' : ' ghost') + '" data-plan="' + k + '">' + (owned ? info.name + 'にアップグレード' : info.name + 'を購入') + '</button>' +
         '</div>';
     }).join('');
@@ -284,7 +334,16 @@
     el.innerHTML = '<section class="teaser" id="' + (owned ? 'upgrade-plans' : 'plans') + '">' + lead +
       '<div class="plans">' + cards + '</div><p class="err" id="buy-err" hidden></p>' +
       '<p class="note">買い切りです。月額料金はかかりません。クレジットカード、Apple Pay、Google Pay に対応。決済は Stripe で安全に処理されます。</p></section>';
-    if (!owned) sticky(t[0] + 'の取扱説明書を読む<small>買い切り ' + yen(plans.lite.price) + '円〜</small>');
+    if (!owned) {
+      sticky(t[0] + 'の取扱説明書を読む<small>買い切り ' + yen(plans.lite.price) + '円〜</small>');
+      // 料金プランが実際に画面に入ったときに一度だけ数える
+      if ('IntersectionObserver' in window) {
+        var seen = new IntersectionObserver(function (es) {
+          if (es[0].isIntersecting) { trackOnce('plans_view'); seen.disconnect(); }
+        });
+        seen.observe(document.getElementById('plans'));
+      }
+    }
 
     Array.prototype.forEach.call(el.querySelectorAll('button[data-plan]'), function (btn) {
       btn.onclick = function () {
@@ -295,6 +354,7 @@
         }
         var label = btn.textContent;
         btn.disabled = true; btn.textContent = '決済ページを準備中…'; err.hidden = true;
+        track('buy_click_' + plan);
         API.checkout({ code: code, plan: plan, partner: partner, upgradeFrom: owned ? owned.sid : null }).then(function (res) {
           if (res.url) { location.href = res.url; return; }
           if (res.sessionId) { savePaid(code, res.sessionId, plan); showResult(code, null); return; }
@@ -312,7 +372,7 @@
     el.innerHTML = '<p class="muted">レポートを読み込んでいます…</p>';
     API.report(owned.sid).then(function (rep) {
       if (!rep || rep.error) throw new Error((rep && rep.error) || 'レポートを読み込めませんでした');
-      renderPremium(code, rep);
+      renderPremium(code, rep, owned.sid);
       renderPlans(code, { sid: owned.sid, plan: rep.plan });
     }).catch(function (x) {
       el.innerHTML = '<p class="err">' + x.message + '</p>';
@@ -439,7 +499,7 @@
     return '<details class="toc"><summary>目次（' + secs.length + '項目）</summary><ol>' + items + '</ol></details>';
   }
 
-  function renderPremium(code, rep) {
+  function renderPremium(code, rep, sid) {
     var p = LC.parseCode(code), el = document.getElementById('premium');
     var html = '';
     if (rep.together) html += togetherHtml(p, rep);
@@ -451,7 +511,12 @@
       html += '<details class="partner-report"><summary><h2 class="part">相手のレポート（<span class="nw">' + rep.partner.code + '</span>「' + LC.TYPES[o.core][0] + '」）</h2><span class="note">タップで開く</span></summary>' +
         '<div class="stack">' + selfHtml(o, rep.partner.lite) + standardHtml(o, rep.partner.standard, false) + '</div></details>';
     }
-    el.innerHTML = '<div class="stack" id="report">' + html + '</div>';
+    // 購入の証明は Stripe の購入ID。これを付けたURLを開けば、別の端末でも同じレポートが読める
+    var keep = API.demo || !sid ? '' : '<section class="invite"><h3>別の端末でも読むには</h3>' +
+      '<p>このレポート専用のURLです。自分あてにLINEやメールで送っておくと、スマホを変えたり、別のブラウザで開いたりしても読み返せます。URLを知っている人は誰でも読めるので、人には送らないでください。</p>' +
+      '<div class="sharerow"><button class="btn small" id="keep-copy">レポートのURLをコピー</button></div></section>';
+    el.innerHTML = keep + '<div class="stack" id="report" style="margin-top:28px">' + html + '</div>';
+    copyButton('keep-copy', location.origin + '/?session_id=' + encodeURIComponent(sid || ''), 'link_copy');
     var stack = document.getElementById('report');
     var toc = tocHtml(stack);
     if (toc) {
@@ -495,12 +560,10 @@
     var brand = document.getElementById('brand');
     if (brand) brand.onclick = function (e) { e.preventDefault(); renderIntro(); };
     if (API.demo) setupDemo();
-    // 導入ページの料金は HTML に直接書いてあるが、lib/plans.js の値が変わったらそちらに合わせる
-    ensurePlans().then(function (p) {
-      Array.prototype.forEach.call(document.querySelectorAll('[data-price]'), function (el) {
-        var k = el.dataset.price; if (p[k]) el.textContent = yen(p[k].price);
-      });
-    }, function () { /* 取れなくても導入ページと診断は動く */ });
+    var params = null;
+    try { params = new URLSearchParams(location.search); } catch (e) { params = null; }
+    var inv = params && normalize(params.get('invite'));
+    if (inv && LC.parseCode(inv)) { sset('lc_invite', inv); trackOnce('invite_open'); }
     // 同じタブで結果のリンク（#コード）を開いたときにも結果を出す
     window.addEventListener('hashchange', function () {
       var code = (location.hash || '').slice(1);
@@ -515,7 +578,12 @@
       view('result');
       app.innerHTML = '<p class="muted">お支払いを確認しています…</p>';
       API.report(sid).then(function (rep) {
-        if (rep && rep.code) { savePaid(rep.code, sid, rep.plan); setHash(rep.code); showResult(rep.code, null); return; }
+        if (rep && rep.code) {
+          // 購入は、同じ購入IDにつき一度だけ数える（URLを開き直しても増えない）
+          var counted = load('lc_counted', []);
+          if (counted.indexOf(sid) < 0 && PLAN_INFO[rep.plan]) { counted.push(sid); save('lc_counted', counted); track('purchase_' + rep.plan); }
+          savePaid(rep.code, sid, rep.plan); setHash(rep.code); showResult(rep.code, null); return;
+        }
         app.innerHTML = '<section class="panel"><p class="err">' + ((rep && rep.error) || '購入情報を確認できませんでした') + '</p>' +
           '<p class="note">コンビニ払いなどでお支払いが完了していない場合は、完了後にこのページを開き直してください。</p><div><button class="btn small" id="top">トップへ</button></div></section>';
         document.getElementById('top').onclick = renderIntro;
@@ -523,7 +591,11 @@
       return;
     }
     var code = (location.hash || '').slice(1);
-    if (LC.parseCode(code)) showResult(code, null); else renderIntro();
+    var start = false;
+    try { start = new URLSearchParams(location.search).get('start') === '1'; } catch (e) { start = false; }
+    if (LC.parseCode(code)) showResult(code, null);
+    else if (start) { setHash(''); startQuiz(); }   // タイプ別ページの「診断する」から来たときは、すぐ1問目へ
+    else renderIntro();
   }
   boot();
 })();

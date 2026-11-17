@@ -42,3 +42,22 @@
 
 - [ラブコード診断（トップ・診断）](https://lovecode-9ax.pages.dev/): 診断の説明、16タイプの一覧、料金、よくある質問、診断の開始
 - [特定商取引法に基づく表記・プライバシーポリシー](https://lovecode-9ax.pages.dev/legal)
+
+## タイプ別ページ
+
+- [ひまわり（COFH）](https://lovecode-9ax.pages.dev/types/cofh): 好きをまっすぐ照らす人。恋愛傾向、物語、恋愛あるある
+- [船長（COFM）](https://lovecode-9ax.pages.dev/types/cofm): 二人の進路を迷わず決める人。恋愛傾向、物語、恋愛あるある
+- [縁側（COSH）](https://lovecode-9ax.pages.dev/types/cosh): ゆっくり深く、包み込む人。恋愛傾向、物語、恋愛あるある
+- [大樹（COSM）](https://lovecode-9ax.pages.dev/types/cosm): 何年たっても揺るがない人。恋愛傾向、物語、恋愛あるある
+- [花火（EOFH）](https://lovecode-9ax.pages.dev/types/eofh): 一瞬で燃え上がる、大きな愛の人。恋愛傾向、物語、恋愛あるある
+- [名探偵（EOFM）](https://lovecode-9ax.pages.dev/types/eofm): 小さなサインも見逃さない人。恋愛傾向、物語、恋愛あるある
+- [月見草（EOSH）](https://lovecode-9ax.pages.dev/types/eosh): 静かに想いを咲かせ続ける人。恋愛傾向、物語、恋愛あるある
+- [天気予報士（EOSM）](https://lovecode-9ax.pages.dev/types/eosm): 恋の雲行きを先読みする人。恋愛傾向、物語、恋愛あるある
+- [風来坊（CKFH）](https://lovecode-9ax.pages.dev/types/ckfh): ときめきに素直、でも縛られない人。恋愛傾向、物語、恋愛あるある
+- [ソロキャンパー（CKFM）](https://lovecode-9ax.pages.dev/types/ckfm): 自分の世界ごと愛してほしい人。恋愛傾向、物語、恋愛あるある
+- [黒猫（CKSH）](https://lovecode-9ax.pages.dev/types/cksh): 気まぐれに甘える、懐くと深い人。恋愛傾向、物語、恋愛あるある
+- [書斎の住人（CKSM）](https://lovecode-9ax.pages.dev/types/cksm): 静かな信頼を積み上げる人。恋愛傾向、物語、恋愛あるある
+- [ジェットコースター（EKFH）](https://lovecode-9ax.pages.dev/types/ekfh): 近づくと怖く、離れると寂しい人。恋愛傾向、物語、恋愛あるある
+- [綱渡り師（EKFM）](https://lovecode-9ax.pages.dev/types/ekfm): 頭でバランスを取りすぎる人。恋愛傾向、物語、恋愛あるある
+- [ハリネズミ（EKSH）](https://lovecode-9ax.pages.dev/types/eksh): 近づきたいのに、トゲが出る人。恋愛傾向、物語、恋愛あるある
+- [要塞（EKSM）](https://lovecode-9ax.pages.dev/types/eksm): 守りは固く、内側は誰より繊細な人。恋愛傾向、物語、恋愛あるある

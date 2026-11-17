@@ -6,7 +6,10 @@
     "dev": "wrangler pages dev public",
     "deploy": "wrangler pages deploy public --project-name lovecode",
     "build:demo": "node build-demo.mjs",
-    "test": "node test.mjs"
+    "test": "node test.mjs",
+    "build:types": "node tools/build-types.mjs",
+    "build:og": "node tools/build-og.mjs",
+    "stats": "wrangler d1 execute lovecode-stats --remote --command \"SELECT day, name, n FROM events ORDER BY day DESC, name\""
   },
   "devDependencies": {
     "wrangler": "^4.0.0"

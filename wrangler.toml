@@ -1,0 +1,10 @@
+# Cloudflare Pages の設定。シークレット（STRIPE_SECRET_KEY）はここには書かず、wrangler pages secret put で登録する
+name = "lovecode"
+pages_build_output_dir = "public"
+compatibility_date = "2026-11-01"
+
+# 計測用のデータベース（何人がどこまで進んだかの合計だけを数える）
+[[d1_databases]]
+binding = "DB"
+database_name = "lovecode-stats"
+database_id = "ae585c72-0210-417c-873f-cc33ed437171"
