@@ -147,4 +147,54 @@ assert.strictEqual(jstDay(Date.UTC(2026, 0, 1, 15, 0)), '2026-01-02');
 const appJs = readFileSync('./public/app.js', 'utf8');
 for (const m of appJs.matchAll(/track(?:Once)?\('([a-z0-9_]+)'/g)) assert.ok(m[1].endsWith('_') ? EVENTS.some((e) => e.startsWith(m[1])) : EVENTS.includes(m[1]), 'lib/events.js に ' + m[1] + ' がない');
 for (const plan of Object.keys(PLANS)) assert.ok(EVENTS.includes('buy_click_' + plan) && EVENTS.includes('purchase_' + plan));
+
+// 8) 購入前に見せる「続きの冒頭」：1文目と、2文目の書き出しだけ。続きの大半は出さない
+const { buildPreview, countChars } = await import('./lib/preview.js');
+const { onRequestGet: getPreview } = await import('./functions/api/preview.js');
+for (const code of codes) {
+  const pv = buildPreview(code), seen = buildReport(code, 'lite').lite.seen;
+  assert.ok(pv.lead.endsWith('。') && seen.startsWith(pv.lead + pv.fade), code);
+  assert.ok(pv.fade.length > 0 && pv.fade.length <= 14 && pv.lead.length + pv.fade.length < seen.length, code + ' の冒頭が長すぎる');
+  assert.ok(pv.chars.lite > 2000 && pv.chars.standard > pv.chars.lite, code);
+}
+assert.strictEqual(buildPreview('bad'), null);
+assert.ok(countChars({ a: 'あい', b: ['う'] }) === 3);
+assert.strictEqual((await getPreview({ request: new Request('https://x/api/preview?code=bad') })).status, 400);
+const pvRes = await getPreview({ request: new Request('https://x/api/preview?code=EOSH-WP') }).then((r) => r.json());
+assert.ok(pvRes.lead && !JSON.stringify(pvRes).includes('portrait'));
+
+// 9) 決済をやめて戻る先は、結果ページ（やめたことが分かる印つき）
+await post({ code: 'EOSH-WP', plan: 'lite' });
+assert.strictEqual(sent.get('cancel_url'), 'https://lovecode.pages.dev/?canceled=1#EOSH-WP');
+assert.ok(sent.get('success_url').includes('session_id={CHECKOUT_SESSION_ID}'));
+
+// 10) 結果ページ：見出しの横に「無料」やプラン名のタグを付けない。プラン選びは区切りには並べない
+assert.ok(!/class="tag[ "]|stickybuy/.test(appJs) && !index.includes('stickybuy'));
+assert.ok(appJs.includes('ここから先は有料です') && appJs.includes('id="buy"'));
+
+// 11) トップページの言葉づかい：読む人を「病気」と決めつけない（愛着障害は医師が診断するもの。この診断で分かるのは傾向）
+assert.ok(!/愛着障害(です|かも|になっ|の可能性|のせい)/.test(index), 'トップページが「愛着障害」と決めつけている');
+assert.ok(index.includes('愛着障害とは違うのですか？') && index.includes('医学的・心理学的な診断ではありません'));
+assert.ok(!index.includes('愛情言語') && !appJs.includes('愛情言語'), '「愛の言語」に統一する');
+
+// 12) 診断の質問には、どれも具体例が付いている
+for (const item of LC.LIKERT) assert.ok(item.ex && item.ex.length >= 10 && item.ex.length <= 40, item.q + ' の具体例');
+
+// 13) 改行の位置：語の途中や、句読点の前では切らない。最後に1〜2文字だけ残さない
+vm.runInNewContext(readFileSync('./public/phrase.js', 'utf8'), ctx);
+const split = (t) => Array.from(ctx.window.LCPhrase.split(t));
+assert.deepStrictEqual(split('返信が遅いと、嫌われたかもと考えてしまう'), ['返信が', '遅いと、', '嫌われたかもと', '考えてしまう']);
+assert.deepStrictEqual(split('仕事で落ち込んだ日に、「今日はつらかった」と話せる').slice(-2), ['「今日はつらかった」と', '話せる']);
+assert.deepStrictEqual(split('静かに想いを咲かせ続ける人').slice(-1), ['続ける人']);
+for (const word of ['贈り物', '取り扱い', '付き合い', '話し合い', '思い出', 'ひだまり型', 'ひとり時間型', 'たしかめ型', 'ゆらぎ型', '愛の言語', '一緒の時間', 'その日', 'やり直す', 'やり方', 'お土産']) {
+  assert.deepStrictEqual(split(word), [word], word + ' の途中で切れる');
+}
+const texts = [...LC.LIKERT.flatMap((x) => [x.q, x.ex]), ...LC.PAIRS.flatMap((x) => [x.qa, x.qb]), ...Object.values(LC.TYPES).map((x) => x[1]), ...Object.values(LC.ARUARU).flat()];
+for (const t of texts) {
+  const parts = split(t);
+  assert.strictEqual(parts.join(''), t);
+  assert.ok(parts.every((x) => !/^[、。！？」』）]/.test(x)), t + ' で句読点が行頭に来る');
+  assert.ok(parts.length === 1 || parts[parts.length - 1].replace(/[、。！？」』）]/g, '').length > 2, t + ' の最後が短すぎる');
+}
+assert.ok(index.includes('<script src="phrase.js"></script>') && !/auto-phrase;/.test(readFileSync('./public/style.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')));
 console.log('all tests passed');

@@ -31,6 +31,9 @@
   --sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "Yu Gothic UI", "Yu Gothic", Meiryo, system-ui, sans-serif;
   --latin: "Outfit", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
   --shadow: 0 1px 2px rgba(26, 23, 25, .05), 0 16px 40px -16px rgba(26, 23, 25, .18);
+  /* 色の役割: --accent は「押すもの」（ボタン・選択中）だけ。--mark は読み物の飾りで、結果ページではその人の愛着スタイルの色になる */
+  --mark: var(--accent);
+  --mark-soft: var(--accent-soft);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -64,8 +67,11 @@ body {
   -webkit-font-smoothing: antialiased;
   line-break: strict; overflow-wrap: anywhere;
 }
-/* 見出しや短い文は、文節の切れ目で改行する（長い本文は行の端まで詰めたほうが読みやすい） */
-h1, h2, h3, h4, .btn, .lead, .sub, .qtext, .tagline, .choices button, .react .q, .aru li, .tile, .locked li, ul.aruaru li, .stickybuy p, .faq summary, .steps p, .after { word-break: auto-phrase; }
+/* 見出しや短い文は、文節の切れ目でだけ改行する。切ってよい位置には phrase.js が <wbr> を入れる
+   （word-break: auto-phrase は iPhone の Safari で効かないので使わない）。長い本文は行の端まで詰める */
+.ph { word-break: keep-all; overflow-wrap: anywhere; }
+.lead, .sub, .after, .tagline, .punch, .qex, .choices button, ul.aruaru li, .visitor p, .calm, .paywall .lede { text-wrap: balance; }
+p, dd, li { text-wrap: pretty; }
 [hidden] { display: none !important; }
 .nw { white-space: nowrap; }
 .boot-app #lp { display: none; }
@@ -93,6 +99,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px -8px var(--accent); }
 .btn:disabled { opacity: .6; transform: none; box-shadow: none; cursor: default; }
 .btn.big { font-size: 18px; padding: 16px 34px; min-height: 60px; }
+@media (max-width: 400px) { .btn.big { font-size: 17px; padding-inline: 20px; } }
 .btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
 .btn.ghost:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
 .btn.small { padding: 8px 16px; min-height: 40px; font-size: 14px; border-radius: 10px; }
@@ -117,7 +124,7 @@ body[data-view="quiz"] .top .btn, body[data-view="result"] .top .btn { display: 
 
 /* ---------- 導入ページ ---------- */
 .lp section { padding-block: clamp(56px, 9vw, 104px); }
-.lp h2 { font-size: clamp(26px, 5.2vw, 42px); text-align: center; }
+.lp h2 { font-size: clamp(24px, 5.2vw, 42px); text-align: center; }
 .lp .sub { text-align: center; color: var(--muted); max-width: 36em; margin: 14px auto 0; }
 .lp .head { margin-bottom: clamp(28px, 5vw, 48px); }
 
@@ -128,8 +135,9 @@ body[data-view="quiz"] .top .btn, body[data-view="result"] .top .btn { display: 
 .faces span:nth-child(4), .faces span:nth-child(5) { width: 64px; height: 64px; font-size: 31px; margin-top: -5px; z-index: 1; }
 @media (max-width: 420px) { .faces span { width: 44px; height: 44px; font-size: 21px; } .faces span:nth-child(4), .faces span:nth-child(5) { width: 52px; height: 52px; font-size: 25px; } }
 .hero .kicker { font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: .08em; margin-bottom: 14px; display: block; }
-.hero h1 { font-size: clamp(30px, 6.6vw, 54px); line-height: 1.32; max-width: 17em; margin-inline: auto; }
-.hero .lead { font-size: clamp(16px, 2.4vw, 18px); color: var(--muted); max-width: 33em; margin: 22px auto 0; }
+.hero h1 { font-size: clamp(26px, 8.2vw, 54px); line-height: 1.32; max-width: 17em; margin-inline: auto; }
+.hero .lead { font-size: clamp(17px, 2.6vw, 20px); font-weight: 700; color: var(--ink2); max-width: 33em; margin: 22px auto 0; line-height: 1.8; }
+.hero .lead2 { font-size: 16px; color: var(--muted); max-width: 34em; margin: 14px auto 0; }
 .hero code, .lp code { font-family: var(--latin); font-weight: 700; color: var(--ink); background: var(--card); border-radius: 6px; padding: 1px 7px; font-size: .95em; white-space: nowrap; }
 .cta { display: grid; justify-items: center; gap: 12px; margin-top: 32px; }
 .cta .facts { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: 13px; color: var(--muted); padding: 0; margin: 0; list-style: none; }
@@ -143,7 +151,7 @@ body[data-view="quiz"] .top .btn, body[data-view="result"] .top .btn { display: 
 .chat { width: 100%; max-width: 360px; background: var(--surface); border-radius: 28px; padding: 18px 16px 22px; box-shadow: var(--shadow); display: grid; gap: 8px; }
 .chat .who { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 8px; font-weight: 700; font-size: 15px; }
 .chat .who i { width: 34px; height: 34px; border-radius: 50%; background: var(--t-ck); display: grid; place-items: center; font-style: normal; font-size: 18px; }
-.chat .b { justify-self: end; max-width: 82%; background: var(--ink); color: var(--bg); border-radius: 18px 18px 4px 18px; padding: 9px 14px; font-size: 15px; line-height: 1.6; }
+.chat .b { justify-self: end; max-width: 88%; background: var(--ink); color: var(--bg); border-radius: 18px 18px 4px 18px; padding: 9px 14px; font-size: 14px; line-height: 1.6; }
 .chat .meta { justify-self: end; font-size: 11px; color: var(--muted); }
 .chat .gap { justify-self: center; font-size: 12px; color: var(--muted); background: var(--card); border-radius: 99px; padding: 3px 14px; margin: 10px 0 2px; }
 .chat .wait { justify-self: start; display: flex; gap: 5px; padding: 12px 14px; background: var(--card); border-radius: 18px 18px 18px 4px; }
@@ -170,6 +178,23 @@ body[data-view="quiz"] .top .btn, body[data-view="result"] .top .btn { display: 
   .aru .em { width: 44px; height: 44px; font-size: 22px; border-radius: 12px; }
 }
 .aru-card .foot-note { text-align: center; color: var(--dark-muted); font-size: 14px; margin-top: 18px; }
+
+/* 「それはクセです」と言い直すところ */
+.reframe { max-width: 38em; margin: clamp(28px, 5vw, 44px) auto 0; display: grid; gap: 14px; }
+.reframe h3 { font-size: clamp(20px, 4vw, 26px); text-align: center; }
+.reframe p { color: var(--ink2); }
+.reframe .punch { font-size: clamp(18px, 3.4vw, 22px); font-weight: 700; color: var(--ink); line-height: 1.7; text-align: center; text-wrap: balance; margin-top: 6px; }
+
+/* 愛の言語 */
+.story { max-width: 38em; margin: 0 auto clamp(24px, 4vw, 36px); color: var(--ink2); }
+.langs { display: grid; gap: 10px; max-width: 880px; margin-inline: auto; }
+.lang { background: var(--card); border-radius: 18px; padding: 18px 20px; display: grid; grid-template-columns: 180px minmax(0, 1fr) minmax(0, 1fr); gap: 8px 22px; align-items: start; }
+.lang h3 { font-size: 18px; display: flex; gap: 10px; align-items: center; }
+.lang .em { width: 40px; height: 40px; border-radius: 12px; background: var(--surface); display: grid; place-items: center; font-size: 20px; flex: none; }
+.lang p { font-size: 15px; color: var(--ink2); line-height: 1.75; }
+.lang .k { display: block; font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--muted); margin-bottom: 2px; }
+.lang p:last-child .k { color: var(--accent); }
+@media (max-width: 760px) { .lang { grid-template-columns: minmax(0, 1fr); gap: 10px; } }
 
 /* 流れ・コードの読み方 */
 .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; counter-reset: step; }
@@ -211,6 +236,13 @@ body[data-view="quiz"] .top .btn, body[data-view="result"] .top .btn { display: 
   .tile strong { flex-direction: column; align-items: center; font-size: 15px; }
   .tile span.d { text-wrap: balance; }
 }
+@media (max-width: 360px) { .tile { padding: 14px 4px; } .tile strong { font-size: 13px; } }
+@media (max-width: 360px) {
+  .aru li { font-size: 14px; }
+  .brand { font-size: 15px; }
+  .top .btn { padding: 8px 12px; white-space: nowrap; }
+  .top .btn .arrow { display: none; }
+}
 
 /* 根拠 */
 .basis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
@@ -246,8 +278,11 @@ body[data-view="quiz"] .top .btn, body[data-view="result"] .top .btn { display: 
 .progress .bar { height: 8px; background: var(--card); border-radius: 99px; overflow: hidden; }
 .progress .bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .25s ease; }
 .progress .meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; }
-.qcard { padding: clamp(28px, 7vw, 56px) 0; display: grid; gap: 36px; min-height: 340px; align-content: center; }
+.qcard { padding: clamp(24px, 6vw, 48px) 0; display: grid; gap: 30px; min-height: 420px; align-content: center; }
 .qcard .eyebrow { text-align: center; }
+.qhead { display: grid; gap: 16px; }
+.qex { justify-self: center; max-width: 30em; background: var(--card); border-radius: 14px; padding: 12px 16px; font-size: 15px; line-height: 1.75; color: var(--ink2); text-align: center; }
+.qex b { display: block; font-size: 11px; letter-spacing: .1em; color: var(--muted); margin-bottom: 2px; }
 .qcard .qtext { font-size: clamp(21px, 5vw, 27px); font-weight: 700; line-height: 1.6; text-wrap: balance; text-align: center; }
 .likert { display: grid; gap: 12px; max-width: 420px; width: 100%; margin-inline: auto; }
 .likert .dots { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
@@ -290,35 +325,32 @@ body[data-view="quiz"] .top .btn, body[data-view="result"] .top .btn { display: 
 .axis .names b { color: var(--ink); }
 .axis .track { position: relative; height: 12px; background: var(--surface); border-radius: 99px; }
 .axis .track::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; background: var(--line); }
-.axis .track i { position: absolute; top: 0; bottom: 0; background: var(--accent); border-radius: 99px; z-index: 1; }
+.axis .track i { position: absolute; top: 0; bottom: 0; background: var(--mark); border-radius: 99px; z-index: 1; }
 .axis .label { font-size: 12px; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
 
 .sec { display: grid; gap: 14px; scroll-margin-top: 76px; }
 .sec h2, .sec h3 { font-size: 21px; line-height: 1.5; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
 .sec > p, .prose p, .kv p, .qa p { color: var(--ink2); line-height: 1.95; }
 .prose { display: grid; gap: 14px; }
-.tag { font-size: 11px; letter-spacing: .06em; border-radius: 6px; padding: 2px 8px; font-weight: 700; line-height: 1.6; white-space: nowrap; }
-.tag.free { background: var(--card); color: var(--muted); }
-.tag.paid { background: var(--accent-soft); color: var(--accent); }
 .kv { display: grid; gap: 18px; margin: 0; }
 .kv > div { display: grid; gap: 6px; }
 .kv dt, .kv .k { font-size: 14px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; }
-.kv dt::before, .kv .k::before { content: ""; width: 4px; height: 16px; border-radius: 2px; background: var(--accent); flex: none; }
+.kv dt::before, .kv .k::before { content: ""; width: 4px; height: 16px; border-radius: 2px; background: var(--mark); flex: none; }
 .kv dd { margin: 0; color: var(--ink2); line-height: 1.95; }
 .kv .kv { padding-left: 12px; }
 ul.dots { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 ul.dots li { position: relative; padding-left: 20px; color: var(--ink2); line-height: 1.8; }
-ul.dots li::before { content: ""; position: absolute; left: 3px; top: .72em; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+ul.dots li::before { content: ""; position: absolute; left: 3px; top: .72em; width: 7px; height: 7px; border-radius: 50%; background: var(--mark); }
 ul.aruaru { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 ul.aruaru li { background: var(--card); border-radius: 14px; padding: 14px 16px 14px 46px; position: relative; font-weight: 700; line-height: 1.7; }
-ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px; color: var(--accent); font-weight: 700; }
-.ask { border-left: 4px solid var(--accent); padding: 12px 16px; background: var(--card); border-radius: 0 12px 12px 0; font-weight: 700; line-height: 1.8; }
+ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px; color: var(--mark); font-weight: 700; }
+.ask { border-left: 4px solid var(--mark); padding: 12px 16px; background: var(--card); border-radius: 0 12px 12px 0; font-weight: 700; line-height: 1.8; }
 .ask + .ask { margin-top: 8px; }
 .ask .who { display: block; font-size: 12px; font-weight: 700; color: var(--muted); }
 .tips { margin: 0; padding: 0; list-style: none; counter-reset: tip; display: grid; gap: 16px; }
 .tips li { counter-increment: tip; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: start; color: var(--ink2); line-height: 1.8; }
 .tips li strong { color: var(--ink); }
-.tips li::before { content: counter(tip); font-family: var(--latin); font-weight: 700; font-size: 16px; width: 34px; height: 34px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; line-height: 1; }
+.tips li::before { content: counter(tip); font-family: var(--latin); font-weight: 700; font-size: 16px; width: 34px; height: 34px; border-radius: 50%; background: var(--mark-soft); color: var(--mark); display: grid; place-items: center; line-height: 1; }
 .compat-form { display: flex; gap: 8px; flex-wrap: wrap; }
 .compat-form input { flex: 1 1 160px; text-transform: uppercase; }
 .compat-out { display: grid; gap: 12px; }
@@ -344,33 +376,50 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
 .tlink.on { background: var(--ink); color: var(--bg); }
 @media (hover: hover) { a.tlink:hover { background: var(--accent-soft); } a.tile:hover { transform: translateY(-2px); box-shadow: var(--shadow); } }
 
-/* 購入 */
-.teaser { background: var(--tint); border-radius: 24px; padding: 28px 22px; display: grid; gap: 16px; scroll-margin-top: 76px; }
-.teaser h3 { font-size: 22px; }
-.locked { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.locked li { background: var(--surface); border-radius: 12px; padding: 12px 14px 12px 42px; position: relative; font-weight: 700; font-size: 15px; line-height: 1.6; }
-.locked li::before { content: "🔒"; position: absolute; left: 13px; top: 11px; font-size: 15px; }
-.plans { display: grid; gap: 14px; }
-.plan { position: relative; background: var(--surface); border: 1.5px solid var(--line); border-radius: 20px; padding: 24px 20px; display: grid; gap: 12px; min-width: 0; }
-.plan.star { border: 2.5px solid var(--accent); }
-.plan .eyebrow { font-family: var(--latin); }
-.plan h4 { font-size: 18px; line-height: 1.5; }
-.plan .price { font-family: var(--latin); font-weight: 700; font-size: 36px; line-height: 1.1; font-variant-numeric: tabular-nums; }
-.plan .price small { font-family: var(--sans); font-size: 13px; color: var(--muted); font-weight: 500; }
-.plan details summary { cursor: pointer; font-size: 14px; font-weight: 700; color: var(--muted); padding: 4px 0; }
-.plan ul { margin: 6px 0 0; padding: 0; list-style: none; font-size: 14px; line-height: 1.7; display: grid; gap: 6px; color: var(--ink2); }
-.plan ul li { padding-left: 22px; position: relative; }
-.plan ul li::before { content: "✓"; position: absolute; left: 2px; color: var(--accent); font-weight: 700; }
-.plan .btn { width: 100%; }
-.plan input { width: 100%; text-transform: uppercase; }
-.badge { position: absolute; top: -13px; left: 18px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 12px; }
-.stickybuy { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); transform: translateY(110%); transition: transform .25s ease; }
-.stickybuy { visibility: hidden; }
-.stickybuy.show { transform: none; visibility: visible; }
-.stickybuy > div { max-width: 640px; margin-inline: auto; display: flex; gap: 12px; align-items: center; justify-content: space-between; }
-.stickybuy p { font-size: 13px; font-weight: 700; line-height: 1.5; min-width: 0; }
-.stickybuy p small { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
-.stickybuy .btn { flex: none; min-height: 46px; padding: 10px 18px; font-size: 15px; }
+/* 続きの読みかけと、有料の区切り */
+.peek { margin-bottom: -4px; }
+.paywall { display: grid; gap: 16px; scroll-margin-top: 76px; }
+.paywall .rule { display: flex; align-items: center; gap: 14px; font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
+.paywall .rule::before, .paywall .rule::after { content: ""; flex: 1; border-top: 1.5px dashed var(--line); }
+.paywall h3 { font-size: 22px; line-height: 1.5; }
+.paywall .lede { color: var(--ink2); line-height: 1.9; }
+.paywall .calm { background: var(--card); border-radius: 14px; padding: 14px 16px; font-size: 14px; font-weight: 700; line-height: 1.8; }
+.chapters { margin: 0; padding: 0 0 0 1.9em; display: grid; gap: 2px; color: var(--ink2); font-size: 15px; line-height: 1.7; }
+.chapters li { padding: 5px 0 5px 4px; }
+.chapters li::marker { font-family: var(--latin); font-weight: 700; color: var(--muted); font-size: 13px; }
+.chapters li.now { color: var(--ink); font-weight: 700; }
+.chapters li.now small { margin-left: 10px; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; white-space: nowrap; }
+details.more summary { cursor: pointer; font-size: 14px; font-weight: 700; color: var(--muted); padding: 6px 0; }
+details.more .chapters { margin-top: 2px; }
+.btn.wide { width: 100%; flex-direction: column; gap: 2px; }
+.btn small { font-size: 12px; font-weight: 500; opacity: .9; }
+.paywall .note { text-align: center; }
+
+/* プラン選びのシート（「続きを読む」を押したあとに開く） */
+.sheet { border: 0; padding: 26px 20px calc(20px + env(safe-area-inset-bottom, 0px)); width: min(100%, 520px); max-width: none; max-height: min(92vh, 92dvh); overflow-y: auto; background: var(--surface); color: var(--ink); border-radius: 24px; box-shadow: var(--shadow); }
+.sheet[open] { display: grid; gap: 14px; }
+.sheet::backdrop { background: rgba(20, 16, 22, .55); }
+@media (max-width: 560px) { .sheet { margin: auto 0 0; width: 100%; border-radius: 24px 24px 0 0; } }
+.sheet h3 { font-size: 20px; padding-right: 40px; }
+.sheet .x { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--card); font-size: 20px; line-height: 1; color: var(--muted); }
+.opts { display: grid; gap: 10px; }
+.opt { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; border: 2px solid var(--line); border-radius: 16px; padding: 14px 16px; cursor: pointer; }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.opt input { grid-row: span 2; width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
+.opt .nm { font-weight: 700; font-size: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.opt .nm em { font-style: normal; font-size: 11px; font-weight: 700; color: var(--accent-ink); background: var(--accent); border-radius: 999px; padding: 1px 9px; }
+.opt .pr { font-family: var(--latin); font-weight: 700; font-size: 18px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.opt .ds { grid-column: 2 / -1; font-size: 13px; color: var(--ink2); line-height: 1.6; }
+.pairbox { display: grid; gap: 6px; }
+.pairbox label { font-size: 13px; font-weight: 700; }
+.pairbox input { width: 100%; text-transform: uppercase; }
+.sheet details.more .k { font-size: 13px; font-weight: 700; margin: 10px 0 6px; }
+.sheet details.more ul.dots { gap: 6px; font-size: 14px; }
+.assure { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 13px; color: var(--ink2); line-height: 1.7; }
+.assure li { padding-left: 22px; position: relative; }
+.assure li::before { content: "✓"; position: absolute; left: 2px; color: var(--accent); font-weight: 700; }
+.sheet .linkbtn { justify-self: center; }
+.sheet .note a { margin-left: 4px; }
 
 /* 有料レポート */
 .stack { display: grid; gap: 44px; }
@@ -384,7 +433,7 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
 @media (max-width: 520px) { .toc ol { grid-template-columns: minmax(0, 1fr); } }
 .toc li { counter-increment: toc; }
 .toc button { border: 0; background: none; padding: 7px 0; text-align: left; font-size: 14px; line-height: 1.6; color: var(--ink2); display: flex; gap: 10px; width: 100%; }
-.toc button::before { content: counter(toc, decimal-leading-zero); font-family: var(--latin); font-weight: 700; color: var(--accent); flex: none; }
+.toc button::before { content: counter(toc, decimal-leading-zero); font-family: var(--latin); font-weight: 700; color: var(--mark); flex: none; }
 .toc button:hover { color: var(--accent); }
 .ranking { display: grid; gap: 8px; }
 .ranking details { background: var(--card); border-radius: 12px; padding: 12px 14px; }
@@ -403,18 +452,18 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
 .partner-report[open] summary { margin-bottom: 36px; }
 .cgroup { display: grid; gap: 10px; }
 .cgroup h4 { margin: 10px 0 0; font-size: 17px; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
-.cgroup h4 .st { color: var(--accent); font-size: 14px; letter-spacing: .05em; }
+.cgroup h4 .st { color: var(--mark); font-size: 14px; letter-spacing: .05em; }
 .cgroup > p { font-size: 15px; color: var(--ink2); }
 .rephrase { display: grid; gap: 10px; }
 .rephrase > div { display: grid; gap: 6px; background: var(--card); border-radius: 14px; padding: 14px 16px; }
-.rephrase .before { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--accent); }
+.rephrase .before { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--mark); }
 .rephrase .after { font-weight: 700; }
-.rephrase .after::before { content: "→ "; color: var(--accent); }
+.rephrase .after::before { content: "→ "; color: var(--mark); }
 .guide-text { white-space: pre-wrap; font: inherit; background: var(--surface); border-radius: 10px; padding: 12px; margin: 0; }
 .qa { display: grid; gap: 22px; }
 .qa > div { display: grid; gap: 6px; }
 .qa .q { font-weight: 700; color: var(--ink); }
-.qa .q::before { content: "Q. "; color: var(--accent); font-family: var(--latin); font-weight: 700; }
+.qa .q::before { content: "Q. "; color: var(--mark); font-family: var(--latin); font-weight: 700; }
 .panel .kv dd, .panel p { color: var(--ink2); }
 
 /* 特定商取引法ページ */
@@ -446,14 +495,41 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
       <div class="faces" aria-hidden="true">
         <span style="--qt:var(--t-co)">🌻</span><span style="--qt:var(--t-ck)">🐈‍⬛</span><span style="--qt:var(--t-eo)">🎆</span><span style="--qt:var(--t-eo)">🌙</span><span style="--qt:var(--t-ek)">🦔</span><span style="--qt:var(--t-ck)">⛺</span><span style="--qt:var(--t-ek)">🎢</span><span style="--qt:var(--t-co)">🌳</span>
       </div>
-      <h1><span class="kicker">ラブコード診断｜無料の恋愛タイプ診断</span>その恋の不安、クセかも。30問で、あなたの恋愛をコードにします。</h1>
-      <p class="lead">恋をすると出てくる「不安のクセ」と、愛を感じる「愛情言語」。この2つから、あなたの恋愛タイプを <code>EOSH-WP</code> のような英字のコードで表します。</p>
+      <h1><span class="kicker">ラブコード診断｜愛着スタイル × 愛の言語の無料診断</span>なんで私ばっかり、<br>不安になるんだろう。</h1>
+      <p class="lead">返信が遅いだけで、眠れない。<br>重いと思われたくなくて、平気なふりをする。</p>
+      <p class="lead2">それは、性格のせいでも、愛が重すぎるせいでもありません。恋をすると出てくる心のクセ「愛着スタイル」と、愛の受け取り方「愛の言語」。この2つがわかると、恋がうまくいかない理由が見えてきます。</p>
       <div class="cta">
-        <button class="btn big" data-start>無料で診断する <span class="arrow" aria-hidden="true">→</span></button>
-        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ見られます</li></ul>
+        <button class="btn big" data-start>無料で、恋のクセを知る <span class="arrow" aria-hidden="true">→</span></button>
+        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ読めます</li></ul>
         <p class="resume" id="resume" hidden></p>
       </div>
       <div id="demo-tools"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-worry" style="padding-top:0">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-worry">こんなこと、<br>していませんか？</h2>
+      </div>
+      <div class="aru-card">
+        <ul class="aru">
+          <li><span class="em" style="--qt:var(--t-eo)">📱</span>返信が来るまで、何度もトーク画面を開いてしまう</li>
+          <li><span class="em" style="--qt:var(--t-ek)">🎭</span>わざとそっけなくして、相手の気持ちを試してしまう</li>
+          <li><span class="em" style="--qt:var(--t-ek)">✍️</span>「重い」と思われるのが怖くて、送る前に何度も書き直す</li>
+          <li><span class="em" style="--qt:var(--t-ck)">🚪</span>距離が縮まると、急に冷めて逃げたくなる</li>
+          <li><span class="em" style="--qt:var(--t-eo)">👀</span>恋人のSNSで、誰と一緒にいるのかを確かめてしまう</li>
+          <li><span class="em" style="--qt:var(--t-ck)">😶</span>本当はさみしいのに、「別に平気」と言ってしまう</li>
+          <li><span class="em" style="--qt:var(--t-eo)">🌙</span>「どうせいつか離れていく」と、夜にひとりで考え込む</li>
+          <li><span class="em" style="--qt:var(--t-ek)">💔</span>勢いで別れ話をして、あとから後悔したことがある</li>
+        </ul>
+      </div>
+      <div class="reframe">
+        <h3>ひとつでも当てはまったなら。</h3>
+        <p>それは、あなたの性格が悪いからでも、愛が重いからでもありません。心理学で<strong>「愛着スタイル」</strong>と呼ばれる、人と親しくなるときの心のクセです。</p>
+        <p>SNSでは「愛着障害」という言葉で語られることもありますが、ほとんどの場合は病気ではなく、誰にでもある傾向です。子どものころからの人との関わりの中で少しずつ形づくられ、大人になってからの関係の中でも変わっていくと考えられています。</p>
+        <p class="punch">クセは、名前がわかると扱えるようになります。</p>
+      </div>
     </div>
   </section>
 
@@ -461,7 +537,7 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
     <div class="container">
       <div class="head">
         <h2 id="h-scene">既読のまま、3時間。<br>あなたはどう思う？</h2>
-        <p class="sub">同じ場面でも、感じ方は人によって違います。その違いが「恋のクセ」です。</p>
+        <p class="sub">愛着スタイルは、大きく分けて4つ。同じ場面でも、心の動き方がまるで違います。</p>
       </div>
       <div class="scene-grid">
         <div class="chat" role="img" aria-label="メッセージを2通送ったあと、既読のまま3時間返信がない画面">
@@ -479,27 +555,27 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
           <div class="react" style="--qc:var(--q-ek)"><p class="t">ゆらぎ型<small>恐れ・回避</small></p><p class="q">「もう一通送りたい。でも、重いと思われたくない」</p></div>
         </div>
       </div>
-      <p class="after">この4つは「愛着スタイル」と呼ばれる心のクセです。ラブコード診断は、ここに恋のペース、判断の仕方、愛情言語を足して、あなたの恋愛タイプを出します。</p>
+      <p class="after">あなたは、どれに近いですか？ 自分で思っているタイプと、実際のタイプは違うかもしれません。</p>
     </div>
   </section>
 
-  <section aria-labelledby="h-aru">
+  <section aria-labelledby="h-ll">
     <div class="container">
       <div class="head">
-        <h2 id="h-aru">こんな恋愛あるある、<br>ありませんか？</h2>
+        <h2 id="h-ll">大事にされているのに、<br>なぜかさみしい。</h2>
+        <p class="sub">それは、2人の「愛の言語」が違うからかもしれません。</p>
       </div>
-      <div class="aru-card">
-        <ul class="aru">
-          <li><span class="em" style="--qt:var(--t-eo)">📱</span>返信が来るまで、何度もスマホを見てしまう</li>
-          <li><span class="em" style="--qt:var(--t-ek)">✍️</span>送る前に、メッセージを何度も直す</li>
-          <li><span class="em" style="--qt:var(--t-ck)">🐈‍⬛</span>甘えたい日と、放っておいてほしい日の差が激しい</li>
-          <li><span class="em" style="--qt:var(--t-co)">🌻</span>好きな人ができると、友達にすぐバレる</li>
-          <li><span class="em" style="--qt:var(--t-eo)">🌙</span>「この先どうなるんだろう」と夜に考え込む</li>
-          <li><span class="em" style="--qt:var(--t-ek)">🦔</span>好きな人ほど、そっけなくしてしまう</li>
-          <li><span class="em" style="--qt:var(--t-ck)">⛺</span>恋人がいても、趣味の時間は譲らない</li>
-          <li><span class="em" style="--qt:var(--t-co)">🍵</span>家でのんびり過ごすデートがいちばん好き</li>
-        </ul>
-        <p class="foot-note">あるあるは、タイプごとに違います。あなたのあるあるは、診断結果で読めます。</p>
+      <p class="story">彼は「行動」で愛を伝えているのに、あなたがほしいのは「言葉」。どちらも相手を想っているのに、届かない。すれ違いの原因は、愛情の量ではなく、伝え方の違いです。愛情の伝え方と受け取り方には5つの型があり、「愛の言語（ラブランゲージ）」と呼ばれています。</p>
+      <div class="langs">
+        <div class="lang"><h3><span class="em" aria-hidden="true">💬</span>言葉</h3><p><span class="k">こうされると嬉しい</span>「好き」「ありがとう」を、言葉で言ってほしい。</p><p><span class="k">すれ違うと</span>言ってもらえないと、何をしてもらっても不安が残る。</p></div>
+        <div class="lang"><h3><span class="em" aria-hidden="true">⏳</span>一緒の時間</h3><p><span class="k">こうされると嬉しい</span>スマホを置いて、ちゃんと向き合ってほしい。</p><p><span class="k">すれ違うと</span>彼が友達と出かけるだけでモヤモヤする。嫉妬深いのではなく、時間がそのまま愛情だから。</p></div>
+        <div class="lang"><h3><span class="em" aria-hidden="true">🎁</span>贈り物</h3><p><span class="k">こうされると嬉しい</span>自分を思って選んでくれた、その気持ちがうれしい。</p><p><span class="k">すれ違うと</span>記念日を忘れられると、「考えてくれなかった」ことに傷つく。</p></div>
+        <div class="lang"><h3><span class="em" aria-hidden="true">🤝</span>行動</h3><p><span class="k">こうされると嬉しい</span>困っているときに、黙って動いてほしい。</p><p><span class="k">すれ違うと</span>口では優しいのに何もしてくれないと、気持ちが冷めていく。</p></div>
+        <div class="lang"><h3><span class="em" aria-hidden="true">🫂</span>スキンシップ</h3><p><span class="k">こうされると嬉しい</span>手をつなぐ、ハグをする。触れ合いで安心したい。</p><p><span class="k">すれ違うと</span>触れ合いが減ると、「冷めたのかな」と考えてしまう。</p></div>
+      </div>
+      <div class="reframe">
+        <p>しかも、愛の言語はひとりにひとつとは限りません。自分では「言葉」だと思っていても、本当に満たされるのは「一緒の時間」かもしれません。</p>
+        <p class="punch">自分の言語がわかると、「なんで分かってくれないの」が「こうしてくれると嬉しい」に変わります。</p>
       </div>
     </div>
   </section>
@@ -507,12 +583,13 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
   <section aria-labelledby="h-how" style="padding-top:0">
     <div class="container">
       <div class="head">
-        <h2 id="h-how">診断の流れ</h2>
+        <h2 id="h-how">理由がわかると、<br>恋は少し楽になる。</h2>
+        <p class="sub">30問に答えるだけ。約5分で、あなたの恋にひとつの名前がつきます。</p>
       </div>
       <ol class="steps">
-        <li><h3>30問に答える</h3><p>「あてはまる？」に5段階で答えるだけ。考え込まずに、直感で選んでください。約5分で終わります。</p></li>
-        <li><h3>ラブコードが出る</h3><p>4つの軸から決まる16タイプに、あなたに響く愛情言語を足して、ひとつのコードになります。</p></li>
-        <li><h3>結果を読む</h3><p>タイプの説明、物語、恋愛あるある、あなたに響く愛情言語が、その場で読めます。</p></li>
+        <li><h3>直感で、30問に答える</h3><p>「あてはまる？」に5段階で答えるだけ。考え込まなくて大丈夫です。登録もいりません。</p></li>
+        <li><h3>あなたの恋が、コードになる</h3><p>愛着スタイル、恋のペース、判断の仕方、愛の言語。その組み合わせから、16タイプのどれかと、あなたに響く愛の言語が決まります。</p></li>
+        <li><h3>「これ、私だ」が見つかる</h3><p>タイプの説明、物語、恋愛あるある、あなたに響く愛の言語が、その場で読めます。</p></li>
       </ol>
       <div class="anatomy-box">
         <h3>コードの読み方（例：EOSH-WP）</h3>
@@ -525,7 +602,7 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
           <div class="slot ll"><b>W</b><span>言葉</span><small>メイン</small></div>
           <div class="slot ll"><b>P</b><span>スキンシップ</span><small>サブ</small></div>
         </div>
-        <p class="note">前の2文字が愛着スタイル、次の2文字が恋のペースと判断の仕方。ハイフンの後ろは、言葉(W)・一緒の時間(T)・贈り物(G)・行動(A)・スキンシップ(P)のうち、あなたに響く愛情言語です。</p>
+        <p class="note">前の2文字が愛着スタイル、次の2文字が恋のペースと判断の仕方。ハイフンの後ろは、言葉(W)・一緒の時間(T)・贈り物(G)・行動(A)・スキンシップ(P)のうち、あなたに響く愛の言語です。</p>
       </div>
     </div>
   </section>
@@ -584,7 +661,7 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
       </div>
       <div class="basis">
         <div><h3>愛着スタイル</h3><p>人と親しくなるときの心のクセです。成人の愛着研究では、「不安」と「回避」の2つの強さで、安定・不安・回避・恐れ回避の4つに分けて考えます。コードの前半2文字がこれにあたります。</p></div>
-        <div><h3>5つの愛情言語</h3><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。</p></div>
+        <div><h3>5つの愛の言語</h3><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。</p></div>
       </div>
       <p class="note disclaimer">質問はこの2つの考え方を参考に、独自に作っています。エンタメとしてお楽しみください。医学的・心理学的な診断ではありません。回答と結果はお使いのブラウザの中にだけ保存され、運営者のサーバーには送られません。</p>
     </div>
@@ -596,12 +673,13 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
         <h2 id="h-faq">よくある質問</h2>
       </div>
       <div class="faq">
-        <details><summary>ラブコード診断とは何ですか？</summary><p>恋をしたときに出てくる不安のクセ（愛着スタイル）と、愛情の受け取り方（愛情言語）から、あなたの恋愛タイプを「EOSH-WP」のような英字のコードで表す無料の恋愛診断です。30問・約5分で、登録なしで受けられます。</p></details>
-        <details><summary>無料でどこまでわかりますか？</summary><p>あなたのラブコード、16タイプのうちどのタイプか、タイプの説明と物語、恋愛あるある、あなたに響く愛情言語まで無料で読めます。</p></details>
+        <details><summary>ラブコード診断とは何ですか？</summary><p>恋をしたときに出てくる心のクセ（愛着スタイル）と、愛情の受け取り方（愛の言語）から、あなたの恋愛タイプを「EOSH-WP」のような英字のコードで表す無料の恋愛診断です。30問・約5分で、登録なしで受けられます。</p></details>
+        <details><summary>無料でどこまでわかりますか？</summary><p>あなたのラブコード、16タイプのうちどのタイプか、タイプの説明と物語、恋愛あるある、あなたに響く愛の言語まで無料で読めます。</p></details>
         <details><summary>質問は何問ですか？どのくらい時間がかかりますか？</summary><p>全部で30問、約5分です。前半の20問は5段階で答え、後半の10問は2つのうち嬉しいほうを選びます。</p></details>
+        <details><summary>愛着スタイルとは何ですか？</summary><p>人と親しくなるときに出てくる心のクセのことです。相手の気持ちを確かめたくなる「不安」と、距離を取りたくなる「回避」の2つの強さで、安定型・不安型・回避型・恐れ回避型の4つに分かれます。ラブコード診断では、ひだまり型・たしかめ型・ひとり時間型・ゆらぎ型と呼んでいます。</p></details>
+        <details><summary>愛着障害とは違うのですか？</summary><p>違います。「愛着障害」は本来、医師が診断する医学的な状態を指す言葉です。この診断でわかるのは「愛着スタイル」で、恋をしたときに出やすい心のクセの傾向です。病気かどうかを判定するものではありません。つらさが続いて生活に支障があるときは、医療機関や専門家に相談してください。</p></details>
+        <details><summary>愛の言語（ラブランゲージ）とは何ですか？</summary><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。ラブコード診断では、5つのうちあなたに響く1〜2個がコードの後ろに付きます。</p></details>
         <details><summary>MBTIや16Personalitiesと関係はありますか？</summary><p>関係ありません。ラブコード診断は恋愛に絞った独自の診断で、性格全般の4文字タイプを判定するものではありません。成人の愛着研究と「5つの愛の言語」の考え方を参考に、質問を独自に作っています。</p></details>
-        <details><summary>愛着スタイルとは何ですか？</summary><p>人と親しくなるときに出てくる心のクセのことです。相手の気持ちを確かめたくなる「不安」と、距離を取りたくなる「回避」の2つの強さで、安定・不安・回避・恐れ回避の4つに分かれます。ラブコード診断では、ひだまり型・たしかめ型・ひとり時間型・ゆらぎ型と呼んでいます。</p></details>
-        <details><summary>愛情言語とは何ですか？</summary><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。ラブコード診断では、5つのうちあなたに響く1〜2個がコードの後ろに付きます。</p></details>
         <details><summary>診断結果は当たりますか？</summary><p>エンタメとして楽しむための診断で、医学的・心理学的な診断ではありません。結果は、答えたときの状況や気持ちによって変わることがあります。自分の恋のクセを言葉にするきっかけとして使ってください。</p></details>
         <details><summary>回答や結果はどこかに保存されますか？</summary><p>回答と結果は、お使いのブラウザの中にだけ保存されます。運営者のサーバーには送られません。会員登録もいりません。</p></details>
       </div>
@@ -610,10 +688,11 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
 
   <section class="last" aria-labelledby="h-last">
     <div class="container">
-      <h2 id="h-last">次は、あなたの恋の番。</h2>
+      <h2 id="h-last">次は、あなたの番。</h2>
+      <p class="sub">なんで不安になるのか。なんですれ違うのか。<br>5分後には、その理由に名前がついています。</p>
       <div class="cta">
-        <button class="btn big" data-start>無料で診断する <span class="arrow" aria-hidden="true">→</span></button>
-        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ見られます</li></ul>
+        <button class="btn big" data-start>無料で、恋のクセを知る <span class="arrow" aria-hidden="true">→</span></button>
+        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ読めます</li></ul>
       </div>
     </div>
   </section>
@@ -622,8 +701,120 @@ ul.aruaru li::before { content: "✓"; position: absolute; left: 16px; top: 14px
 </div>
 
 <main class="wrap" id="app" hidden></main>
-<div class="stickybuy" id="stickybuy" aria-hidden="true"><div><p id="stickybuy-text"></p><button class="btn" id="stickybuy-go">プランを見る</button></div></div>
 
+<script>
+// 短い文（見出し・質問・キャッチコピー）を、文節の切れ目でだけ改行させる。
+// CSS の word-break: auto-phrase は iPhone の Safari では効かないので、どのブラウザでも同じ結果になるよう自前でやる。
+// やり方: 切ってよい位置に <wbr> を入れ、.ph（word-break: keep-all）でそれ以外の位置では切れないようにする。
+// 長い本文には使わない（本文は行の端まで詰めたほうが読みやすい）。
+(function (root) {
+  // 漢字1字のあとに付くひらがな1字が、この中の文字なら、そこで切ってよい（助詞や活用語尾の終わり）。例: 返信が|遅い
+  // 「り」「き」「し」「い」などは入れない（贈り物・取り扱い・付き合い・話し合い・思い出 のような語の途中で切れるため）
+  var TAIL = 'がをにはへとでものやかてばらどなるたずうくす';
+  var STOP = '、。！？';          // このあとは切ってよい
+  var CLOSE = '」』）';           // 閉じかっこ。あとに助詞が続くときは切らない（「…」と|話せる）
+  var OPEN = '「『（';
+  var HIRA = /[ぁ-ゖ]/;
+  var KANJI = /[一-龠々〆ヶ]/;
+  var START = /[一-龠々〆ヶァ-ヴA-Za-z0-9０-９]/;   // 次の語の始まりになる文字
+  var SUFFIX = '型達方用的';      // 前の語にくっつく漢字（やり方・あなた達）。この前では切らない
+  // 途中で切りたくない語（上の規則だと切れてしまうもの）
+  var KEEP = ['ひだまり型', 'ひとり時間', 'たしかめ型', 'ゆらぎ型', '愛の言語', '一緒の時間', 'この', 'その', 'あの', 'どの', 'もう一', '女の子', '男の子', 'やり直', 'やり取'];
+
+  // 切ってよい位置（その位置の文字の前で切れる）を返す
+  function points(text) {
+    var out = [], i, k, from;
+    var locked = {};
+    for (k = 0; k < KEEP.length; k++) {
+      from = text.indexOf(KEEP[k]);
+      while (from >= 0) {
+        // 「この」「その」などは、うしろの語と離さない（その|日 にしない）
+        for (i = from + 1; i <= from + KEEP[k].length - (KEEP[k].length > 2 ? 1 : 0); i++) locked[i] = true;
+        from = text.indexOf(KEEP[k], from + 1);
+      }
+    }
+    for (i = 1; i < text.length; i++) {
+      if (locked[i]) continue;
+      var a = text.charAt(i - 1), b = text.charAt(i), c = text.charAt(i + 1);
+      if (STOP.indexOf(b) >= 0 || CLOSE.indexOf(b) >= 0) continue;   // 句読点や閉じかっこを行頭に送らない
+      if (STOP.indexOf(a) >= 0) { out.push(i); continue; }
+      if (CLOSE.indexOf(a) >= 0) { if (!HIRA.test(b)) out.push(i); continue; }
+      if (OPEN.indexOf(b) >= 0) { if (OPEN.indexOf(a) < 0) out.push(i); continue; }
+      if (!HIRA.test(a) || !START.test(b)) continue;
+      if (SUFFIX.indexOf(b) >= 0 && !KANJI.test(c)) continue;
+      // 助詞などのあと、またはひらがなが2字以上続いたあとは、次の語の前で切ってよい
+      if (TAIL.indexOf(a) >= 0 || HIRA.test(text.charAt(i - 2))) out.push(i);
+    }
+    // 最後に1〜2文字だけが次の行に落ちる切り方はしない（「…する人」の「人」だけが残る、など）
+    var tail = text.replace(/[、。！？」』）]+$/, '').length;
+    out = out.filter(function (p) { return tail - p > 2 && p > 1; });
+    return out;
+  }
+
+  // 文節ごとに分けた配列（テスト用）
+  function split(text) {
+    var p = points(text), out = [], last = 0;
+    for (var i = 0; i < p.length; i++) { out.push(text.slice(last, p[i])); last = p[i]; }
+    out.push(text.slice(last));
+    return out;
+  }
+
+  // HTML の文字列にして返す。タグを含む文字列はそのまま返す
+  function html(text) {
+    text = String(text);
+    if (text.indexOf('<') >= 0) return text;
+    return '<span class="ph">' + split(text).join('<wbr>') + '</span>';
+  }
+
+  // すでにページにある要素に適用する（中のタグは残し、文字の部分にだけ <wbr> を入れる）
+  function apply(scope, selector) {
+    var els = scope.querySelectorAll(selector);
+    for (var e = 0; e < els.length; e++) {
+      var el = els[e];
+      if (el.classList.contains('ph')) continue;
+      el.classList.add('ph');
+      var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), nodes = [], n;
+      while ((n = walker.nextNode())) nodes.push(n);
+      for (var i = 0; i < nodes.length; i++) {
+        var parts = split(nodes[i].nodeValue);
+        if (parts.length < 2) continue;
+        var frag = document.createDocumentFragment();
+        for (var j = 0; j < parts.length; j++) {
+          if (j) frag.appendChild(document.createElement('wbr'));
+          frag.appendChild(document.createTextNode(parts[j]));
+        }
+        nodes[i].parentNode.replaceChild(frag, nodes[i]);
+      }
+    }
+  }
+
+  // 長い本文用：段落の最後の数文字をひとかたまりにして、最後の行に1〜2文字だけ落ちるのを防ぐ（「…ます。」だけの行を作らない）
+  function tail(scope, selector) {
+    var els = scope.querySelectorAll(selector);
+    for (var e = 0; e < els.length; e++) {
+      var el = els[e];
+      if (el.classList.contains('ph') || el.hasAttribute('data-tail') || el.closest('.ph')) continue;
+      el.setAttribute('data-tail', '');
+      var node = el.lastChild;
+      while (node && node.nodeType === 1 && node.lastChild && !/^(BUTTON|A|UL|OL|DL|DIV|DETAILS)$/.test(node.tagName)) node = node.lastChild;
+      if (!node || node.nodeType !== 3) continue;
+      var text = node.nodeValue.replace(/\s+$/, '');
+      if (text.length < 12) continue;
+      var cut = text.length - 6;
+      // かたまりの先頭に、行頭に置けない文字（句読点・閉じかっこ・小さいかな・長音）が来ないようにする
+      while (cut > 0 && /[、。！？」』）ぁぃぅぇぉっゃゅょァィゥェォッャュョー]/.test(text.charAt(cut))) cut -= 1;
+      var span = document.createElement('span');
+      span.className = 'nw';
+      span.textContent = text.slice(cut);
+      node.nodeValue = text.slice(0, cut);
+      node.parentNode.insertBefore(span, node.nextSibling);
+    }
+  }
+
+  root.LCPhrase = { split: split, html: html, apply: apply, tail: tail };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
 <script>
 // 無料で見せる範囲のデータ（質問・タイプ名・概要）。有料部分は lib/premium.js（サーバー側）にある。
 window.LC = (function () {
@@ -634,31 +825,51 @@ window.LC = (function () {
     { label: '判断の軸', pos: 'H', posName: '気持ち', neg: 'M', negName: '頭' }
   ];
 
-  // t:'l' = 5段階。ax = 軸番号、s = +1 なら「そう思う」が pos 側
+  // 5段階の質問。ax = 軸番号、s = +1 なら「そう思う」が pos 側。ex = 質問の下に出す具体例（質問の意味を狭めない、よくある場面にする）
   var LIKERT = [
-    { ax: 0, s: 1, q: '返信が遅いと、嫌われたかもと考えてしまう' },
-    { ax: 1, s: -1, q: '恋人には弱いところも見せられる' },
-    { ax: 2, s: 1, q: 'いいなと思ったら、自分から早めに動く' },
-    { ax: 3, s: 1, q: '恋人選びは「条件」より「気持ち」が大事だ' },
-    { ax: 0, s: 1, q: '恋人が自分を大切に思っているか、時々確かめたくなる' },
-    { ax: 1, s: 1, q: '付き合いが深くなると、少し息苦しく感じることがある' },
-    { ax: 2, s: -1, q: '付き合うかどうかは、時間をかけて決めたい' },
-    { ax: 3, s: -1, q: 'ケンカしたら、まず冷静に原因を話し合いたい' },
-    { ax: 0, s: -1, q: '恋人が友達と楽しそうにしていても、特に気にならない' },
-    { ax: 1, s: 1, q: '困ったとき、恋人に頼るより自分で解決したい' },
-    { ax: 2, s: 1, q: '恋が始まるときは、勢いやノリも大事だと思う' },
-    { ax: 3, s: 1, q: '気持ちが盛り上がると、後先を考えずに動いてしまう' },
-    { ax: 0, s: 1, q: '「重い」と思われないか心配になることがある' },
-    { ax: 1, s: -1, q: '好きな人とはできるだけ一緒にいたい' },
-    { ax: 2, s: -1, q: '気になる人がいても、まず友達として様子を見る' },
-    { ax: 3, s: -1, q: '相手の気持ちより、話の筋が通っているかが気になる' },
-    { ax: 0, s: -1, q: '恋人から急に連絡がなくても、忙しいんだろうと思える' },
-    { ax: 1, s: 1, q: '「将来の話」をされると、ちょっと構えてしまう' },
-    { ax: 2, s: 1, q: '好きになるスピードは速いほうだ' },
-    { ax: 3, s: 1, q: '恋愛の悩みは、解決策より気持ちを分かってほしい' }
+    { ax: 0, s: 1, q: '返信が遅いと、嫌われたかもと考えてしまう',
+      ex: 'いつもはすぐ返ってくるのに、半日たっても返事がないとき' },
+    { ax: 1, s: -1, q: '恋人には弱いところも見せられる',
+      ex: '仕事で落ち込んだ日に、「今日はつらかった」と話せる' },
+    { ax: 2, s: 1, q: 'いいなと思ったら、自分から早めに動く',
+      ex: '気になる人ができたら、その週のうちに自分から誘う' },
+    { ax: 3, s: 1, q: '恋人選びは「条件」より「気持ち」が大事だ',
+      ex: '年収や職業が理想どおりでなくても、好きなら付き合う' },
+    { ax: 0, s: 1, q: '恋人が自分を大切に思っているか、時々確かめたくなる',
+      ex: '「私のこと好き？」と聞きたくなる。前のトークを読み返す' },
+    { ax: 1, s: 1, q: '付き合いが深くなると、少し息苦しく感じることがある',
+      ex: '毎日の連絡や、毎週末に会うのが当たり前になってきたとき' },
+    { ax: 2, s: -1, q: '付き合うかどうかは、時間をかけて決めたい',
+      ex: '告白されても、何回か会ってから返事をしたい' },
+    { ax: 3, s: -1, q: 'ケンカしたら、まず冷静に原因を話し合いたい',
+      ex: '感情をぶつける前に、「何がいやだったか」を整理したい' },
+    { ax: 0, s: -1, q: '恋人が友達と楽しそうにしていても、特に気にならない',
+      ex: '恋人が友達との旅行の写真を、楽しそうに見せてきたとき' },
+    { ax: 1, s: 1, q: '困ったとき、恋人に頼るより自分で解決したい',
+      ex: '体調をくずしたときや引っ越しのときも、まず自分でなんとかする' },
+    { ax: 2, s: 1, q: '恋が始まるときは、勢いやノリも大事だと思う',
+      ex: '出会ったその日に、流れで次の約束まで決まってもいい' },
+    { ax: 3, s: 1, q: '気持ちが盛り上がると、後先を考えずに動いてしまう',
+      ex: '急に会いたくなって、夜遅くに会いに行ったり長文を送ったりする' },
+    { ax: 0, s: 1, q: '「重い」と思われないか心配になることがある',
+      ex: '送ろうとしたメッセージを、「長すぎるかも」と消したことがある' },
+    { ax: 1, s: -1, q: '好きな人とはできるだけ一緒にいたい',
+      ex: '予定のない休日は、できれば恋人と過ごしたい' },
+    { ax: 2, s: -1, q: '気になる人がいても、まず友達として様子を見る',
+      ex: 'すぐ2人で会おうとせず、グループで何度か会ってみる' },
+    { ax: 3, s: -1, q: '相手の気持ちより、話の筋が通っているかが気になる',
+      ex: 'ケンカ中、「さっきと言っていることが違う」と言いたくなる' },
+    { ax: 0, s: -1, q: '恋人から急に連絡がなくても、忙しいんだろうと思える',
+      ex: '丸一日返信がなくても、いつもどおりに過ごせる' },
+    { ax: 1, s: 1, q: '「将来の話」をされると、ちょっと構えてしまう',
+      ex: '「いつか一緒に住みたいね」と言われて、返事に困る' },
+    { ax: 2, s: 1, q: '好きになるスピードは速いほうだ',
+      ex: '2〜3回会っただけで、もう好きだと思う' },
+    { ax: 3, s: 1, q: '恋愛の悩みは、解決策より気持ちを分かってほしい',
+      ex: '落ち込んだ話をしたとき、助言より「つらかったね」がほしい' }
   ];
 
-  // 愛情言語の二択（5つから2つずつ、全10組）
+  // 愛の言語の二択（5つから2つずつ、全10組）
   var PAIRS = [
     { a: 'W', b: 'T', qa: '「いつもありがとう」と言葉で言われる', qb: '予定を空けて、一緒に過ごしてくれる' },
     { a: 'G', b: 'A', qa: '誕生日に、考え抜いたプレゼントをくれる', qb: '困っていることを、先回りして片付けてくれる' },
@@ -1007,7 +1218,7 @@ const PACE = {
   }
 };
 
-// ---------- 愛情言語（ライト以上） ----------
+// ---------- 愛の言語（ライト以上） ----------
 const LL = {
   W: {
     need: '「好き」「ありがとう」「すごいね」と言葉にしてもらうことで、愛情を実感するタイプです。そのぶん、何気ないきつい一言は人一倍心に刺さります。',
@@ -1015,7 +1226,7 @@ const LL = {
     starving: '相手の言葉を何度も読み返したり、「ねえ、好き？」と聞きたくなったりしたら、言葉が足りていないサインです。',
     joys: ['別れ際に「今日も会えてよかった」と言われる', '頑張ったことを具体的に褒めてもらう', '寝る前の「おやすみ、好きだよ」', '友達の前で、自分のことを良く言ってくれる', '手書きのメッセージカード', 'ケンカのあとの「ごめんね、大事に思ってる」', '何でもない日の「ありがとう」', '見た目の変化に気づいて、言葉にしてくれる'],
     giveTips: 'あなたが言葉で伝えるときは、「いつも」より「今日の〇〇が嬉しかった」と具体的に伝えましょう。具体的な言葉ほど、相手の心に長く残ります。',
-    receive: '相手の愛情言語が言葉でない場合、相手はきっと別の形で愛を伝えています。会いに来てくれる、手伝ってくれる。そうした行動を、言葉の代わりとして受け取ってみてください。',
+    receive: '相手の愛の言語が言葉でない場合、相手はきっと別の形で愛を伝えています。会いに来てくれる、手伝ってくれる。そうした行動を、言葉の代わりとして受け取ってみてください。',
     phrases: ['たまにでいいから、言葉で言ってもらえるとすごく嬉しい', '「ありがとう」って言われると、それだけで一日がんばれる', '照れくさかったら、メッセージで一言くれるだけで十分だよ'],
     action: '会った日の終わりに、今日よかったことを一つ言葉にする'
   },
@@ -1025,7 +1236,7 @@ const LL = {
     starving: '会っているのに相手がスマホばかり見ていてイライラしたり、次に会う予定が決まっていないと落ち着かなかったりしたら、時間が足りていないサインです。',
     joys: ['スマホを見ずに、目を見て話を聞いてくれる', '忙しい中でも会う時間をつくってくれる', '一緒に料理をする', '散歩しながら、とりとめのない話をする', '毎週決まった曜日の電話のような、二人だけの習慣', '相手の趣味に一緒に付き合ってくれる', '旅行の計画を一緒に立てる', '何もしない日を、一緒にのんびり過ごす'],
     giveTips: 'あなたが時間で愛を伝えるときは、長さより中身を大事にしましょう。会っている間はスマホを置く、相手の話を最後まで聞く。それだけで「大切にされている」と伝わります。',
-    receive: '相手の愛情言語が時間でない場合、会う回数が少なくても、愛情が薄いとは限りません。会えない間のメッセージや気づかいに、相手の愛がこめられているはずです。',
+    receive: '相手の愛の言語が時間でない場合、会う回数が少なくても、愛情が薄いとは限りません。会えない間のメッセージや気づかいに、相手の愛がこめられているはずです。',
     phrases: ['長くなくていいから、会ってるときはちゃんと二人の時間にしたい', '忙しいのは分かってるから、次に会う日だけ先に決めておきたい', '何もしなくていいから、一緒にいる時間がほしい'],
     action: '週に一度、スマホを置いて30分話す'
   },
@@ -1035,7 +1246,7 @@ const LL = {
     starving: '記念日を忘れられたことがずっと引っかかっていたり、ほかのカップルのプレゼントの話が妙に気になったりしたら、贈り物が足りていないサインです。',
     joys: ['出かけた先で見つけた、小さなお土産', '前に話した「欲しいもの」を覚えていてくれる', '好きなお菓子を、さりげなく買ってきてくれる', '記念日の花束', '二人の写真をまとめたアルバム', '手紙を添えたプレゼント', '旅行先で撮った写真を送ってくれる', 'おそろいの小物'],
     giveTips: 'あなたが贈り物で伝えるときは、値段より「覚えていた」ことが伝わるものを選びましょう。前に相手が話していたものや、二人の思い出にまつわるものは、特別な贈り物になります。',
-    receive: '相手の愛情言語が贈り物でない場合、記念日にプレゼントがなくても、気持ちがないわけではありません。欲しいものがあるなら、具体的に伝えておくのがいちばんです。',
+    receive: '相手の愛の言語が贈り物でない場合、記念日にプレゼントがなくても、気持ちがないわけではありません。欲しいものがあるなら、具体的に伝えておくのがいちばんです。',
     phrases: ['高いものじゃなくていいから、思い出してくれた印がほしい', 'コンビニのお菓子一個でも、選んでくれたことが嬉しい', '記念日だけは、何か形に残るものを交換したいな'],
     action: '出先で見つけた小さなものを持って帰る'
   },
@@ -1045,7 +1256,7 @@ const LL = {
     starving: '「なんで自分ばっかり」と思うことが増えたり、相手が手伝ってくれないことにイライラしたりしたら、行動が足りていないサインです。',
     joys: ['体調が悪い日に、ご飯や薬を買ってきてくれる', '疲れている日に、駅まで迎えに来てくれる', '面倒な手続きや予約を代わりにしてくれる', '重い荷物を持ってくれる', '家事を言われる前にやってくれる', '引っ越しや大掃除を手伝ってくれる', '仕事が忙しい時期に、生活のことを支えてくれる', '頼んだことを忘れずにやってくれる'],
     giveTips: 'あなたが行動で伝えるときは、黙ってやるより「これやっておいたよ」と一言添えましょう。気づいてもらえることで、あなたの愛情はちゃんと届きます。',
-    receive: '相手の愛情言語が行動でない場合、気が利かないように見えても、悪気はないことがほとんどです。してほしいことは、具体的にお願いしましょう。',
+    receive: '相手の愛の言語が行動でない場合、気が利かないように見えても、悪気はないことがほとんどです。してほしいことは、具体的にお願いしましょう。',
     phrases: ['言葉もうれしいけど、忙しいときにちょっと手伝ってもらえるのがいちばん嬉しい', '疲れてる日に「何かしようか？」って聞いてくれるだけで嬉しい', 'お互い得意なことを分担できたら、すごく楽になると思う'],
     action: '相手が忙しい日に、用事を一つ代わる'
   },
@@ -1055,13 +1266,13 @@ const LL = {
     starving: '隣に座っても距離があると寂しくなったり、ケンカのあとにハグがないと仲直りした気がしなかったりしたら、スキンシップが足りていないサインです。',
     joys: ['会ったときと別れるときのハグ', '歩くときに手をつなぐ', 'ソファで肩を寄せ合って過ごす', '落ち込んだときに背中をさすってもらう', '寝る前に頭をなでてもらう', '人混みで、自然に手を引いてくれる', 'ケンカのあとのハグ', '隣に座ったときに、肩や腕が触れている'],
     giveTips: 'あなたが触れ合いで伝えるときは、相手の気分や場所を見て選びましょう。人前が苦手な相手なら、二人きりのときにしっかりと。タイミングが合うほど、触れ合いは安心に変わります。',
-    receive: '相手の愛情言語がスキンシップでない場合、触れ合いが少なくても、気持ちが冷めたわけではありません。「手をつなぎたい」と言葉にすれば、たいてい応えてくれます。',
+    receive: '相手の愛の言語がスキンシップでない場合、触れ合いが少なくても、気持ちが冷めたわけではありません。「手をつなぎたい」と言葉にすれば、たいてい応えてくれます。',
     phrases: ['何も言わなくていいから、ぎゅっとしてもらえると安心する', '歩くときは、手をつないでいたいな', 'ケンカのあとは、ハグで仲直りしたい'],
     action: '会ったときと別れるときに、必ずハグする'
   }
 };
 
-// ---------- 愛着×愛情言語（ライト以上） ----------
+// ---------- 愛着×愛の言語（ライト以上） ----------
 const CROSS = {
   CO: {
     W: '言葉がなくても関係を疑わないぶん、自分が言葉を求めていることを忘れがちです。でも本当は、言葉をもらうと、あなたの安心はさらに強くなります。欲しい言葉は、遠慮せず素直にお願いしてかまいません。',
@@ -1171,8 +1382,8 @@ const PAIR_DEEP = {
 };
 
 const LL_PAIR_TIP = {
-  shared: '二人に共通の愛情言語がある組み合わせです。そこを意識して増やすだけで、お互いの満足度が上がりやすいペアです。',
-  none: '共通の愛情言語がない二人です。愛情があっても「届いていない」と感じやすいので、相手の言語で愛を伝える練習をしていきましょう。'
+  shared: '二人に共通の愛の言語がある組み合わせです。そこを意識して増やすだけで、お互いの満足度が上がりやすいペアです。',
+  none: '共通の愛の言語がない二人です。愛情があっても「届いていない」と感じやすいので、相手の言語で愛を伝える練習をしていきましょう。'
 };
 
 
@@ -1201,7 +1412,7 @@ const QA = {
   ]
 };
 
-// 愛情言語ごとのデートのアイデア（ライト）
+// 愛の言語ごとのデートのアイデア（ライト）
 const DATES = {
   W: ['手紙を交換する記念日のディナー', 'お互いの好きなところを3つずつ言い合う夜のカフェ', '思い出の場所をめぐって、そのときの気持ちを話す散歩', '1冊のノートに交代で書き込む交換日記'],
   T: ['スマホを置いて過ごす、半日のピクニック', '一から一緒に作る料理の日', '電車で知らない駅まで行く小さな旅', '同じ本や映画を見て、感想を話す日'],
@@ -1213,7 +1424,7 @@ const DATES = {
 // 全タイプ共通の読み物（ライト）
 const COMMON = {
   spot: {
-    intro: '人は、自分がしてほしいことを相手にもしがちです。相手がふだんあなたに何をしてくれるかを見ると、相手の愛情言語の見当がつきます。',
+    intro: '人は、自分がしてほしいことを相手にもしがちです。相手がふだんあなたに何をしてくれるかを見ると、相手の愛の言語の見当がつきます。',
     hints: [
       ['言葉', 'よく褒めてくれる人や、メッセージがまめな人は「言葉」の可能性があります。'],
       ['一緒の時間', '会う予定をよく提案してくれる人や、会っているときにスマホを見ない人は「一緒の時間」かもしれません。'],
@@ -1379,6 +1590,29 @@ function buildReport(code, plan = 'lite', partner = null) {
   }
   return rep;
 }
+// 購入前に見せる「続きの冒頭」と、続きの文字数。文章の本体は lib/premium.js（サーバー側）にあり、ここからは冒頭だけを出す
+
+
+// レポートの文字数（キー名や記号、英数字のコードを除いたおおよその数）
+function countChars(o) {
+  return JSON.stringify(o).replace(/"[a-zA-Z]+":|[{}\[\]",]/g, '').replace(/[A-Z0-9-]/g, '').length;
+}
+
+const round = (n) => Math.round(n / 100) * 100;
+
+function buildPreview(code) {
+  const rep = buildReport(code, 'standard');
+  if (!rep) return null;
+  // 最初の章「恋人から見たあなた」の1文目は全部見せ、2文目は書き出しだけ（画面では薄く消えていく）
+  const seen = rep.lite.seen, cut = seen.indexOf('。') + 1;
+  const lite = countChars(rep.lite);
+  return {
+    code,
+    lead: seen.slice(0, cut),
+    fade: seen.slice(cut, cut + 14),
+    chars: { lite: round(lite), standard: round(lite + countChars(rep.standard)) }
+  };
+}
 
 window.LC_API = {
   demo: true,
@@ -1388,6 +1622,7 @@ window.LC_API = {
     var prev = o.upgradeFrom ? o.upgradeFrom.split('|') : null;
     return Promise.resolve({ sessionId: ['demo', o.code, o.plan, o.partner || (prev && prev[3]) || ''].join('|') });
   },
+  preview: function (code) { return Promise.resolve(buildPreview(code)); },
   report: function (sid) { var s = sid.split('|'); return Promise.resolve(buildReport(s[1], s[2], s[3] || null)); }
 };
 </script>
@@ -1409,11 +1644,20 @@ window.LC_API = {
   function setHash(code) {
     // 一度使えば用が済むパラメータだけ外す（utm などのほかのパラメータは残す）
     try {
-      var q = new URLSearchParams(location.search); q.delete('session_id'); q.delete('start'); q.delete('invite');
+      var q = new URLSearchParams(location.search); q.delete('session_id'); q.delete('start'); q.delete('invite'); q.delete('canceled');
       var qs = q.toString();
       history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + (code ? '#' + code : ''));
     } catch (e) { /* 表示には影響しない */ }
   }
+  // 短い文（見出し・質問など）を文節の切れ目で改行させる。仕組みは phrase.js
+  function phrases(scope, selector) {
+    if (!window.LCPhrase) return;
+    window.LCPhrase.apply(scope, selector);
+    // 本文は行の端まで詰めるが、最後の行に1〜2文字だけ落ちないようにする
+    window.LCPhrase.tail(scope, PROSE);
+  }
+  var PROSE = '.prose p, .kv dd, .kv p, .sec > p, ul.dots li, .tips li .muted, .qa p, .ranking p, .cgroup > p, .invite p, .visitor p, .paywall .lede, .note, .panel > p, .codecard > p:not(.tagline)';
+  var SHORT = 'h2, h3, h4, .tagline, .eyebrow, .qtext, .qex, .choices button, .btn, .linkbtn, .chip, ul.aruaru li, .chapters li, .opt .nm, .opt .ds, .calm, .ask, .rephrase span, .qa .q, .tips strong, .toc button, .toc summary, .visitor strong, .ranking .nm, .ranking .near, .axis .names span, .axis .label, .kv dt, .kv .k, .assure li, details.more summary';
   function llNames(list) { return list.map(function (k) { return LC.LL[k].name; }).join('・'); }
   function sget(key) { try { return sessionStorage.getItem(key); } catch (e) { return null; } }
   function sset(key, value) { try { sessionStorage.setItem(key, value); } catch (e) { /* なくても動く */ } }
@@ -1449,7 +1693,7 @@ window.LC_API = {
     document.body.dataset.view = name;
     lp.hidden = name !== 'lp';
     app.hidden = name === 'lp';
-    if (name !== 'result') sticky(null);
+    if (name !== 'result') shown = null;
   }
 
   // ---------- 導入ページ ----------
@@ -1482,7 +1726,7 @@ window.LC_API = {
     el.innerHTML =
       '<div class="demo-banner">デモ版です。決済はStripeにつながず、「購入する」を押すとそのまま有料レポートが開きます。</div>' +
       '<section class="panel" style="margin-top:12px"><span class="eyebrow">制作者用ビューア</span>' +
-      '<p class="muted">16タイプ×愛情言語の結果を直接確認できます。</p>' +
+      '<p class="muted">16タイプ×愛の言語の結果を直接確認できます。</p>' +
       '<div class="viewer">' +
       '<label for="v-core">タイプ<select id="v-core">' + Object.keys(LC.TYPES).map(function (c) { return '<option value="' + c + '">' + c + ' ' + LC.TYPES[c][0] + '</option>'; }).join('') + '</select></label>' +
       '<label for="v-ll1">メイン<select id="v-ll1">' + LC.LL_ORDER.map(function (k) { return '<option value="' + k + '">' + k + ' ' + LC.LL[k].name + '</option>'; }).join('') + '</select></label>' +
@@ -1506,14 +1750,15 @@ window.LC_API = {
   }
 
   // ---------- 診断 ----------
-  function startQuiz() { state = { likert: [], pairs: [], i: 0 }; track('quiz_start'); view('quiz'); renderQuestion(); window.scrollTo(0, 0); }
+  function startQuiz() { state = { likert: [], pairs: [], i: 0 }; track('quiz_start'); app.style.removeProperty('--mark'); app.style.removeProperty('--mark-soft'); view('quiz'); renderQuestion(); window.scrollTo(0, 0); }
 
   function renderQuestion() {
     var i = state.i, isPair = i >= LC.LIKERT.length;
     var body;
     if (!isPair) {
       var cur = state.likert[i];
-      body = '<p class="eyebrow">あてはまる？</p><p class="qtext">' + LC.LIKERT[i].q + '</p>' +
+      body = '<p class="eyebrow">あてはまる？</p><div class="qhead"><p class="qtext">' + LC.LIKERT[i].q + '</p>' +
+        '<p class="qex"><b>たとえば</b>' + LC.LIKERT[i].ex + '</p></div>' +
         '<div class="likert"><div class="dots" role="group" aria-label="5段階で答える">' + [1, 2, 3, 4, 5].map(function (v) {
           var label = ['そう思わない', 'あまりそう思わない', 'どちらでもない', 'ややそう思う', 'そう思う'][v - 1];
           return '<button data-v="' + v + '" aria-label="' + label + '" title="' + label + '"' + (cur === v ? ' class="on"' : '') + '></button>';
@@ -1524,7 +1769,7 @@ window.LC_API = {
         '<div class="choices"><button data-v="a"' + (c === 'a' ? ' class="on"' : '') + '>' + p.qa + '</button><button data-v="b"' + (c === 'b' ? ' class="on"' : '') + '>' + p.qb + '</button></div>';
     }
     app.innerHTML =
-      '<div class="progress"><div class="meta"><span>' + (isPair ? 'パート2 愛情言語' : 'パート1 恋のクセ') + '</span><span>' + (i + 1) + ' / ' + TOTAL + '</span></div>' +
+      '<div class="progress"><div class="meta"><span>' + (isPair ? 'パート2 愛の言語' : 'パート1 恋のクセ') + '</span><span>' + (i + 1) + ' / ' + TOTAL + '</span></div>' +
       '<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="' + TOTAL + '" aria-valuenow="' + i + '"><i style="width:' + Math.round((i / TOTAL) * 100) + '%"></i></div></div>' +
       '<section class="qcard">' + body + '</section>' +
       '<div class="qnav"><button class="linkbtn" id="back">' + (i === 0 ? 'トップに戻る' : 'ひとつ前へ') + '</button></div>';
@@ -1538,6 +1783,7 @@ window.LC_API = {
       };
     });
     document.getElementById('back').onclick = function () { if (state.i === 0) renderIntro(); else { state.i -= 1; renderQuestion(); } };
+    phrases(app, SHORT);
   }
 
   function finish() {
@@ -1554,7 +1800,10 @@ window.LC_API = {
     if (!pct) { var last = load('lc_last', null); if (last && last.code === code) pct = last.pct; }
     setHash(code);
     view('result');
-    sticky(null);
+    shown = code;
+    // 結果とレポートの飾り（箇条書きの点、見出しの印など）は、その人の愛着スタイルの色にする。ボタンの色は変えない
+    app.style.setProperty('--mark', ATT_COLOR[p.att]);
+    app.style.setProperty('--mark-soft', ATT_TINT[p.att]);
     var t = LC.TYPES[p.core], a = LC.ATT[p.att];
     var owned = getPaid(code);
 
@@ -1583,7 +1832,6 @@ window.LC_API = {
     // 自分で診断した結果でも、購入済みでもないとき（シェアされたリンクを開いた人）には診断への入口を出す
     var visitor = !pct && !owned ? '<section class="visitor"><p><strong>これは ' + code + '「' + t[0] + '」の結果ページです。</strong><br>あなたのラブコードも調べてみませんか？</p>' +
       '<button class="btn" id="visitor-start">無料で診断する <span class="arrow" aria-hidden="true">→</span></button><p class="note">30問・約5分・登録なし</p></section>' : '';
-    var free = ' <span class="tag free">無料</span>';
 
     app.innerHTML =
       '<section class="codecard" style="--qc:' + ATT_COLOR[p.att] + ';--qt:' + ATT_TINT[p.att] + '">' +
@@ -1600,14 +1848,14 @@ window.LC_API = {
       visitor +
       reply +
       axes +
-      '<section class="sec"><h3>' + a.name + 'のあなた' + free + '</h3>' + prose(a.body) + '</section>' +
-      '<section class="sec"><h3>' + t[0] + 'の物語' + free + '</h3>' + prose(LC.STORY[p.core]) + '</section>' +
-      '<section class="sec"><h3>' + t[0] + 'の恋愛あるある' + free + '</h3>' + list(LC.ARUARU[p.core], 'aruaru') + '</section>' +
-      '<section class="sec"><h3>あなたに響く愛情言語' + free + '</h3><dl class="kv">' + p.ll.map(function (k) {
+      '<section class="sec"><h3>' + a.name + 'のあなた</h3>' + prose(a.body) + '</section>' +
+      '<section class="sec"><h3>' + t[0] + 'の物語</h3>' + prose(LC.STORY[p.core]) + '</section>' +
+      '<section class="sec"><h3>' + t[0] + 'の恋愛あるある</h3>' + list(LC.ARUARU[p.core], 'aruaru') + '</section>' +
+      '<section class="sec"><h3>あなたに響く愛の言語</h3><dl class="kv">' + p.ll.map(function (k) {
         return '<div><dt>' + LC.LL[k].name + '（' + LC.LL[k].en + '）</dt><dd>' + LC.LL[k].short + '</dd></div>';
       }).join('') + '</dl></section>' +
-      invite +
       '<div id="premium"></div><div id="upgrade"></div>' +
+      invite +
       '<div class="sharerow"><button class="btn ghost small" id="again">' + (pct || owned ? 'もう一度診断する' : '自分も診断する') + '</button><button class="btn ghost small" id="top">トップへ</button></div>' +
       footer();
 
@@ -1623,15 +1871,16 @@ window.LC_API = {
       if (el) el.addEventListener('click', function () { track(x[1]); });
     });
 
+    phrases(app, SHORT);
     mountPremium(code, owned);
     window.scrollTo(0, 0);
   }
 
   // ---------- 購入 ----------
   var PLAN_INFO = {
-    lite: { name: 'ライト', lead: '自分の取扱説明書', items: ['恋人から見たあなたと、今週からできる一歩', '恋の強み・つまずき・要注意サイン', '合う恋人と、気をつけたい相手', '恋のペース、アプローチ、デート、LINE', '愛情言語の取扱説明、もらって嬉しいことリスト、おすすめのデート', '相手の愛情言語の見分け方', 'つい言ってしまう一言の言い換え', '恋のQ&A', 'うまくいくための5つのことと、セルフケア', '恋人に見せる取扱説明書'] },
+    lite: { name: 'ライト', lead: '自分の取扱説明書', items: ['恋人から見たあなたと、今週からできる一歩', '恋の強み・つまずき・要注意サイン', '合う恋人と、気をつけたい相手', '恋のペース、アプローチ、デート、LINE', '愛の言語の取扱説明、もらって嬉しいことリスト、おすすめのデート', '相手の愛の言語の見分け方', 'つい言ってしまう一言の言い換え', '恋のQ&A', 'うまくいくための5つのことと、セルフケア', '恋人に見せる取扱説明書'] },
     standard: { name: 'スタンダード', lead: 'ライトの全部＋恋の実践編', items: ['ライトの内容すべて', 'ケンカのパターンと、ケンカ中にやらないほうがいいこと', '仲直りの4ステップと、ケンカの基本ルール', '長続きする二人の習慣と、マンネリしたとき', '嫉妬、失恋、復縁', '同棲・結婚を考えたとき', 'マッチングアプリでの恋', '片思い・付き合いたて・長く付き合っている時期のアドバイス', '16タイプとの付き合いやすさと、付き合うときのコツ', '相手のコードを入れて見る相性チェック'] },
-    pair: { name: 'ペア', lead: '2人分＋2人だけの相性レポート', items: ['あなたと相手、2人分のスタンダード', '2人の間で起きやすいズレの具体例', 'そのまま使える会話のテンプレ', '2人の愛情言語の届け方', '2人におすすめの習慣'] }
+    pair: { name: 'ペア', lead: '2人分＋2人だけの相性レポート', items: ['あなたと相手、2人分のスタンダード', '2人の間で起きやすいズレの具体例', 'そのまま使える会話のテンプレ', '2人の愛の言語の届け方', '2人におすすめの習慣'] }
   };
   var PLAN_KEYS = ['lite', 'standard', 'pair'];
   var plans = null, plansPromise = null;
@@ -1660,105 +1909,147 @@ window.LC_API = {
   }
   function yen(n) { return n.toLocaleString('ja-JP'); }
 
+  var shown = null;       // いま表示している結果のコード
+  var canceled = false;   // 決済ページまで行って、買わずに戻ってきた直後か
+
   function mountPremium(code, owned) {
     var el = document.getElementById('premium');
     el.innerHTML = '<p class="muted">読み込んでいます…</p>';
-    ensurePlans().then(function () {
-      if (owned) { loadPremium(code, owned); } else { el.innerHTML = ''; renderPlans(code, null); }
+    // 続きの冒頭（読みかけの部分）。取れなくても、購入はできるようにする
+    var preview = owned ? Promise.resolve(null) : API.preview(code).then(function (x) { return x && x.lead ? x : null; }, function () { return null; });
+    Promise.all([ensurePlans(), preview]).then(function (res) {
+      if (shown !== code) return;
+      if (owned) loadPremium(code, owned); else renderPaywall(code, null, res[1]);
     }, function () {
-      el.innerHTML = '<p class="err">料金プランを読み込めませんでした。</p><div><button class="btn small ghost" id="retry">もう一度読み込む</button></div>';
+      el.innerHTML = '<p class="err">続きを読み込めませんでした。</p><div><button class="btn small ghost" id="retry">もう一度読み込む</button></div>';
       document.getElementById('retry').onclick = function () { mountPremium(code, owned); };
     });
   }
 
-  // 結果ページの下に固定する購入バー。プラン一覧がまだ下にあるあいだだけ出す
-  var stickyOff = null;
-  function sticky(label) {
-    var el = document.getElementById('stickybuy');
-    if (stickyOff) { stickyOff(); stickyOff = null; }
-    if (!el) return;
-    el.classList.remove('show'); el.setAttribute('aria-hidden', 'true');
-    if (!label) return;
-    document.getElementById('stickybuy-text').innerHTML = label;
-    document.getElementById('stickybuy-go').onclick = function () {
-      var target = document.getElementById('plans');
-      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
-    var ticking = false;
-    var check = function () {
-      ticking = false;
-      var target = document.getElementById('plans');
-      var on = !!target && window.scrollY > 240 && target.getBoundingClientRect().top > window.innerHeight;
-      el.classList.toggle('show', on); el.setAttribute('aria-hidden', on ? 'false' : 'true');
-    };
-    var onScroll = function () { if (!ticking) { ticking = true; requestAnimationFrame(check); } };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    stickyOff = function () { window.removeEventListener('scroll', onScroll); };
+  // 章の見出し。購入前に目次として見せる（selfHtml / standardHtml / togetherHtml の見出しと合わせる）
+  function chapters(plan, a) {
+    if (plan === 'lite') return ['恋人から見たあなた', a.name + '（' + a.base + '）を深く知る', '合う恋人と、気をつけたい相手', 'あなたの恋のペース', '愛の言語の取扱説明', a.name + '×愛の言語', '相手の愛の言語の見分け方', 'つい言ってしまう一言の言い換え', 'うまくいくための5つのこと', '恋のQ&amp;A', '自分を満たすためのセルフケア', '愛着スタイルは変わるの？', '恋人に見せる取扱説明書'];
+    if (plan === 'standard') return ['ケンカと別れの危機', 'ケンカの基本ルール', '長続きする二人の習慣', 'マンネリしたとき', '嫉妬との付き合い方', '失恋したとき', '復縁したくなったら', '同棲・結婚を考えたとき', 'マッチングアプリでの恋', '恋の段階別アドバイス', '16タイプとの付き合いやすさ', '相性チェック'];
+    return ['2人の間で起きやすいズレ', 'そのまま使える会話のテンプレ', 'ペースとケンカの仕方', '2人の愛の言語', '2人におすすめの習慣', '相手の取扱説明書と、恋の実践編'];
+  }
+  function chapterList(items, reading) {
+    var head = items.slice(0, 6), rest = items.slice(6);
+    return '<ol class="chapters">' + head.map(function (x, i) { return i === 0 && reading ? '<li class="now">' + x + '<small>読みかけ</small></li>' : '<li>' + x + '</li>'; }).join('') + '</ol>' +
+      (rest.length ? '<details class="more"><summary>ほか' + rest.length + '章</summary><ol class="chapters" start="7">' + rest.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ol></details>' : '');
   }
 
-  // owned: 購入済みのプラン（なければ null）。上のプランだけを差額で並べる
-  function renderPlans(code, owned) {
+  // 「ここから先は有料です」の区切り。owned: 購入済みのプラン（なければ null）。preview: 続きの冒頭と文字数
+  // プラン選びは、ここでは見せない。「続きを読む」を押したあとのシートで選ぶ
+  function renderPaywall(code, owned, preview) {
     var el = document.getElementById(owned ? 'upgrade' : 'premium');
     if (!el) return;
     var p = LC.parseCode(code), t = LC.TYPES[p.core], a = LC.ATT[p.att];
-    var ownedRank = owned ? plans[owned.plan].rank : 0;
+    var ownedRank = owned ? plans[owned.plan].rank : 0, base = owned ? plans[owned.plan].price : 0;
     var keys = PLAN_KEYS.filter(function (k) { return plans[k].rank > ownedRank; });
     if (!keys.length) { el.innerHTML = ''; return; }
-    var cards = keys.map(function (k) {
-      var info = PLAN_INFO[k], price = plans[k].price - (owned ? plans[owned.plan].price : 0);
-      var star = k === 'standard' && !owned;
-      var head = info.items.slice(0, 4), rest = info.items.slice(4);
-      return '<div class="plan' + (star ? ' star' : '') + '">' +
-        (star ? '<span class="badge">おすすめ</span>' : '') +
-        '<span class="eyebrow">' + info.name + '</span>' +
-        '<h4>' + info.lead + '</h4>' +
-        '<div class="price">' + yen(price) + '<small> 円（税込）' + (owned ? '・差額' : '') + '</small></div>' +
-        (k === 'pair' ? '<p class="note">1人あたり ' + yen(plans.pair.price / 2) + '円</p>' : '') +
-        '<ul>' + head.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
-        (rest.length ? '<details><summary>ほかに' + rest.length + '項目</summary><ul>' + rest.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></details>' : '') +
-        (k === 'pair' ? '<label class="note" for="pair-partner">相手のラブコード（先に相手にも無料診断してもらってね）</label><input type="text" id="pair-partner" placeholder="例：CKSM-A" autocomplete="off" value="' + (inviter() && inviter() !== code ? inviter() : '') + '">' : '') +
-        '<button class="btn' + (star ? '' : ' ghost') + '" data-plan="' + k + '">' + (owned ? info.name + 'にアップグレード' : info.name + 'を購入') + '</button>' +
-        '</div>';
-    }).join('');
-    var lead = owned
-      ? '<span class="eyebrow">もっと読む</span><h3>差額だけで、上のプランにアップグレードできます</h3>'
-      : '<span class="eyebrow">ここから先は有料レポート</span><h3>' + t[0] + 'のあなた専用の、恋の取扱説明書</h3>' +
-        '<p>無料の結果は入口です。レポートでは、' + a.name + 'のクセが恋のどの場面で出やすいか、そのときどうすればいいかまで、具体的に書いています。</p>' +
-        '<ul class="locked"><li>恋人から見た「' + t[0] + '」のあなた</li><li>恋の強み・つまずき・要注意サイン</li><li>あなたに合う恋人と、気をつけたい相手</li><li>つい言ってしまう一言の言い換え</li><li>恋人に見せる取扱説明書</li></ul>';
-    el.innerHTML = '<section class="teaser" id="' + (owned ? 'upgrade-plans' : 'plans') + '">' + lead +
-      '<div class="plans">' + cards + '</div><p class="err" id="buy-err" hidden></p>' +
-      '<p class="note">買い切りです。月額料金はかかりません。クレジットカード、Apple Pay、Google Pay に対応。決済は Stripe で安全に処理されます。</p></section>';
+    var next = keys[0];
+    var price = function (k) { return plans[k].price - base; };
+
+    var html;
     if (!owned) {
-      sticky(t[0] + 'の取扱説明書を読む<small>買い切り ' + yen(plans.lite.price) + '円〜</small>');
-      // 料金プランが実際に画面に入ったときに一度だけ数える
+      // 読みかけの部分：1文目はそのまま、2文目は1文字ずつ薄くして消えていくように見せる
+      var fade = preview ? Array.prototype.map.call(preview.fade, function (ch, i) { return '<span style="opacity:' + (0.8 * (1 - i / preview.fade.length)).toFixed(2) + '">' + ch + '</span>'; }).join('') : '';
+      html = (preview ? '<section class="sec peek"><h3>恋人から見たあなた</h3><div class="prose"><p>' + preview.lead + '<span aria-hidden="true">' + fade + '</span></p></div></section>' : '') +
+        '<section class="paywall" id="plans">' +
+        (canceled ? '<p class="calm">お支払いは完了していません。料金はかかっていません。続きは、いつでもここから読めます。</p>' : '') +
+        '<div class="rule"><span>ここから先は有料です</span></div>' +
+        '<h3>' + t[0] + 'のあなた専用の、恋の取扱説明書</h3>' +
+        '<p class="lede">' + (preview ? '続きは約' + yen(preview.chars.lite) + '字。' : '') + a.name + 'のクセが恋のどの場面で出やすいか、そのときどうすればいいかを、' + chapters('lite', a).length + 'の章で書いています。</p>' +
+        chapterList(chapters('lite', a), !!preview) +
+        '<button class="btn big wide" id="paywall-go">続きを読む<small>' + yen(price('lite')) + '円〜・買い切り</small></button>' +
+        '<p class="note">月額料金も、会員登録もありません。</p></section>';
+    } else {
+      html = '<section class="paywall" id="upgrade-plans">' +
+        '<div class="rule"><span>ここから先は「' + PLAN_INFO[next].name + '」</span></div>' +
+        '<h3>' + (next === 'standard' ? '恋の実践編' : '2人だけの相性レポート') + '</h3>' +
+        '<p class="lede">' + (next === 'standard' ? 'ケンカ、嫉妬、失恋、復縁、結婚。恋がうまくいかなくなったときに読む章です。' : '相手のコードを入れると、2人の間で起きやすいズレと、そのまま使える会話の例が読めます。') + '</p>' +
+        chapterList(chapters(next, a), false) +
+        '<button class="btn big wide" id="paywall-go">続きを読む<small>差額 ' + yen(price(next)) + '円・買い切り</small></button></section>';
+    }
+
+    // 「続きを読む」を押したあとに開くシート。ここで初めてプランを選び、迷いそうな点に先に答える
+    var inv = inviter();
+    var opts = keys.map(function (k, i) {
+      var desc = k === 'lite' ? '自分の取扱説明書' + (preview ? '・約' + yen(preview.chars.lite) + '字' : '')
+        : k === 'standard' ? (owned ? 'ケンカ・嫉妬・失恋・復縁・結婚・相性チェック' : 'ライトの全部と、恋の実践編' + (preview ? '・約' + yen(preview.chars.standard) + '字' : ''))
+          : '2人分のスタンダードと、2人だけの相性レポート';
+      return '<label class="opt"><input type="radio" name="plan" value="' + k + '"' + (i === 0 ? ' checked' : '') + '>' +
+        '<span class="nm">' + PLAN_INFO[k].name + (k === 'standard' && !owned ? '<em>おすすめ</em>' : '') + '</span>' +
+        '<span class="pr">' + (owned ? '差額 ' : '') + yen(price(k)) + '円</span><span class="ds">' + desc + '</span></label>';
+    }).join('');
+    html += '<dialog class="sheet" id="buy" aria-labelledby="buy-title">' +
+      '<button class="x" id="buy-x" aria-label="閉じる">×</button>' +
+      '<h3 id="buy-title">どこまで読みますか？</h3>' +
+      '<div class="opts">' + opts + '</div>' +
+      (keys.indexOf('pair') >= 0 ? '<div class="pairbox" id="pair-box" hidden><label for="pair-partner">相手のラブコード</label>' +
+        '<input type="text" id="pair-partner" placeholder="例：CKSM-A" autocomplete="off" value="' + (inv && inv !== code ? inv : '') + '">' +
+        '<p class="note">相手のコードがまだなら、結果ページの「相手にも診断してもらう」から送れます。相手の診断は無料です。</p></div>' : '') +
+      '<details class="more"><summary>それぞれの中身をくわしく見る</summary>' + keys.map(function (k) {
+        return '<p class="k">' + PLAN_INFO[k].name + '</p>' + list(PLAN_INFO[k].items);
+      }).join('') + '</details>' +
+      '<ul class="assure">' + (owned ? '' : '<li>迷ったらライトで大丈夫です。あとから差額だけで上のプランに変えられます</li>') +
+      '<li>買い切りです。月額料金はかかりません</li><li>決済は Stripe。カード番号は運営者に届きません</li></ul>' +
+      '<p class="err" id="buy-err" hidden></p>' +
+      '<button class="btn big wide" id="buy-go"></button>' +
+      '<p class="note">購入後すぐに読めます。デジタルコンテンツのため、購入後の返品・返金はできません。' +
+      (API.demo ? '' : '<a href="legal.html" target="_blank" rel="noopener">特定商取引法に基づく表記</a>') + '</p>' +
+      '<button class="linkbtn" id="buy-later">あとにする</button></dialog>';
+    el.innerHTML = html;
+    phrases(el, SHORT + ', .paywall .rule span, .sheet .note');
+
+    var dlg = document.getElementById('buy'), go = document.getElementById('buy-go'), err = document.getElementById('buy-err');
+    var selected = function () { var r = dlg.querySelector('input[name="plan"]:checked'); return r ? r.value : next; };
+    var sync = function () {
+      var k = selected(), box = document.getElementById('pair-box');
+      if (box) box.hidden = k !== 'pair';
+      go.disabled = false; go.textContent = 'お支払いへ進む（' + yen(price(k)) + '円）';
+    };
+    var close = function () { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); };
+    Array.prototype.forEach.call(dlg.querySelectorAll('input[name="plan"]'), function (r) { r.onchange = sync; });
+    sync();
+    document.getElementById('paywall-go').onclick = function () {
+      track('paywall_open'); err.hidden = true; sync();
+      if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    };
+    document.getElementById('buy-x').onclick = close;
+    document.getElementById('buy-later').onclick = close;
+    dlg.addEventListener('click', function (e) { if (e.target === dlg) close(); });   // シートの外側を押したら閉じる
+    go.onclick = function () {
+      var plan = selected(), partner = null;
+      if (plan === 'pair') {
+        partner = normalize(document.getElementById('pair-partner').value);
+        if (!LC.parseCode(partner)) { err.hidden = false; err.textContent = '相手のコードを「CKSM-A」のような形で入力してください。'; return; }
+      }
+      go.disabled = true; go.textContent = '決済ページを準備中…'; err.hidden = true;
+      track('buy_click_' + plan);
+      API.checkout({ code: code, plan: plan, partner: partner, upgradeFrom: owned ? owned.sid : null }).then(function (res) {
+        if (res.url) { location.href = res.url; return; }
+        if (res.sessionId) { close(); savePaid(code, res.sessionId, plan); showResult(code, null); return; }
+        throw new Error(res.error || '決済ページを開けませんでした');
+      }).catch(function (x) {
+        sync(); err.hidden = false; err.textContent = x.message;
+      });
+    };
+
+    if (!owned) {
+      // 区切りが実際に画面に入ったときに一度だけ数える
       if ('IntersectionObserver' in window) {
         var seen = new IntersectionObserver(function (es) {
           if (es[0].isIntersecting) { trackOnce('plans_view'); seen.disconnect(); }
         });
         seen.observe(document.getElementById('plans'));
       }
+      // 決済をやめて戻ってきた人は、元いた場所（区切りのところ）に戻す
+      if (canceled) {
+        canceled = false; track('checkout_cancel');
+        setTimeout(function () { var x = document.getElementById('plans'); if (x) x.scrollIntoView({ behavior: 'instant', block: 'start' }); }, 60);
+      }
     }
-
-    Array.prototype.forEach.call(el.querySelectorAll('button[data-plan]'), function (btn) {
-      btn.onclick = function () {
-        var plan = btn.dataset.plan, err = document.getElementById('buy-err'), partner = null;
-        if (plan === 'pair') {
-          partner = normalize(document.getElementById('pair-partner').value);
-          if (!LC.parseCode(partner)) { err.hidden = false; err.textContent = '相手のコードを「CKSM-A」のような形で入力してください。'; return; }
-        }
-        var label = btn.textContent;
-        btn.disabled = true; btn.textContent = '決済ページを準備中…'; err.hidden = true;
-        track('buy_click_' + plan);
-        API.checkout({ code: code, plan: plan, partner: partner, upgradeFrom: owned ? owned.sid : null }).then(function (res) {
-          if (res.url) { location.href = res.url; return; }
-          if (res.sessionId) { savePaid(code, res.sessionId, plan); showResult(code, null); return; }
-          throw new Error(res.error || '決済ページを開けませんでした');
-        }).catch(function (x) {
-          btn.disabled = false; btn.textContent = label;
-          err.hidden = false; err.textContent = x.message;
-        });
-      };
-    });
   }
 
   function loadPremium(code, owned) {
@@ -1767,7 +2058,7 @@ window.LC_API = {
     API.report(owned.sid).then(function (rep) {
       if (!rep || rep.error) throw new Error((rep && rep.error) || 'レポートを読み込めませんでした');
       renderPremium(code, rep, owned.sid);
-      renderPlans(code, { sid: owned.sid, plan: rep.plan });
+      renderPaywall(code, { sid: owned.sid, plan: rep.plan }, null);
     }).catch(function (x) {
       el.innerHTML = '<p class="err">' + x.message + '</p>';
     });
@@ -1775,7 +2066,6 @@ window.LC_API = {
 
   function normalize(raw) { return (raw || '').trim().toUpperCase().replace(/[－ー―‐]/g, '-'); }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
-  function tag(plan) { return ' <span class="tag paid">' + PLAN_INFO[plan].name + '</span>'; }
   function list(items, cls) { return '<ul class="' + (cls || 'dots') + '">' + items.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>'; }
   function kv(label, body) { return '<div><span class="k">' + label + '</span>' + (body.charAt(0) === '<' ? body : para(body)) + '</div>'; }
   function stars(score) { var n = Math.max(1, Math.min(5, Math.round(score / 20))); return '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n); }
@@ -1806,29 +2096,29 @@ window.LC_API = {
 
   function selfHtml(p, l) {
     var a = LC.ATT[p.att];
-    return '<section class="sec"><h3>恋人から見たあなた' + tag('lite') + '</h3>' + prose(l.seen) +
+    return '<section class="sec"><h3>恋人から見たあなた</h3>' + prose(l.seen) +
       '<div class="kv">' + kv('今週からできる一歩', '<div class="ask">' + l.step + '</div>') + '</div></section>' +
-      '<section class="sec"><h3>' + a.name + '（' + a.base + '）を深く知る' + tag('lite') + '</h3>' + prose(l.portrait) + prose(l.loop) +
+      '<section class="sec"><h3>' + a.name + '（' + a.base + '）を深く知る</h3>' + prose(l.portrait) + prose(l.loop) +
       '<div class="kv">' + kv('強み', list(l.strengths)) + kv('つまずきやすいところ', list(l.pitfalls)) + kv('こんなときは要注意', list(l.signs)) + '</div></section>' +
-      '<section class="sec"><h3>合う恋人と、気をつけたい相手' + tag('lite') + '</h3><div class="kv">' + kv('あなたに合う恋人', l.match) + kv('気をつけたい相手', l.caution) + '</div></section>' +
-      '<section class="sec"><h3>恋のペース「' + l.pace.title + '」' + tag('lite') + '</h3>' + prose(l.pace.body) +
+      '<section class="sec"><h3>合う恋人と、気をつけたい相手</h3><div class="kv">' + kv('あなたに合う恋人', l.match) + kv('気をつけたい相手', l.caution) + '</div></section>' +
+      '<section class="sec"><h3>恋のペース「' + l.pace.title + '」</h3>' + prose(l.pace.body) +
       '<div class="kv">' + kv('アプローチ・告白', l.pace.approach) + kv('デート', l.pace.date) + kv('連絡・LINE', l.pace.line) + '</div></section>' +
-      '<section class="sec"><h3>愛情言語の取扱説明' + tag('lite') + '</h3>' + l.ll.map(function (x) {
+      '<section class="sec"><h3>愛の言語の取扱説明</h3>' + l.ll.map(function (x) {
         return '<div class="panel"><span class="eyebrow">' + LC.LL[x.key].name + '</span><div class="kv">' +
           kv('こうされると満たされる', x.need) + kv('気をつけたいこと', x.give) + kv('足りていないサイン', x.starving) +
-          kv('もらって嬉しいことリスト', list(x.joys)) + (x.key === l.ll[0].key ? kv('おすすめのデート', list(l.dates)) : '') + kv('あなたが贈るときのコツ', x.giveTips) + kv('相手の愛情言語が違うとき', x.receive) +
+          kv('もらって嬉しいことリスト', list(x.joys)) + (x.key === l.ll[0].key ? kv('おすすめのデート', list(l.dates)) : '') + kv('あなたが贈るときのコツ', x.giveTips) + kv('相手の愛の言語が違うとき', x.receive) +
           kv('恋人へのお願いの例文', x.phrases.map(function (s) { return '<div class="ask">「' + s + '」</div>'; }).join('')) + '</div></div>';
       }).join('') + '</section>' +
-      '<section class="sec"><h3>' + a.name + '×愛情言語' + tag('lite') + '</h3><div class="kv">' + l.cross.map(function (c) { return kv(LC.LL[c.key].name, c.text); }).join('') + '</div></section>' +
-      '<section class="sec"><h3>相手の愛情言語の見分け方' + tag('lite') + '</h3>' + prose(l.spot.intro) + '<div class="kv">' + l.spot.hints.map(function (h) { return kv(h[0], h[1]); }).join('') + '</div>' + prose(l.spot.outro) + '</section>' +
-      '<section class="sec"><h3>つい言ってしまう一言の言い換え' + tag('lite') + '</h3><div class="rephrase">' + l.rephrase.map(function (r) {
+      '<section class="sec"><h3>' + a.name + '×愛の言語</h3><div class="kv">' + l.cross.map(function (c) { return kv(LC.LL[c.key].name, c.text); }).join('') + '</div></section>' +
+      '<section class="sec"><h3>相手の愛の言語の見分け方</h3>' + prose(l.spot.intro) + '<div class="kv">' + l.spot.hints.map(function (h) { return kv(h[0], h[1]); }).join('') + '</div>' + prose(l.spot.outro) + '</section>' +
+      '<section class="sec"><h3>つい言ってしまう一言の言い換え</h3><div class="rephrase">' + l.rephrase.map(function (r) {
         return '<div><span class="before">「' + r[0] + '」</span><span class="after">「' + r[1] + '」</span></div>';
       }).join('') + '</div></section>' +
-      '<section class="sec"><h3>うまくいくための5つのこと' + tag('lite') + '</h3><ol class="tips">' + l.tips.map(function (x) { return '<li><span><strong>' + x.t + '</strong><br><span class="muted">' + x.why + '</span></span></li>'; }).join('') + '</ol></section>' +
-      '<section class="sec"><h3>恋のQ&amp;A' + tag('lite') + '</h3><div class="qa">' + l.qa.map(function (x) { return '<div><p class="q">' + x.q + '</p>' + para(x.a) + '</div>'; }).join('') + '</div></section>' +
-      '<section class="sec"><h3>自分を満たすためのセルフケア' + tag('lite') + '</h3>' + list(l.selfcare) + '</section>' +
-      '<section class="sec"><h3>愛着スタイルは変わるの？' + tag('lite') + '</h3>' + prose(l.change) + '</section>' +
-      '<section class="sec panel guide"><h3>恋人に見せる取扱説明書' + tag('lite') + '</h3>' +
+      '<section class="sec"><h3>うまくいくための5つのこと</h3><ol class="tips">' + l.tips.map(function (x) { return '<li><span><strong>' + x.t + '</strong><br><span class="muted">' + x.why + '</span></span></li>'; }).join('') + '</ol></section>' +
+      '<section class="sec"><h3>恋のQ&amp;A</h3><div class="qa">' + l.qa.map(function (x) { return '<div><p class="q">' + x.q + '</p>' + para(x.a) + '</div>'; }).join('') + '</div></section>' +
+      '<section class="sec"><h3>自分を満たすためのセルフケア</h3>' + list(l.selfcare) + '</section>' +
+      '<section class="sec"><h3>愛着スタイルは変わるの？</h3>' + prose(l.change) + '</section>' +
+      '<section class="sec panel guide"><h3>恋人に見せる取扱説明書</h3>' +
       '<p class="note">恋人や気になる人に、そのまま送れる文章です。「この人」はあなたのことです。</p>' +
       '<p>' + l.guide.att + '</p><p>' + l.guide.pace + '</p>' +
       '<p>この人に愛情がいちばん伝わるのは「' + l.guide.ll.map(function (x) { return x.name; }).join('」と「') + '」です。たとえば次のようなことです。</p>' +
@@ -1837,21 +2127,21 @@ window.LC_API = {
   }
 
   function standardHtml(p, s, withTool) {
-    return '<section class="sec"><h3>ケンカと別れの危機' + tag('standard') + '</h3><div class="kv">' +
+    return '<section class="sec"><h3>ケンカと別れの危機</h3><div class="kv">' +
       kv('ケンカのパターン', s.crisis.pattern) + kv('ケンカ中にやらないほうがいいこと', list(s.crisis.dont)) +
       kv('別れそうになったとき', s.crisis.breakup) +
       kv('仲直りの4ステップ', '<ol class="tips">' + s.crisis.makeup.map(function (x) { return '<li><span>' + x + '</span></li>'; }).join('') + '</ol>') + '</div></section>' +
-      '<section class="sec"><h3>ケンカの基本ルール' + tag('standard') + '</h3>' + prose(s.fightRules.intro) + list(s.fightRules.rules) + '</section>' +
-      '<section class="sec"><h3>長続きする二人の習慣' + tag('standard') + '</h3>' + list(s.habits) + '</section>' +
-      '<section class="sec"><h3>マンネリしたとき' + tag('standard') + '</h3>' + prose(s.rut) + '</section>' +
-      '<section class="sec"><h3>嫉妬との付き合い方' + tag('standard') + '</h3>' + prose(s.jealousy) + '</section>' +
-      '<section class="sec"><h3>失恋したとき' + tag('standard') + '</h3>' + prose(s.afterBreakup) + '</section>' +
-      '<section class="sec"><h3>復縁したくなったら' + tag('standard') + '</h3>' + prose(s.reunion) + '</section>' +
-      '<section class="sec"><h3>同棲・結婚を考えたとき' + tag('standard') + '</h3>' + prose(s.marriage) + '</section>' +
-      '<section class="sec"><h3>マッチングアプリでの恋' + tag('standard') + '</h3>' + prose(s.app) + '</section>' +
-      '<section class="sec"><h3>恋の段階別アドバイス' + tag('standard') + '</h3><div class="kv">' +
+      '<section class="sec"><h3>ケンカの基本ルール</h3>' + prose(s.fightRules.intro) + list(s.fightRules.rules) + '</section>' +
+      '<section class="sec"><h3>長続きする二人の習慣</h3>' + list(s.habits) + '</section>' +
+      '<section class="sec"><h3>マンネリしたとき</h3>' + prose(s.rut) + '</section>' +
+      '<section class="sec"><h3>嫉妬との付き合い方</h3>' + prose(s.jealousy) + '</section>' +
+      '<section class="sec"><h3>失恋したとき</h3>' + prose(s.afterBreakup) + '</section>' +
+      '<section class="sec"><h3>復縁したくなったら</h3>' + prose(s.reunion) + '</section>' +
+      '<section class="sec"><h3>同棲・結婚を考えたとき</h3>' + prose(s.marriage) + '</section>' +
+      '<section class="sec"><h3>マッチングアプリでの恋</h3>' + prose(s.app) + '</section>' +
+      '<section class="sec"><h3>恋の段階別アドバイス</h3><div class="kv">' +
       kv('片思い', s.stages.crush) + kv('付き合いたて', s.stages.early) + kv('長く付き合っている', s.stages.long) + '</div></section>' +
-      '<section class="sec"><h3>16タイプとの付き合いやすさ' + tag('standard') + '</h3>' +
+      '<section class="sec"><h3>16タイプとの付き合いやすさ</h3>' +
       '<p class="note">★が少ない相手は「合わない」相手ではなく、すれ違いやすいところがはっきりしている相手です。同じ★の中では、ペースや判断の仕方が近い順に並んでいます。タイプ名をタップすると、その人と付き合うときのコツが開きます。</p>' +
       s.compat.map(function (g) {
         return '<div class="cgroup"><h4>' + LC.ATT[g.att].name + 'の人と <span class="st" aria-label="付き合いやすさ 5段階中' + g.ease + '">' + stars(g.ease * 20) + '</span></h4><p>' + g.text + '</p><div class="ranking">' + g.types.map(function (c) {
@@ -1859,26 +2149,26 @@ window.LC_API = {
           return '<details><summary><code>' + c.core + '</code><span class="nm">' + LC.EMOJI[c.core] + ' ' + c.name + '</span><span class="near">' + near + '</span></summary><p>' + c.howto + '</p></details>';
         }).join('') + '</div></div>';
       }).join('') + '</section>' +
-      (withTool ? '<section class="sec panel"><h3>相性チェック' + tag('standard') + '</h3>' +
-        '<p class="muted">相手にも診断してもらい、そのコードを入れてください。愛情言語まで含めて見られます。</p>' +
+      (withTool ? '<section class="sec panel"><h3>相性チェック</h3>' +
+        '<p class="muted">相手にも診断してもらい、そのコードを入れてください。愛の言語まで含めて見られます。</p>' +
         '<div class="compat-form"><input type="text" id="partner" placeholder="例：CKSM-A" aria-label="相手のラブコード" autocomplete="off"><button class="btn small" id="compat-go">相性を見る</button></div>' +
         '<div class="compat-out" id="compat-out"></div></section>' : '');
   }
 
   function togetherHtml(p, rep) {
     var t = rep.together, o = LC.parseCode(rep.partner.code);
-    return '<section class="codecard pairhead" style="--qc:var(--accent);--qt:var(--tint)"><span class="eyebrow">2人の相性レポート' + tag('pair') + '</span>' +
+    return '<section class="codecard pairhead" style="--qc:var(--accent);--qt:var(--tint)"><span class="eyebrow">2人の相性レポート</span>' +
       '<div class="pair-codes"><span>' + p.core + '-' + p.ll.join('') + '<small>' + LC.TYPES[p.core][0] + '</small></span><b>×</b><span>' + o.core + '-' + o.ll.join('') + '<small>' + LC.TYPES[o.core][0] + '</small></span></div>' +
       '<p>' + t.att + '</p></section>' +
-      '<section class="sec"><h3>2人の間で起きやすいズレ' + tag('pair') + '</h3>' + list(t.gaps) + '</section>' +
-      '<section class="sec"><h3>そのまま使える会話のテンプレ' + tag('pair') + '</h3>' + t.talks.map(function (x) {
+      '<section class="sec"><h3>2人の間で起きやすいズレ</h3>' + list(t.gaps) + '</section>' +
+      '<section class="sec"><h3>そのまま使える会話のテンプレ</h3>' + t.talks.map(function (x) {
         return '<div class="ask"><span class="who">' + x.who + '</span>「' + x.line + '」</div>';
       }).join('') + '</section>' +
-      '<section class="sec"><h3>ペースとケンカの仕方' + tag('pair') + '</h3>' + prose(t.pace) + prose(t.judge) + '</section>' +
-      '<section class="sec"><h3>2人の愛情言語' + tag('pair') + '</h3>' + prose((t.ll.shared.length ? '二人に共通する愛情言語は「' + t.ll.shared.join('・') + '」です。' : '') + t.ll.summary) +
+      '<section class="sec"><h3>ペースとケンカの仕方</h3>' + prose(t.pace) + prose(t.judge) + '</section>' +
+      '<section class="sec"><h3>2人の愛の言語</h3>' + prose((t.ll.shared.length ? '二人に共通する愛の言語は「' + t.ll.shared.join('・') + '」です。' : '') + t.ll.summary) +
       '<div class="kv">' + kv('あなたから相手へ', '<div class="kv">' + t.ll.toPartner.map(function (x) { return kv(x.name, x.action); }).join('') + '</div>') +
       kv('相手からあなたへ', '<div class="kv">' + t.ll.toYou.map(function (x) { return kv(x.name, x.action); }).join('') + '</div>') + '</div></section>' +
-      '<section class="sec"><h3>2人におすすめの習慣' + tag('pair') + '</h3>' + prose(t.ritual) + '</section>';
+      '<section class="sec"><h3>2人におすすめの習慣</h3>' + prose(t.ritual) + '</section>';
   }
 
   // 長いレポートの頭に目次を付ける。見出しの文字（プラン名のタグは除く）をそのまま使う
@@ -1888,7 +2178,7 @@ window.LC_API = {
     var items = secs.map( function (sec, i) {
       var h = sec.querySelector('h3');
       sec.id = 'sec-' + i;
-      return '<li><button data-to="sec-' + i + '">' + esc(h.firstChild.textContent.trim()) + '</button></li>';
+      return '<li><button data-to="sec-' + i + '">' + esc(h.textContent.trim()) + '</button></li>';
     }).join('');
     return '<details class="toc"><summary>目次（' + secs.length + '項目）</summary><ol>' + items + '</ol></details>';
   }
@@ -1897,13 +2187,13 @@ window.LC_API = {
     var p = LC.parseCode(code), el = document.getElementById('premium');
     var html = '';
     if (rep.together) html += togetherHtml(p, rep);
-    html += '<h2 class="part">' + (rep.together ? 'あなたのレポート' : 'あなたのレポート（' + PLAN_INFO[rep.plan].name + '）') + '</h2>';
+    html += '<h2 class="part">' + 'あなたの取扱説明書' + '</h2>';
     html += selfHtml(p, rep.lite);
-    if (rep.standard) html += standardHtml(p, rep.standard, true);
+    if (rep.standard) html += '<h2 class="part">恋の実践編</h2>' + standardHtml(p, rep.standard, true);
     if (rep.partner) {
       var o = LC.parseCode(rep.partner.code);
-      html += '<details class="partner-report"><summary><h2 class="part">相手のレポート（<span class="nw">' + rep.partner.code + '</span>「' + LC.TYPES[o.core][0] + '」）</h2><span class="note">タップで開く</span></summary>' +
-        '<div class="stack">' + selfHtml(o, rep.partner.lite) + standardHtml(o, rep.partner.standard, false) + '</div></details>';
+      html += '<details class="partner-report" style="--mark:' + ATT_COLOR[o.att] + ';--mark-soft:' + ATT_TINT[o.att] + '"><summary><h2 class="part">相手のレポート（<span class="nw">' + rep.partner.code + '</span>「' + LC.TYPES[o.core][0] + '」）</h2><span class="note">タップで開く</span></summary>' +
+        '<div class="stack">' + selfHtml(o, rep.partner.lite) + '<h2 class="part">相手の恋の実践編</h2>' + standardHtml(o, rep.partner.standard, false) + '</div></details>';
     }
     // 購入の証明は Stripe の購入ID。これを付けたURLを開けば、別の端末でも同じレポートが読める
     var keep = API.demo || !sid ? '' : '<section class="invite"><h3>別の端末でも読むには</h3>' +
@@ -1919,9 +2209,11 @@ window.LC_API = {
         b.onclick = function () { var to = document.getElementById(b.dataset.to); if (to) to.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
       });
     }
+    phrases(el, SHORT);
     var go = document.getElementById('compat-go');
     if (go) go.onclick = function () {
       document.getElementById('compat-out').innerHTML = compat(p, rep.standard, normalize(document.getElementById('partner').value));
+      phrases(document.getElementById('compat-out'), SHORT);
     };
     Array.prototype.forEach.call(el.querySelectorAll('.copy-guide'), function (btn) {
       btn.onclick = function () {
@@ -1941,10 +2233,10 @@ window.LC_API = {
     var judgeKey = me.pace[1] === o.pace[1] ? (me.pace[1] === 'H' ? 'sameH' : 'sameM') : 'diffH';
     var shared = me.ll.filter(function (k) { return o.ll.indexOf(k) >= 0; });
     var llText = shared.length
-      ? '「' + llNames(shared) + '」が、二人に共通する愛情言語です。そこを意識して増やすだけで、お互いの満足度が上がりやすいペアです。'
-      : '共通の愛情言語がない二人です。あなたが' + llNames(me.ll) + 'で愛を伝えても、相手には届きにくいかもしれません。相手には「' + s.actions[o.ll[0]] + '」を試してみてください。逆に、相手からの愛は' + llNames(o.ll) + 'の形で届いているかもしれません。それも愛情だと気づいてあげてください。';
+      ? '「' + llNames(shared) + '」が、二人に共通する愛の言語です。そこを意識して増やすだけで、お互いの満足度が上がりやすいペアです。'
+      : '共通の愛の言語がない二人です。あなたが' + llNames(me.ll) + 'で愛を伝えても、相手には届きにくいかもしれません。相手には「' + s.actions[o.ll[0]] + '」を試してみてください。逆に、相手からの愛は' + llNames(o.ll) + 'の形で届いているかもしれません。それも愛情だと気づいてあげてください。';
     return '<p><strong>相手は ' + o.core + '-' + o.ll.join('') + '「' + t[0] + '」</strong>、' + LC.ATT[o.att].name + 'です。</p>' +
-      '<div class="kv">' + kv('不安のクセの相性', s.attPairs[o.att]) + kv('ペース', s.pacePairs[paceKey]) + kv('ケンカのとき', s.pacePairs[judgeKey]) + kv('愛情言語', llText) + '</div>' +
+      '<div class="kv">' + kv('不安のクセの相性', s.attPairs[o.att]) + kv('ペース', s.pacePairs[paceKey]) + kv('ケンカのとき', s.pacePairs[judgeKey]) + kv('愛の言語', llText) + '</div>' +
       '<p class="note">2人だけのズレの具体例や会話のテンプレは、ペアプランで読めます。</p>';
   }
 
@@ -1954,10 +2246,17 @@ window.LC_API = {
     var brand = document.getElementById('brand');
     if (brand) brand.onclick = function (e) { e.preventDefault(); renderIntro(); };
     if (API.demo) setupDemo();
+    phrases(document, '#lp h1, #lp h2, #lp h3, #lp .lead, #lp .sub, #lp .punch, #lp .after, #lp .aru li, #lp .react .q, #lp .tile strong, #lp .tile .d, #lp .faq summary, #lp .facts li, #lp .lang .k, .top .btn, #lp .btn, #lp .chat .b, #lp .chat .gap, #lp .slot span, #lp .slot small');
+    if (window.LCPhrase) window.LCPhrase.tail(document, '#lp .lead2, #lp .story, #lp .reframe p:not(.punch), #lp .lang p, #lp .steps p, #lp .basis p, #lp .note, #lp .faq details p, #lp .foot-note');
     var params = null;
     try { params = new URLSearchParams(location.search); } catch (e) { params = null; }
     var inv = params && normalize(params.get('invite'));
     if (inv && LC.parseCode(inv)) { sset('lc_invite', inv); trackOnce('invite_open'); }
+    if (params && params.get('canceled') === '1') canceled = true;
+    // 決済ページからブラウザの「戻る」で帰ってきたとき（画面がそのまま復元される）は、押したままのボタンを元に戻す
+    window.addEventListener('pageshow', function (e) {
+      if (e.persisted && shown) { var code = shown; canceled = !getPaid(code); showResult(code, null); }
+    });
     // 同じタブで結果のリンク（#コード）を開いたときにも結果を出す
     window.addEventListener('hashchange', function () {
       var code = (location.hash || '').slice(1);

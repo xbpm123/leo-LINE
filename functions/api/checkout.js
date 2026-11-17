@@ -38,7 +38,8 @@ export async function onRequestPost({ request, env }) {
     'metadata[code]': code,
     'metadata[plan]': plan,
     success_url: origin + '/?session_id={CHECKOUT_SESSION_ID}',
-    cancel_url: origin + '/#' + code
+    // 決済をやめて戻ってきた人には、結果ページで「料金はかかっていません」と伝える
+    cancel_url: origin + '/?canceled=1#' + code
   });
   if (plan === 'pair') form.set('metadata[partner]', partner);
   if (upgradeFrom) form.set('metadata[upgraded_from]', upgradeFrom);

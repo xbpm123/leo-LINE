@@ -102,7 +102,7 @@ function page(core) {
     <a class="btn small" href="/?start=1">無料で診断する <span class="arrow" aria-hidden="true">→</span></a>
   </div>
 </header>
-<main class="wrap">
+<main class="wrap" style="--mark:var(--q-${q});--mark-soft:var(--t-${q})">
   <nav class="crumbs" aria-label="現在の場所"><a href="/">ラブコード診断</a><span aria-hidden="true">›</span>16のラブタイプ<span aria-hidden="true">›</span>${name}</nav>
   <section class="codecard" style="--qc:var(--q-${q});--qt:var(--t-${q})">
     <span class="eyebrow">16のラブタイプ</span>
@@ -128,7 +128,7 @@ function page(core) {
     <ul class="aruaru">${LC.ARUARU[core].map((x) => `<li>${x}</li>`).join('')}</ul>
   </section>
   <section class="visitor">
-    <p><strong>あなたはどのタイプ？</strong><br>診断すると、16タイプに加えて、あなたに響く愛情言語もわかります。</p>
+    <p><strong>あなたはどのタイプ？</strong><br>診断すると、16タイプに加えて、あなたに響く愛の言語もわかります。</p>
     <a class="btn" href="/?start=1">無料で診断する <span class="arrow" aria-hidden="true">→</span></a>
     <p class="note">30問・約5分・登録なし</p>
   </section>
@@ -141,7 +141,13 @@ function page(core) {
   <p class="note">エンタメとしてお楽しみください。医学的・心理学的な診断ではありません。</p>
   <nav class="foot"><a href="/">トップ</a><a href="/legal">特定商取引法に基づく表記</a><a href="/legal#privacy">プライバシーポリシー</a></nav>
 </main>
-<script>if (navigator.sendBeacon) navigator.sendBeacon('/api/event', '{"name":"type_view"}');</script>
+<script src="/phrase.js"></script>
+<script>
+  // 見出しや短い文を、文節の切れ目で改行させる
+  LCPhrase.apply(document, 'h1, h2, .tagline, .eyebrow, .chip, ul.aruaru li, .btn, .visitor strong, .tlink, .slot span, .slot small, .tgroup .k');
+  LCPhrase.tail(document, '.prose p, .visitor p, .note');
+  if (navigator.sendBeacon) navigator.sendBeacon('/api/event', '{"name":"type_view"}');
+</script>
 </body>
 </html>
 `;

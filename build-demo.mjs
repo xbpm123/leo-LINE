@@ -2,7 +2,8 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 
 const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8');
-const premium = read('./lib/plans.js').replace(/^export /gm, '') + read('./lib/premium.js').replace(/^export /gm, '');
+const strip = (src) => src.replace(/^import .*$/gm, '').replace(/^export /gm, '');
+const premium = strip(read('./lib/plans.js')) + strip(read('./lib/premium.js')) + strip(read('./lib/preview.js'));
 const demoApi = `
 ${premium}
 window.LC_API = {
@@ -13,6 +14,7 @@ window.LC_API = {
     var prev = o.upgradeFrom ? o.upgradeFrom.split('|') : null;
     return Promise.resolve({ sessionId: ['demo', o.code, o.plan, o.partner || (prev && prev[3]) || ''].join('|') });
   },
+  preview: function (code) { return Promise.resolve(buildPreview(code)); },
   report: function (sid) { var s = sid.split('|'); return Promise.resolve(buildReport(s[1], s[2], s[3] || null)); }
 };`;
 
@@ -28,6 +30,9 @@ const html = `<title>ラブコード診断</title>
 ${read('./public/style.css')}
 </style>
 ${body}
+<script>
+${read('./public/phrase.js')}
+</script>
 <script>
 ${read('./public/data.js')}
 </script>

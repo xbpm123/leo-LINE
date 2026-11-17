@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ラブコード診断｜恋の不安のクセ×愛情言語でわかる無料の恋愛タイプ診断</title>
-<meta name="description" content="ラブコード診断は、恋をすると出てくる不安のクセ（愛着スタイル）と愛情言語から、あなたの恋愛タイプを16タイプのコードで表す無料の恋愛診断です。30問・約5分、登録なし。">
+<title>ラブコード診断｜愛着スタイル×愛の言語でわかる無料の恋愛タイプ診断</title>
+<meta name="description" content="なんで私ばっかり不安になるんだろう。その理由が見えてくる無料の恋愛診断です。恋をすると出てくる愛着スタイル（不安型・回避型など）と、5つの愛の言語（ラブランゲージ）から、あなたの恋愛タイプを16タイプで表します。30問・約5分、登録なし。">
 <link rel="canonical" href="https://lovecode-9ax.pages.dev/">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#121013" media="(prefers-color-scheme: dark)">
@@ -12,8 +12,8 @@
 <meta property="og:site_name" content="ラブコード診断">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:url" content="https://lovecode-9ax.pages.dev/">
-<meta property="og:title" content="ラブコード診断｜その恋の不安、クセかも。">
-<meta property="og:description" content="30問・約5分。恋の不安のクセと愛情言語から、あなたの恋愛を16タイプのコードにします。無料・登録なし。">
+<meta property="og:title" content="なんで私ばっかり、不安になるんだろう。｜ラブコード診断">
+<meta property="og:description" content="恋がうまくいかない理由は、性格ではなく「愛着スタイル」と「愛の言語」にあるのかも。30問・約5分の無料診断。登録なし。">
 <meta property="og:image" content="https://lovecode-9ax.pages.dev/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -26,7 +26,7 @@
 <link rel="stylesheet" href="style.css">
 <script>
   // 結果ページ、購入後の戻り、タイプ別ページからの「診断する」で開いたときは、導入ページを一瞬も見せない
-  if (/^#[CE][OK][FS][HM]-/.test(location.hash) || /[?&](session_id|start)=/.test(location.search)) document.documentElement.className = 'boot-app';
+  if (/^#[CE][OK][FS][HM]-/.test(location.hash) || /[?&](session_id|start|canceled)=/.test(location.search)) document.documentElement.className = 'boot-app';
 </script>
 <script type="application/ld+json">
 {
@@ -39,7 +39,7 @@
       "name": "ラブコード診断",
       "alternateName": "LOVE CODE",
       "inLanguage": "ja",
-      "description": "恋の不安のクセ（愛着スタイル）と愛情言語から、恋愛タイプを16タイプのコードで表す無料の恋愛診断。",
+      "description": "愛着スタイルと愛の言語（ラブランゲージ）から、恋愛タイプを16タイプのコードで表す無料の恋愛診断。",
       "publisher": { "@id": "https://lovecode-9ax.pages.dev/#org" }
     },
     {
@@ -58,19 +58,20 @@
       "browserRequirements": "JavaScript が必要です",
       "inLanguage": "ja",
       "isAccessibleForFree": true,
-      "description": "30問・約5分の恋愛タイプ診断。無料で16タイプの結果と、あなたに響く愛情言語がわかります。",
+      "description": "30問・約5分の恋愛タイプ診断。無料で、愛着スタイルをもとにした16タイプの結果と、あなたに響く愛の言語がわかります。",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" }
     },
     {
       "@type": "FAQPage",
       "@id": "https://lovecode-9ax.pages.dev/#faq",
       "mainEntity": [
-        { "@type": "Question", "name": "ラブコード診断とは何ですか？", "acceptedAnswer": { "@type": "Answer", "text": "恋をしたときに出てくる不安のクセ（愛着スタイル）と、愛情の受け取り方（愛情言語）から、あなたの恋愛タイプを「EOSH-WP」のような英字のコードで表す無料の恋愛診断です。30問・約5分で、登録なしで受けられます。" } },
-        { "@type": "Question", "name": "無料でどこまでわかりますか？", "acceptedAnswer": { "@type": "Answer", "text": "あなたのラブコード、16タイプのうちどのタイプか、タイプの説明と物語、恋愛あるある、あなたに響く愛情言語まで無料で読めます。" } },
+        { "@type": "Question", "name": "ラブコード診断とは何ですか？", "acceptedAnswer": { "@type": "Answer", "text": "恋をしたときに出てくる心のクセ（愛着スタイル）と、愛情の受け取り方（愛の言語）から、あなたの恋愛タイプを「EOSH-WP」のような英字のコードで表す無料の恋愛診断です。30問・約5分で、登録なしで受けられます。" } },
+        { "@type": "Question", "name": "無料でどこまでわかりますか？", "acceptedAnswer": { "@type": "Answer", "text": "あなたのラブコード、16タイプのうちどのタイプか、タイプの説明と物語、恋愛あるある、あなたに響く愛の言語まで無料で読めます。" } },
         { "@type": "Question", "name": "質問は何問ですか？どのくらい時間がかかりますか？", "acceptedAnswer": { "@type": "Answer", "text": "全部で30問、約5分です。前半の20問は5段階で答え、後半の10問は2つのうち嬉しいほうを選びます。" } },
+        { "@type": "Question", "name": "愛着スタイルとは何ですか？", "acceptedAnswer": { "@type": "Answer", "text": "人と親しくなるときに出てくる心のクセのことです。相手の気持ちを確かめたくなる「不安」と、距離を取りたくなる「回避」の2つの強さで、安定型・不安型・回避型・恐れ回避型の4つに分かれます。ラブコード診断では、ひだまり型・たしかめ型・ひとり時間型・ゆらぎ型と呼んでいます。" } },
+        { "@type": "Question", "name": "愛着障害とは違うのですか？", "acceptedAnswer": { "@type": "Answer", "text": "違います。「愛着障害」は本来、医師が診断する医学的な状態を指す言葉です。この診断でわかるのは「愛着スタイル」で、恋をしたときに出やすい心のクセの傾向です。病気かどうかを判定するものではありません。つらさが続いて生活に支障があるときは、医療機関や専門家に相談してください。" } },
+        { "@type": "Question", "name": "愛の言語（ラブランゲージ）とは何ですか？", "acceptedAnswer": { "@type": "Answer", "text": "「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。ラブコード診断では、5つのうちあなたに響く1〜2個がコードの後ろに付きます。" } },
         { "@type": "Question", "name": "MBTIや16Personalitiesと関係はありますか？", "acceptedAnswer": { "@type": "Answer", "text": "関係ありません。ラブコード診断は恋愛に絞った独自の診断で、性格全般の4文字タイプを判定するものではありません。成人の愛着研究と「5つの愛の言語」の考え方を参考に、質問を独自に作っています。" } },
-        { "@type": "Question", "name": "愛着スタイルとは何ですか？", "acceptedAnswer": { "@type": "Answer", "text": "人と親しくなるときに出てくる心のクセのことです。相手の気持ちを確かめたくなる「不安」と、距離を取りたくなる「回避」の2つの強さで、安定・不安・回避・恐れ回避の4つに分かれます。ラブコード診断では、ひだまり型・たしかめ型・ひとり時間型・ゆらぎ型と呼んでいます。" } },
-        { "@type": "Question", "name": "愛情言語とは何ですか？", "acceptedAnswer": { "@type": "Answer", "text": "「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。ラブコード診断では、5つのうちあなたに響く1〜2個がコードの後ろに付きます。" } },
         { "@type": "Question", "name": "診断結果は当たりますか？", "acceptedAnswer": { "@type": "Answer", "text": "エンタメとして楽しむための診断で、医学的・心理学的な診断ではありません。結果は、答えたときの状況や気持ちによって変わることがあります。自分の恋のクセを言葉にするきっかけとして使ってください。" } },
         { "@type": "Question", "name": "回答や結果はどこかに保存されますか？", "acceptedAnswer": { "@type": "Answer", "text": "回答と結果は、お使いのブラウザの中にだけ保存されます。運営者のサーバーには送られません。会員登録もいりません。" } }
       ]
@@ -99,14 +100,41 @@
       <div class="faces" aria-hidden="true">
         <span style="--qt:var(--t-co)">🌻</span><span style="--qt:var(--t-ck)">🐈‍⬛</span><span style="--qt:var(--t-eo)">🎆</span><span style="--qt:var(--t-eo)">🌙</span><span style="--qt:var(--t-ek)">🦔</span><span style="--qt:var(--t-ck)">⛺</span><span style="--qt:var(--t-ek)">🎢</span><span style="--qt:var(--t-co)">🌳</span>
       </div>
-      <h1><span class="kicker">ラブコード診断｜無料の恋愛タイプ診断</span>その恋の不安、クセかも。30問で、あなたの恋愛をコードにします。</h1>
-      <p class="lead">恋をすると出てくる「不安のクセ」と、愛を感じる「愛情言語」。この2つから、あなたの恋愛タイプを <code>EOSH-WP</code> のような英字のコードで表します。</p>
+      <h1><span class="kicker">ラブコード診断｜愛着スタイル × 愛の言語の無料診断</span>なんで私ばっかり、<br>不安になるんだろう。</h1>
+      <p class="lead">返信が遅いだけで、眠れない。<br>重いと思われたくなくて、平気なふりをする。</p>
+      <p class="lead2">それは、性格のせいでも、愛が重すぎるせいでもありません。恋をすると出てくる心のクセ「愛着スタイル」と、愛の受け取り方「愛の言語」。この2つがわかると、恋がうまくいかない理由が見えてきます。</p>
       <div class="cta">
-        <button class="btn big" data-start>無料で診断する <span class="arrow" aria-hidden="true">→</span></button>
-        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ見られます</li></ul>
+        <button class="btn big" data-start>無料で、恋のクセを知る <span class="arrow" aria-hidden="true">→</span></button>
+        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ読めます</li></ul>
         <p class="resume" id="resume" hidden></p>
       </div>
       <div id="demo-tools"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-worry" style="padding-top:0">
+    <div class="container">
+      <div class="head">
+        <h2 id="h-worry">こんなこと、<br>していませんか？</h2>
+      </div>
+      <div class="aru-card">
+        <ul class="aru">
+          <li><span class="em" style="--qt:var(--t-eo)">📱</span>返信が来るまで、何度もトーク画面を開いてしまう</li>
+          <li><span class="em" style="--qt:var(--t-ek)">🎭</span>わざとそっけなくして、相手の気持ちを試してしまう</li>
+          <li><span class="em" style="--qt:var(--t-ek)">✍️</span>「重い」と思われるのが怖くて、送る前に何度も書き直す</li>
+          <li><span class="em" style="--qt:var(--t-ck)">🚪</span>距離が縮まると、急に冷めて逃げたくなる</li>
+          <li><span class="em" style="--qt:var(--t-eo)">👀</span>恋人のSNSで、誰と一緒にいるのかを確かめてしまう</li>
+          <li><span class="em" style="--qt:var(--t-ck)">😶</span>本当はさみしいのに、「別に平気」と言ってしまう</li>
+          <li><span class="em" style="--qt:var(--t-eo)">🌙</span>「どうせいつか離れていく」と、夜にひとりで考え込む</li>
+          <li><span class="em" style="--qt:var(--t-ek)">💔</span>勢いで別れ話をして、あとから後悔したことがある</li>
+        </ul>
+      </div>
+      <div class="reframe">
+        <h3>ひとつでも当てはまったなら。</h3>
+        <p>それは、あなたの性格が悪いからでも、愛が重いからでもありません。心理学で<strong>「愛着スタイル」</strong>と呼ばれる、人と親しくなるときの心のクセです。</p>
+        <p>SNSでは「愛着障害」という言葉で語られることもありますが、ほとんどの場合は病気ではなく、誰にでもある傾向です。子どものころからの人との関わりの中で少しずつ形づくられ、大人になってからの関係の中でも変わっていくと考えられています。</p>
+        <p class="punch">クセは、名前がわかると扱えるようになります。</p>
+      </div>
     </div>
   </section>
 
@@ -114,7 +142,7 @@
     <div class="container">
       <div class="head">
         <h2 id="h-scene">既読のまま、3時間。<br>あなたはどう思う？</h2>
-        <p class="sub">同じ場面でも、感じ方は人によって違います。その違いが「恋のクセ」です。</p>
+        <p class="sub">愛着スタイルは、大きく分けて4つ。同じ場面でも、心の動き方がまるで違います。</p>
       </div>
       <div class="scene-grid">
         <div class="chat" role="img" aria-label="メッセージを2通送ったあと、既読のまま3時間返信がない画面">
@@ -132,27 +160,27 @@
           <div class="react" style="--qc:var(--q-ek)"><p class="t">ゆらぎ型<small>恐れ・回避</small></p><p class="q">「もう一通送りたい。でも、重いと思われたくない」</p></div>
         </div>
       </div>
-      <p class="after">この4つは「愛着スタイル」と呼ばれる心のクセです。ラブコード診断は、ここに恋のペース、判断の仕方、愛情言語を足して、あなたの恋愛タイプを出します。</p>
+      <p class="after">あなたは、どれに近いですか？ 自分で思っているタイプと、実際のタイプは違うかもしれません。</p>
     </div>
   </section>
 
-  <section aria-labelledby="h-aru">
+  <section aria-labelledby="h-ll">
     <div class="container">
       <div class="head">
-        <h2 id="h-aru">こんな恋愛あるある、<br>ありませんか？</h2>
+        <h2 id="h-ll">大事にされているのに、<br>なぜかさみしい。</h2>
+        <p class="sub">それは、2人の「愛の言語」が違うからかもしれません。</p>
       </div>
-      <div class="aru-card">
-        <ul class="aru">
-          <li><span class="em" style="--qt:var(--t-eo)">📱</span>返信が来るまで、何度もスマホを見てしまう</li>
-          <li><span class="em" style="--qt:var(--t-ek)">✍️</span>送る前に、メッセージを何度も直す</li>
-          <li><span class="em" style="--qt:var(--t-ck)">🐈‍⬛</span>甘えたい日と、放っておいてほしい日の差が激しい</li>
-          <li><span class="em" style="--qt:var(--t-co)">🌻</span>好きな人ができると、友達にすぐバレる</li>
-          <li><span class="em" style="--qt:var(--t-eo)">🌙</span>「この先どうなるんだろう」と夜に考え込む</li>
-          <li><span class="em" style="--qt:var(--t-ek)">🦔</span>好きな人ほど、そっけなくしてしまう</li>
-          <li><span class="em" style="--qt:var(--t-ck)">⛺</span>恋人がいても、趣味の時間は譲らない</li>
-          <li><span class="em" style="--qt:var(--t-co)">🍵</span>家でのんびり過ごすデートがいちばん好き</li>
-        </ul>
-        <p class="foot-note">あるあるは、タイプごとに違います。あなたのあるあるは、診断結果で読めます。</p>
+      <p class="story">彼は「行動」で愛を伝えているのに、あなたがほしいのは「言葉」。どちらも相手を想っているのに、届かない。すれ違いの原因は、愛情の量ではなく、伝え方の違いです。愛情の伝え方と受け取り方には5つの型があり、「愛の言語（ラブランゲージ）」と呼ばれています。</p>
+      <div class="langs">
+        <div class="lang"><h3><span class="em" aria-hidden="true">💬</span>言葉</h3><p><span class="k">こうされると嬉しい</span>「好き」「ありがとう」を、言葉で言ってほしい。</p><p><span class="k">すれ違うと</span>言ってもらえないと、何をしてもらっても不安が残る。</p></div>
+        <div class="lang"><h3><span class="em" aria-hidden="true">⏳</span>一緒の時間</h3><p><span class="k">こうされると嬉しい</span>スマホを置いて、ちゃんと向き合ってほしい。</p><p><span class="k">すれ違うと</span>彼が友達と出かけるだけでモヤモヤする。嫉妬深いのではなく、時間がそのまま愛情だから。</p></div>
+        <div class="lang"><h3><span class="em" aria-hidden="true">🎁</span>贈り物</h3><p><span class="k">こうされると嬉しい</span>自分を思って選んでくれた、その気持ちがうれしい。</p><p><span class="k">すれ違うと</span>記念日を忘れられると、「考えてくれなかった」ことに傷つく。</p></div>
+        <div class="lang"><h3><span class="em" aria-hidden="true">🤝</span>行動</h3><p><span class="k">こうされると嬉しい</span>困っているときに、黙って動いてほしい。</p><p><span class="k">すれ違うと</span>口では優しいのに何もしてくれないと、気持ちが冷めていく。</p></div>
+        <div class="lang"><h3><span class="em" aria-hidden="true">🫂</span>スキンシップ</h3><p><span class="k">こうされると嬉しい</span>手をつなぐ、ハグをする。触れ合いで安心したい。</p><p><span class="k">すれ違うと</span>触れ合いが減ると、「冷めたのかな」と考えてしまう。</p></div>
+      </div>
+      <div class="reframe">
+        <p>しかも、愛の言語はひとりにひとつとは限りません。自分では「言葉」だと思っていても、本当に満たされるのは「一緒の時間」かもしれません。</p>
+        <p class="punch">自分の言語がわかると、「なんで分かってくれないの」が「こうしてくれると嬉しい」に変わります。</p>
       </div>
     </div>
   </section>
@@ -160,12 +188,13 @@
   <section aria-labelledby="h-how" style="padding-top:0">
     <div class="container">
       <div class="head">
-        <h2 id="h-how">診断の流れ</h2>
+        <h2 id="h-how">理由がわかると、<br>恋は少し楽になる。</h2>
+        <p class="sub">30問に答えるだけ。約5分で、あなたの恋にひとつの名前がつきます。</p>
       </div>
       <ol class="steps">
-        <li><h3>30問に答える</h3><p>「あてはまる？」に5段階で答えるだけ。考え込まずに、直感で選んでください。約5分で終わります。</p></li>
-        <li><h3>ラブコードが出る</h3><p>4つの軸から決まる16タイプに、あなたに響く愛情言語を足して、ひとつのコードになります。</p></li>
-        <li><h3>結果を読む</h3><p>タイプの説明、物語、恋愛あるある、あなたに響く愛情言語が、その場で読めます。</p></li>
+        <li><h3>直感で、30問に答える</h3><p>「あてはまる？」に5段階で答えるだけ。考え込まなくて大丈夫です。登録もいりません。</p></li>
+        <li><h3>あなたの恋が、コードになる</h3><p>愛着スタイル、恋のペース、判断の仕方、愛の言語。その組み合わせから、16タイプのどれかと、あなたに響く愛の言語が決まります。</p></li>
+        <li><h3>「これ、私だ」が見つかる</h3><p>タイプの説明、物語、恋愛あるある、あなたに響く愛の言語が、その場で読めます。</p></li>
       </ol>
       <div class="anatomy-box">
         <h3>コードの読み方（例：EOSH-WP）</h3>
@@ -178,7 +207,7 @@
           <div class="slot ll"><b>W</b><span>言葉</span><small>メイン</small></div>
           <div class="slot ll"><b>P</b><span>スキンシップ</span><small>サブ</small></div>
         </div>
-        <p class="note">前の2文字が愛着スタイル、次の2文字が恋のペースと判断の仕方。ハイフンの後ろは、言葉(W)・一緒の時間(T)・贈り物(G)・行動(A)・スキンシップ(P)のうち、あなたに響く愛情言語です。</p>
+        <p class="note">前の2文字が愛着スタイル、次の2文字が恋のペースと判断の仕方。ハイフンの後ろは、言葉(W)・一緒の時間(T)・贈り物(G)・行動(A)・スキンシップ(P)のうち、あなたに響く愛の言語です。</p>
       </div>
     </div>
   </section>
@@ -237,7 +266,7 @@
       </div>
       <div class="basis">
         <div><h3>愛着スタイル</h3><p>人と親しくなるときの心のクセです。成人の愛着研究では、「不安」と「回避」の2つの強さで、安定・不安・回避・恐れ回避の4つに分けて考えます。コードの前半2文字がこれにあたります。</p></div>
-        <div><h3>5つの愛情言語</h3><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。</p></div>
+        <div><h3>5つの愛の言語</h3><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。</p></div>
       </div>
       <p class="note disclaimer">質問はこの2つの考え方を参考に、独自に作っています。エンタメとしてお楽しみください。医学的・心理学的な診断ではありません。回答と結果はお使いのブラウザの中にだけ保存され、運営者のサーバーには送られません。</p>
     </div>
@@ -249,12 +278,13 @@
         <h2 id="h-faq">よくある質問</h2>
       </div>
       <div class="faq">
-        <details><summary>ラブコード診断とは何ですか？</summary><p>恋をしたときに出てくる不安のクセ（愛着スタイル）と、愛情の受け取り方（愛情言語）から、あなたの恋愛タイプを「EOSH-WP」のような英字のコードで表す無料の恋愛診断です。30問・約5分で、登録なしで受けられます。</p></details>
-        <details><summary>無料でどこまでわかりますか？</summary><p>あなたのラブコード、16タイプのうちどのタイプか、タイプの説明と物語、恋愛あるある、あなたに響く愛情言語まで無料で読めます。</p></details>
+        <details><summary>ラブコード診断とは何ですか？</summary><p>恋をしたときに出てくる心のクセ（愛着スタイル）と、愛情の受け取り方（愛の言語）から、あなたの恋愛タイプを「EOSH-WP」のような英字のコードで表す無料の恋愛診断です。30問・約5分で、登録なしで受けられます。</p></details>
+        <details><summary>無料でどこまでわかりますか？</summary><p>あなたのラブコード、16タイプのうちどのタイプか、タイプの説明と物語、恋愛あるある、あなたに響く愛の言語まで無料で読めます。</p></details>
         <details><summary>質問は何問ですか？どのくらい時間がかかりますか？</summary><p>全部で30問、約5分です。前半の20問は5段階で答え、後半の10問は2つのうち嬉しいほうを選びます。</p></details>
+        <details><summary>愛着スタイルとは何ですか？</summary><p>人と親しくなるときに出てくる心のクセのことです。相手の気持ちを確かめたくなる「不安」と、距離を取りたくなる「回避」の2つの強さで、安定型・不安型・回避型・恐れ回避型の4つに分かれます。ラブコード診断では、ひだまり型・たしかめ型・ひとり時間型・ゆらぎ型と呼んでいます。</p></details>
+        <details><summary>愛着障害とは違うのですか？</summary><p>違います。「愛着障害」は本来、医師が診断する医学的な状態を指す言葉です。この診断でわかるのは「愛着スタイル」で、恋をしたときに出やすい心のクセの傾向です。病気かどうかを判定するものではありません。つらさが続いて生活に支障があるときは、医療機関や専門家に相談してください。</p></details>
+        <details><summary>愛の言語（ラブランゲージ）とは何ですか？</summary><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。ラブコード診断では、5つのうちあなたに響く1〜2個がコードの後ろに付きます。</p></details>
         <details><summary>MBTIや16Personalitiesと関係はありますか？</summary><p>関係ありません。ラブコード診断は恋愛に絞った独自の診断で、性格全般の4文字タイプを判定するものではありません。成人の愛着研究と「5つの愛の言語」の考え方を参考に、質問を独自に作っています。</p></details>
-        <details><summary>愛着スタイルとは何ですか？</summary><p>人と親しくなるときに出てくる心のクセのことです。相手の気持ちを確かめたくなる「不安」と、距離を取りたくなる「回避」の2つの強さで、安定・不安・回避・恐れ回避の4つに分かれます。ラブコード診断では、ひだまり型・たしかめ型・ひとり時間型・ゆらぎ型と呼んでいます。</p></details>
-        <details><summary>愛情言語とは何ですか？</summary><p>「愛されている」と感じやすい形のことです。言葉、一緒の時間、贈り物、行動、スキンシップの5つがあり、ゲーリー・チャップマン氏の「5つの愛の言語」として知られています。ラブコード診断では、5つのうちあなたに響く1〜2個がコードの後ろに付きます。</p></details>
         <details><summary>診断結果は当たりますか？</summary><p>エンタメとして楽しむための診断で、医学的・心理学的な診断ではありません。結果は、答えたときの状況や気持ちによって変わることがあります。自分の恋のクセを言葉にするきっかけとして使ってください。</p></details>
         <details><summary>回答や結果はどこかに保存されますか？</summary><p>回答と結果は、お使いのブラウザの中にだけ保存されます。運営者のサーバーには送られません。会員登録もいりません。</p></details>
       </div>
@@ -263,10 +293,11 @@
 
   <section class="last" aria-labelledby="h-last">
     <div class="container">
-      <h2 id="h-last">次は、あなたの恋の番。</h2>
+      <h2 id="h-last">次は、あなたの番。</h2>
+      <p class="sub">なんで不安になるのか。なんですれ違うのか。<br>5分後には、その理由に名前がついています。</p>
       <div class="cta">
-        <button class="btn big" data-start>無料で診断する <span class="arrow" aria-hidden="true">→</span></button>
-        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ見られます</li></ul>
+        <button class="btn big" data-start>無料で、恋のクセを知る <span class="arrow" aria-hidden="true">→</span></button>
+        <ul class="facts"><li>30問・約5分</li><li>登録なし</li><li>結果はすぐ読めます</li></ul>
       </div>
     </div>
   </section>
@@ -282,8 +313,8 @@
 </div>
 
 <main class="wrap" id="app" hidden></main>
-<div class="stickybuy" id="stickybuy" aria-hidden="true"><div><p id="stickybuy-text"></p><button class="btn" id="stickybuy-go">プランを見る</button></div></div>
 <!--/BODY-->
+<script src="phrase.js"></script>
 <script src="data.js"></script>
 <script>
   // 本番用：Cloudflare Pages Functions の API を叩く
@@ -294,6 +325,7 @@
       return fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(order) })
         .then(function (r) { return r.json(); });
     },
+    preview: function (code) { return fetch('/api/preview?code=' + encodeURIComponent(code)).then(function (r) { return r.json(); }); },
     report: function (sessionId) {
       return fetch('/api/report?session_id=' + encodeURIComponent(sessionId)).then(function (r) { return r.json(); });
     }
